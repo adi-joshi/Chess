@@ -9,8 +9,8 @@ int min(int a, int b) {
 }
 
 Square::Square(int r, int c) {
-  row = min(max(r, 0), 8);
-  col = min(max(c, 0), 8);
+  row = min(max(r, 1), 8);
+  col = min(max(c, 1), 8);
 }
 
 int Square::get_row(void) {
@@ -22,11 +22,11 @@ int Square::get_col(void) {
 }
 
 void Square::set_row(int r) {
-  row = min(max(r, 0), 8);
+  row = min(max(r, 1), 8);
 }
 
 void Square::set_col(int c) {
-  col = min(max(c, 0), 8);
+  col = min(max(c, 1), 8);
 }
 
 bool Square::operator==(Square &other) {

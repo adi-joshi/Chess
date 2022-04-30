@@ -7,7 +7,7 @@
 
 class Observer {
   public:
-  virtual void notify(Square *from, Square *to, Color c, PieceName p) = 0;
+  virtual void notify(Square from, Square to, Color c, PieceName p) = 0;
 };
 
 #endif

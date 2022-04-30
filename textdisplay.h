@@ -17,7 +17,7 @@ class TextDisplay : public Observer {
   void welcome_msg();
   std::string ask_move(Color turn);
   // called by observer (i.e. Board, after verifying that move is valid)
-  void notify(Square *from, Square *to, Color c, PieceName p); 
+  void notify(Square from, Square to, Color c, PieceName p); 
   void print_board();
   void print_error(Exception e);
   void print_winner(Result r);

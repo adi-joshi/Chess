@@ -43,8 +43,8 @@ std::string TextDisplay::ask_move(Color turn) {
 }
 
 // makes the move on this->board.
-void TextDisplay::notify(Square *from, Square *to, Color c, PieceName p) {
-  board[from->get_row()][from->get_col()] = ' ';
+void TextDisplay::notify(Square from, Square to, Color c, PieceName p) {
+  board[from.get_row() - 1][from.get_col() - 1] = ' ';
   char piece = ' ';
   if (c == Color::White) {
     switch(p) {
@@ -66,7 +66,7 @@ void TextDisplay::notify(Square *from, Square *to, Color c, PieceName p) {
     }
   }
 
-  board[to->get_row()][to->get_col()] = piece;
+  board[to.get_row() - 1][to.get_col() - 1] = piece;
 }
 
 void TextDisplay::print_board(void) {

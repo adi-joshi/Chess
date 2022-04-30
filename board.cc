@@ -1,11 +1,12 @@
 #include "board.h"
+// #include <iostream>
 
 Board::Board(TextDisplay *td) {
   ob.push_back(td);
   for (int i = 0; i < 8; i++) {
     auto white_pawn = new Pawn(Square(2,i), Color::White);
     pieces.push_back(white_pawn);
-    auto black_pawn = new Pawn(Square(2,i), Color::Black);
+    auto black_pawn = new Pawn(Square(7,i), Color::Black);
     pieces.push_back(black_pawn);
   }
 
@@ -19,12 +20,12 @@ Board::Board(TextDisplay *td) {
   auto white_rook2 = new Rook(Square(1, 8), Color::White);
   auto black_rook1 = new Rook(Square(8, 1), Color::Black);
   auto black_knight1 = new Knight(Square(8, 2), Color::Black);
-  auto black_bishop1 = new Bishop(Square(8, 2), Color::Black);
-  auto black_queen = new Queen(Square(8, 2), Color::Black);
-  auto black_king = new King(Square(8, 2), Color::Black);
-  auto black_bishop2 = new Bishop(Square(8, 2), Color::Black);
-  auto black_knight2 = new Knight(Square(8, 2), Color::Black);
-  auto black_rook2 = new Rook(Square(8, 2), Color::Black);
+  auto black_bishop1 = new Bishop(Square(8, 3), Color::Black);
+  auto black_queen = new Queen(Square(8, 4), Color::Black);
+  auto black_king = new King(Square(8, 5), Color::Black);
+  auto black_bishop2 = new Bishop(Square(8, 6), Color::Black);
+  auto black_knight2 = new Knight(Square(8, 7), Color::Black);
+  auto black_rook2 = new Rook(Square(8, 8), Color::Black);
 
   pieces.push_back(white_rook1);
   pieces.push_back(white_knight1);
@@ -45,7 +46,7 @@ Board::Board(TextDisplay *td) {
 
 }
 
-void Board::move(std::string s) {
+void Board::move(std::string s, Color turn) {
   if ((s.size() == 4) &&
       (s[0] >= 'a' && s[0] <= 'h') &&
       (s[1] >= '1' && s[1] <= '8') &&
@@ -55,13 +56,19 @@ void Board::move(std::string s) {
     Square to{s[3] - '0', s[2] - 'a' + 1};
     bool moved = false;
     for (int i = 0; i < pieces.size(); i++) {
-      if (pieces[i]->get_cursq() == from) {
+      if (pieces[i]->get_cursq() == from && pieces[i]->get_color() == turn) {
 	pieces[i]->move(to); // if this piece captures another piece, it removes it from the pieces vector.
+	ob[0]->notify(from, to, pieces[i]->get_color(), pieces[i]->get_name());
 	moved = true;
 	break;
       }
     }
     if (!moved) {
+      /* Debugging pieces array
+      for (int i = 0; i < pieces.size(); i++) {
+	std::cout << pieces[i]->get_cursq().get_row() << " " << pieces[i]->get_cursq().get_col() << std::endl;
+      }
+      */
       throw Exception{"Invalid Movement Command: No piece on starting square (" + s + ")"};
     }
   } else {

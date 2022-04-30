@@ -23,7 +23,7 @@ class Board : public Subject {
 
   public:
   Board(TextDisplay *td);
-  void move(std::string s);
+  void move(std::string s, Color turn);
   bool game_end();
   Result winner();
   friend class Piece; // any piece can get the pieces vector and the moves vector by this
