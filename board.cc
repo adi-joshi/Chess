@@ -46,7 +46,11 @@ Board::Board(TextDisplay *td) {
 
 }
 
-void Board::move(std::string s, Color turn) {
+bool Board::move(std::string s, Color turn) {
+  if (s.size() == 1 && s[0] == 'p') {
+    ob[0]->print_moves(moves.begin());
+    return false;
+  }
   if ((s.size() == 4) &&
       (s[0] >= 'a' && s[0] <= 'h') &&
       (s[1] >= '1' && s[1] <= '8') &&
@@ -57,10 +61,18 @@ void Board::move(std::string s, Color turn) {
     bool moved = false;
     for (int i = 0; i < pieces.size(); i++) {
       if (pieces[i]->get_cursq() == from && pieces[i]->get_color() == turn) {
+	std::tuple<Square, PieceName, Color> before{from, pieces[i]->get_name(), pieces[i]->get_color()};
+
 	pieces[i]->move(to); // if this piece captures another piece, it removes it from the pieces vector.
 	ob[0]->notify(from, to, pieces[i]->get_color(), pieces[i]->get_name());
+
+	std::tuple<Square, PieceName, Color> after{from, pieces[i]->get_name(), pieces[i]->get_color()};
+	std::pair<std::tuple<Square, PieceName, Color>, std::tuple<Square, PieceName, Color>> thismove{before, after};
+
+	moves.push_back(thismove);
 	moved = true;
-	break;
+	turn = static_cast<Color>(static_cast<int>(turn) + 1 % 2);
+	return true;
       }
     }
     if (!moved) {
@@ -74,6 +86,7 @@ void Board::move(std::string s, Color turn) {
   } else {
     throw Exception{"Invalid Movement Command: " + s};
   }
+  return false;
 }
 
 bool Board::game_end(void) {

@@ -14,8 +14,10 @@ void Game::play(void) {
   while(!b->game_end()) {
     try {
       auto s = td->ask_move(turn);
-      b->move(s, turn); // board and textdisplay are in subject observer pattern, so if b->move(s, turn) is valid, it automatically changes the board in textdisplay
-      turn = static_cast<Color>((static_cast<int>(turn) + 1) % 2);
+      bool moved = b->move(s, turn); // board and textdisplay are in subject observer pattern, so if b->move(s, turn) is valid, it automatically changes the board in textdisplay
+      if (moved) {
+	turn = static_cast<Color>(static_cast<int>(turn) + 1 % 2);
+      }
       td->print_board();
     } catch (Exception &e) {
       td->print_error(e);

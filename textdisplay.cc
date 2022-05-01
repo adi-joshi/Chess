@@ -1,5 +1,35 @@
 #include "textdisplay.h"
 #include <iostream>
+#include <iomanip>
+
+//===Helper===
+
+char piecename_to_str(PieceName p, Color c) {
+  char piece = ' ';
+  if (c == Color::White) {
+    switch(p) {
+      case PieceName::King: piece = 'K'; break;
+      case PieceName::Queen: piece = 'Q'; break;
+      case PieceName::Bishop: piece = 'B'; break;
+      case PieceName::Knight: piece = 'N'; break;
+      case PieceName::Rook: piece = 'R'; break;
+      case PieceName::Pawn: piece = 'P'; break;
+    }
+  } else if (c == Color::Black) {
+    switch(p) {
+      case PieceName::King: piece = 'k'; break;
+      case PieceName::Queen: piece = 'q'; break;
+      case PieceName::Bishop: piece = 'b'; break;
+      case PieceName::Knight: piece = 'n'; break;
+      case PieceName::Rook: piece = 'r'; break;
+      case PieceName::Pawn: piece = 'p'; break;
+    }
+  }
+  return piece;
+}
+
+//===
+
 
 TextDisplay::TextDisplay(void) {
   for (int i = 0; i < 8; i++) {
@@ -45,27 +75,7 @@ std::string TextDisplay::ask_move(Color turn) {
 // makes the move on this->board.
 void TextDisplay::notify(Square from, Square to, Color c, PieceName p) {
   board[from.get_row() - 1][from.get_col() - 1] = ' ';
-  char piece = ' ';
-  if (c == Color::White) {
-    switch(p) {
-      case PieceName::King: piece = 'K'; break;
-      case PieceName::Queen: piece = 'Q'; break;
-      case PieceName::Bishop: piece = 'B'; break;
-      case PieceName::Knight: piece = 'N'; break;
-      case PieceName::Rook: piece = 'R'; break;
-      case PieceName::Pawn: piece = 'P'; break;
-    }
-  } else if (c == Color::Black) {
-    switch(p) {
-      case PieceName::King: piece = 'k'; break;
-      case PieceName::Queen: piece = 'q'; break;
-      case PieceName::Bishop: piece = 'b'; break;
-      case PieceName::Knight: piece = 'n'; break;
-      case PieceName::Rook: piece = 'r'; break;
-      case PieceName::Pawn: piece = 'p'; break;
-    }
-  }
-
+  char piece = piecename_to_str(p, c);
   board[to.get_row() - 1][to.get_col() - 1] = piece;
 }
 
@@ -101,6 +111,10 @@ void TextDisplay::print_board(void) {
   }
   std::cout << limiter << std::endl;
   std::cout << "  a b c d e f g h" << std::endl;
+}
+
+void TextDisplay::print_moves(std::vector<Move>::iterator it) {
+  std::cout << "Printing board" << std::endl;
 }
 
 void TextDisplay::print_error(Exception e) {

@@ -9,6 +9,8 @@
 #include "textdisplay.h"
 #include "result.h"
 #include "piece.h"
+#include "move.h"
+
 
 
 class Board : public Subject {
@@ -19,11 +21,11 @@ class Board : public Subject {
   // Stores one move as ({from, name, color}, {to, name, color})
   // e.g. if you play e7e8=Q, then it would be stored as
   // ({e7, Pawn, White}, {e8, Queen, White}).
-  std::vector<std::pair<std::tuple<Square, PieceName, Color>, std::tuple<Square, PieceName, Color>>> moves;
+  std::vector<Move> moves;
 
   public:
   Board(TextDisplay *td);
-  void move(std::string s, Color turn);
+  bool move(std::string s, Color turn);
   bool game_end();
   Result winner();
   friend class Piece; // any piece can get the pieces vector and the moves vector by this
