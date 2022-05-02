@@ -5,13 +5,16 @@
 #include "color.h"
 #include "piecename.h"
 
+class Board;
+
 class Piece {
   // is a friend of class Board
   protected:
+  Board *b;
   Square cursq;
   Color color;
   public:
-  Piece(Square s, Color c);
+  Piece(Board *b, Square s, Color c);
   Square get_cursq();
   virtual void move(Square to) = 0;
   virtual PieceName get_name() = 0;

@@ -1,4 +1,6 @@
 #include "piece.h"
+#include "exception.h"
+#include "board.h"
 
 //===Helper===
 int abs(int a) {
@@ -6,8 +8,8 @@ int abs(int a) {
 }
 
 //===Piece===
-Piece::Piece(Square s, Color c)
-  : cursq{s}, color{c}
+Piece::Piece(Board *b, Square s, Color c)
+  : b{b}, cursq{s}, color{c}
 {}
 
 Square Piece::get_cursq(void) {
@@ -76,22 +78,31 @@ PieceName Pawn::get_name(void) {
 //===Knight===
 
 void Knight::move(Square to) {
-  /*
-  for (int i = 0; i < pieces.size(); i++) {
-    if (pieces[i]->cursq == to &&
-	pieces[i]->color == this->color) {
-      throw Exception{"Invalid move"};
+  if (to == cursq) {
+    throw Exception{"Piece already on Square"};
+  }
+  int piece_index = -1;
+  for (int i = 0; i < b->pieces.size(); i++) {
+    if (b->pieces[i]->get_cursq() == to &&
+	b->pieces[i]->get_color() == this->color) {
+      throw Exception{"Piece of same color already on Square"};
+    } else if (b->pieces[i]->get_cursq() == to &&
+	b->pieces[i]->get_color() != this->color) {
+      int piece_index = i;
+      break;
     }
   }
-  if ((abs(to->get_row() - cursq->get_row()) + 
-	abs(to->get_col() - cursq->get_col()) == 3) &&
-      ((abs(to->get_row() - cur->get_row()) != 3 &&
-	abs(to->get_col() - cur->get_col()) != 3))) {
+  if ((abs(to.get_row() - cursq.get_row()) + 
+	abs(to.get_col() - cursq.get_col()) == 3) &&
+      ((abs(to.get_row() - cursq.get_row()) != 3 &&
+	abs(to.get_col() - cursq.get_col()) != 3))) {
+    if (piece_index != -1) {
+      b->pieces.erase(b->pieces.begin() + piece_index);
+    }
     cursq = to;
   } else {
     throw Exception{"Invalid move"};
   }
-  */
   cursq = to;
 }
 
@@ -103,42 +114,42 @@ PieceName Knight::get_name(void) {
 
 void Bishop::move(Square to) {
   /*
-  if (cursq == to) {
-    throw Exception{"Invalid move"};
-  }
-  int trow = to->get_row();
-  int tcol = to->get_col();
-  int crow = cursq->get_row();
-  int ccol = cursq->get_col();
-  if ((abs(trow - tcol) != abs(crow - ccol)) &&
-      abs(trow + tcol) != abs(crow + ccol)) {
-    throw Exception{"Invalid move"};
-  }
-  int lbrow = min(trow, crow);
-  int lbcol = min(tcol, ccol);
-  int ubrow = max(trow, crow);
-  int ubcol = max(tcol, ccol);
-  if (abs(trow - tcol) == abs(crow - ccol)) {
-    for (int i = 0; i < pieces.size(); i++) {
-      int prow = pieces[i]->cursq->get_row();
-      int pcol = pieces[i]->cursq->get_col();
-      if ((abs(prow - pcol) == abs(trow - tcol)) &&
-	  (prow <= ubrow && prow >= lbrow)) {
-	throw Exception{"Invalid move"};
-      }
-    }
-  } else if (abs(trow + tcol) == abs(crow + ccol)) {
-    for (int i = 0; i < pieces.size(); i++) {
-      int prow = pieces[i]->cursq->get_row();
-      int pcol = pieces[i]->cursq->get_col();
-      if ((abs(prow + pcol) == abs(trow + tcol)) &&
-	  (prow <= ubrow && prow >= lbrow)) {
-	throw Exception{"Invalid move"};
-      }
-    }
-  }
-  cursq = to;
-  */
+     if (cursq == to) {
+     throw Exception{"Invalid move"};
+     }
+     int trow = to->get_row();
+     int tcol = to->get_col();
+     int crow = cursq->get_row();
+     int ccol = cursq->get_col();
+     if ((abs(trow - tcol) != abs(crow - ccol)) &&
+     abs(trow + tcol) != abs(crow + ccol)) {
+     throw Exception{"Invalid move"};
+     }
+     int lbrow = min(trow, crow);
+     int lbcol = min(tcol, ccol);
+     int ubrow = max(trow, crow);
+     int ubcol = max(tcol, ccol);
+     if (abs(trow - tcol) == abs(crow - ccol)) {
+     for (int i = 0; i < pieces.size(); i++) {
+     int prow = pieces[i]->cursq->get_row();
+     int pcol = pieces[i]->cursq->get_col();
+     if ((abs(prow - pcol) == abs(trow - tcol)) &&
+     (prow <= ubrow && prow >= lbrow)) {
+     throw Exception{"Invalid move"};
+     }
+     }
+     } else if (abs(trow + tcol) == abs(crow + ccol)) {
+     for (int i = 0; i < pieces.size(); i++) {
+     int prow = pieces[i]->cursq->get_row();
+     int pcol = pieces[i]->cursq->get_col();
+     if ((abs(prow + pcol) == abs(trow + tcol)) &&
+     (prow <= ubrow && prow >= lbrow)) {
+     throw Exception{"Invalid move"};
+     }
+     }
+     }
+     cursq = to;
+     */
   cursq = to;
 }
 
@@ -150,34 +161,34 @@ PieceName Bishop::get_name(void) {
 
 void Rook::move(Square to) {
   /*
-  if (cursq == to) {
-    throw Exception{"Invalid move"};
-  } else if ((to->get_col() != cursq->get_col()) &&
-      to->get_row() != cursq->get_row()) {
-    throw Exception{"Invalid move"};
-  }
+     if (cursq == to) {
+     throw Exception{"Invalid move"};
+     } else if ((to->get_col() != cursq->get_col()) &&
+     to->get_row() != cursq->get_row()) {
+     throw Exception{"Invalid move"};
+     }
 
-  for (int i = 0; i < pieces.size(); i++) {
-    if (pieces[i]->cursq == to &&
-	pieces[i]->color == this->color) {
-      throw Exception{"Invalid move"};
-    }
-    int lbrow = min(to->get_row(), cursq->get_row());
-    int lbcol = min(to->get_col(), cursq->get_col());
-    int ubrow = max(to->get_row(), cursq->get_row());
-    int ubcol = max(to->get_col(), cursq->get_col());
-    if (pieces[i]->cursq.get_col() == this->get_col() &&
-	pieces[i]->cursq.get_row() > lbrow &&
-	pieces[i]->cursq.get_row() < ubrow) {
-      throw Exception{"Invalid move"};
-    } else if (pieces[i]->cursq.get_row() == this->get_row() &&
-	pieces[i]->cursq.get_col() > lbrow &&
-	pieces[i]->cursq.get_col() < ubrow) {
-      throw Exception{"Invalid move"};
-    }
-  }
-  cursq = to;
-  */
+     for (int i = 0; i < pieces.size(); i++) {
+     if (pieces[i]->cursq == to &&
+     pieces[i]->color == this->color) {
+     throw Exception{"Invalid move"};
+     }
+     int lbrow = min(to->get_row(), cursq->get_row());
+     int lbcol = min(to->get_col(), cursq->get_col());
+     int ubrow = max(to->get_row(), cursq->get_row());
+     int ubcol = max(to->get_col(), cursq->get_col());
+     if (pieces[i]->cursq.get_col() == this->get_col() &&
+     pieces[i]->cursq.get_row() > lbrow &&
+     pieces[i]->cursq.get_row() < ubrow) {
+     throw Exception{"Invalid move"};
+     } else if (pieces[i]->cursq.get_row() == this->get_row() &&
+     pieces[i]->cursq.get_col() > lbrow &&
+     pieces[i]->cursq.get_col() < ubrow) {
+     throw Exception{"Invalid move"};
+     }
+     }
+     cursq = to;
+     */
   cursq = to;
 }
 
@@ -200,23 +211,23 @@ PieceName Queen::get_name(void) {
 
 void King::move(Square to) {
   /*
-  if (to == cursq) {
-    throw Exception{"Invalid move"};
-  } else if ((abs(to->get_col() - cursq->get_col()) > 1) ||
-      (abs(to->get_row() - cursq->get_row()) > 1)) {
-    throw Exception{"Invalid move"};
-  } else if (this->in_check(to)) {
-    throw Exception{"Invalid move"};
-  }
+     if (to == cursq) {
+     throw Exception{"Invalid move"};
+     } else if ((abs(to->get_col() - cursq->get_col()) > 1) ||
+     (abs(to->get_row() - cursq->get_row()) > 1)) {
+     throw Exception{"Invalid move"};
+     } else if (this->in_check(to)) {
+     throw Exception{"Invalid move"};
+     }
 
-  for (int i = 0; i < pieces.size(); i++) {
-    if (pieces[i]->cursq == to &&
-	pieces[i]->color == this->color) {
-      throw Exception{"Invalid move"};
-    }
-  }
-  cursq = to;
-  */
+     for (int i = 0; i < pieces.size(); i++) {
+     if (pieces[i]->cursq == to &&
+     pieces[i]->color == this->color) {
+     throw Exception{"Invalid move"};
+     }
+     }
+     cursq = to;
+     */
   cursq = to;
 }
 

@@ -4,7 +4,6 @@
 #include <array>
 #include <vector>
 #include <string>
-#include "observer.h"
 #include "square.h"
 #include "piecename.h"
 #include "color.h"
@@ -12,7 +11,7 @@
 #include "result.h"
 #include "move.h"
 
-class TextDisplay : public Observer {
+class TextDisplay {
   std::array<std::array<char, 8>, 8> board;
   public:
   TextDisplay();
