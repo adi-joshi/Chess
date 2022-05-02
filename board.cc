@@ -1,5 +1,5 @@
 #include "board.h"
-// #include <iostream>
+#include <iostream>
 
 Board::Board(TextDisplay *td) {
   this->td = td;
@@ -61,12 +61,14 @@ bool Board::move(std::string s, Color turn) {
     bool moved = false;
     for (int i = 0; i < pieces.size(); i++) {
       if (pieces[i]->get_cursq() == from && pieces[i]->get_color() == turn) {
-	std::tuple<Square, PieceName, Color> before{from, pieces[i]->get_name(), pieces[i]->get_color()};
+	auto thispiece = pieces[i];
+	std::tuple<Square, PieceName, Color> before{from, thispiece->get_name(), thispiece->get_color()};
 
-	pieces[i]->move(to); // if this piece captures another piece, it removes it from the pieces vector.
-	td->notify(from, to, pieces[i]->get_color(), pieces[i]->get_name());
 
-	std::tuple<Square, PieceName, Color> after{from, pieces[i]->get_name(), pieces[i]->get_color()};
+	thispiece->move(to); // if this piece captures another piece, it removes it from the pieces vector.
+	td->notify(from, to, thispiece->get_color(), thispiece->get_name());
+
+	std::tuple<Square, PieceName, Color> after{from, thispiece->get_name(), thispiece->get_color()};
 	std::pair<std::tuple<Square, PieceName, Color>, std::tuple<Square, PieceName, Color>> thismove{before, after};
 
 	moves.push_back(thismove);
@@ -76,11 +78,11 @@ bool Board::move(std::string s, Color turn) {
       }
     }
     if (!moved) {
-      /* Debugging pieces array
       for (int i = 0; i < pieces.size(); i++) {
 	std::cout << pieces[i]->get_cursq().get_row() << " " << pieces[i]->get_cursq().get_col() << std::endl;
       }
-      */
+      std::cout << "Asked square: " << from.get_row() << " " << from.get_col() << " -> " << to.get_row() << " " << to.get_col() << std::endl;
+      std::cout << "Current turn is " << (turn == Color::White ? "White" : "Black") << std::endl;
       throw Exception{"Invalid Movement Command: No piece on starting square (" + s + ")"};
     }
   } else {

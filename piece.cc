@@ -79,7 +79,7 @@ PieceName Pawn::get_name(void) {
 
 void Knight::move(Square to) {
   if (to == cursq) {
-    throw Exception{"Piece already on Square"};
+    throw Exception{"Destination square is current square"};
   }
   int piece_index = -1;
   for (int i = 0; i < b->pieces.size(); i++) {
@@ -113,43 +113,57 @@ PieceName Knight::get_name(void) {
 //===Bishop===
 
 void Bishop::move(Square to) {
-  /*
-     if (cursq == to) {
-     throw Exception{"Invalid move"};
-     }
-     int trow = to->get_row();
-     int tcol = to->get_col();
-     int crow = cursq->get_row();
-     int ccol = cursq->get_col();
-     if ((abs(trow - tcol) != abs(crow - ccol)) &&
-     abs(trow + tcol) != abs(crow + ccol)) {
-     throw Exception{"Invalid move"};
-     }
-     int lbrow = min(trow, crow);
-     int lbcol = min(tcol, ccol);
-     int ubrow = max(trow, crow);
-     int ubcol = max(tcol, ccol);
-     if (abs(trow - tcol) == abs(crow - ccol)) {
-     for (int i = 0; i < pieces.size(); i++) {
-     int prow = pieces[i]->cursq->get_row();
-     int pcol = pieces[i]->cursq->get_col();
-     if ((abs(prow - pcol) == abs(trow - tcol)) &&
-     (prow <= ubrow && prow >= lbrow)) {
-     throw Exception{"Invalid move"};
-     }
-     }
-     } else if (abs(trow + tcol) == abs(crow + ccol)) {
-     for (int i = 0; i < pieces.size(); i++) {
-     int prow = pieces[i]->cursq->get_row();
-     int pcol = pieces[i]->cursq->get_col();
-     if ((abs(prow + pcol) == abs(trow + tcol)) &&
-     (prow <= ubrow && prow >= lbrow)) {
-     throw Exception{"Invalid move"};
-     }
-     }
-     }
-     cursq = to;
-     */
+  if (cursq == to) {
+    throw Exception{"Destination square is current square"};
+  }
+  int trow = to.get_row();
+  int tcol = to.get_col();
+  int crow = cursq.get_row();
+  int ccol = cursq.get_col();
+  if ((abs(trow - tcol) != abs(crow - ccol)) &&
+      abs(trow + tcol) != abs(crow + ccol)) {
+    throw Exception{"Destination square is not on a diagonal"};
+  }
+  int lbrow = std::min(trow, crow);
+  int lbcol = std::min(tcol, ccol);
+  int ubrow = std::max(trow, crow);
+  int ubcol = std::max(tcol, ccol);
+
+  int piece_index = -1;
+  for (int i = 0; i < b->pieces.size(); i++) {
+    if (b->pieces[i]->get_cursq() == to &&
+	b->pieces[i]->get_color() == this->color) {
+      throw Exception{"Piece of same color already on Square"};
+    } else if (b->pieces[i]->get_cursq() == to &&
+	b->pieces[i]->get_color() != this->color) {
+      piece_index = i;
+      break;
+    }
+  }
+  if (abs(trow - tcol) == abs(crow - ccol)) {
+    for (int i = 0; i < b->pieces.size(); i++) {
+      int prow = b->pieces[i]->get_cursq().get_row();
+      int pcol = b->pieces[i]->get_cursq().get_col();
+      if ((cursq.get_row() != prow && cursq.get_col() != pcol) &&
+	  (abs(prow - pcol) == abs(trow - tcol)) &&
+	  (prow < ubrow && prow > lbrow)) {
+	throw Exception{"Piece is blocking the diagonal"};
+      }
+    }
+  } else if (abs(trow + tcol) == abs(crow + ccol)) {
+    for (int i = 0; i < b->pieces.size(); i++) {
+      int prow = b->pieces[i]->get_cursq().get_row();
+      int pcol = b->pieces[i]->get_cursq().get_col();
+      if ((cursq.get_row() != prow && cursq.get_col() != pcol) &&
+	  (abs(prow + pcol) == abs(trow + tcol)) &&
+	  (prow < ubrow && prow > lbrow)) {
+	throw Exception{"Piece is blocking the diagonal"};
+      }
+    }
+  }
+  if (piece_index != -1) {
+    b->pieces.erase(b->pieces.begin() + piece_index);
+  }
   cursq = to;
 }
 
