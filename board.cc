@@ -3,7 +3,7 @@
 
 Board::Board(TextDisplay *td) {
   this->td = td;
-  for (int i = 0; i < 8; i++) {
+  for (int i = 1; i <= 8; i++) {
     auto white_pawn = new Pawn(this, Square(2,i), Color::White);
     pieces.push_back(white_pawn);
     auto black_pawn = new Pawn(this, Square(7,i), Color::Black);

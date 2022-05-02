@@ -174,35 +174,43 @@ PieceName Bishop::get_name(void) {
 //===Rook===
 
 void Rook::move(Square to) {
-  /*
-     if (cursq == to) {
-     throw Exception{"Invalid move"};
-     } else if ((to->get_col() != cursq->get_col()) &&
-     to->get_row() != cursq->get_row()) {
-     throw Exception{"Invalid move"};
-     }
+  if (cursq == to) {
+    throw Exception{"Destination square is current square"};
+  } else if ((to.get_col() != cursq.get_col()) &&
+      to.get_row() != cursq.get_row()) {
+    throw Exception{"Destination square is not on the same row or column"};
+  }
 
-     for (int i = 0; i < pieces.size(); i++) {
-     if (pieces[i]->cursq == to &&
-     pieces[i]->color == this->color) {
-     throw Exception{"Invalid move"};
-     }
-     int lbrow = min(to->get_row(), cursq->get_row());
-     int lbcol = min(to->get_col(), cursq->get_col());
-     int ubrow = max(to->get_row(), cursq->get_row());
-     int ubcol = max(to->get_col(), cursq->get_col());
-     if (pieces[i]->cursq.get_col() == this->get_col() &&
-     pieces[i]->cursq.get_row() > lbrow &&
-     pieces[i]->cursq.get_row() < ubrow) {
-     throw Exception{"Invalid move"};
-     } else if (pieces[i]->cursq.get_row() == this->get_row() &&
-     pieces[i]->cursq.get_col() > lbrow &&
-     pieces[i]->cursq.get_col() < ubrow) {
-     throw Exception{"Invalid move"};
-     }
-     }
-     cursq = to;
-     */
+  for (int i = 0; i < b->pieces.size(); i++) {
+    if (b->pieces[i]->get_cursq() == to &&
+	b->pieces[i]->get_color() == this->color) {
+      throw Exception{"Piece of same color already on Square"};
+    }
+    int lbrow = std::min(to.get_row(), cursq.get_row());
+    int lbcol = std::min(to.get_col(), cursq.get_col());
+    int ubrow = std::max(to.get_row(), cursq.get_row());
+    int ubcol = std::max(to.get_col(), cursq.get_col());
+    if (b->pieces[i]->get_cursq().get_col() == cursq.get_col() &&
+	b->pieces[i]->get_cursq().get_row() > lbrow &&
+	b->pieces[i]->get_cursq().get_row() < ubrow) {
+      throw Exception{"Piece is in the way to destination square"};
+    } else if (b->pieces[i]->get_cursq().get_row() == cursq.get_row() &&
+	b->pieces[i]->get_cursq().get_col() > lbcol &&
+	b->pieces[i]->get_cursq().get_col() < ubcol) {
+      throw Exception{"Piece is in the way to destination square"};
+    }
+  }
+  
+  int piece_index = -1;
+  for (int i = 0; i < b->pieces.size(); i++) {
+    if (b->pieces[i]->get_cursq() == to &&
+	b->pieces[i]->get_color() != this->color) {
+      piece_index = i;
+    }
+  }
+  if (piece_index != -1) {
+    b->pieces.erase(b->pieces.begin() + piece_index);
+  }
   cursq = to;
 }
 
