@@ -69,7 +69,52 @@ void Pawn::move(Square to) {
   }
   } else if (color == Color::Black)
   */
-  cursq = to;
+  if (cursq == to) {
+    throw Exception{"Destination square is current square"};
+  }
+  if (color == Color::White) {
+    if (to.get_col() == cursq.get_col()) { // non-capture
+      if (abs(to.get_row() - cursq.get_row()) > 2 ||
+	  to.get_row() < cursq.get_row()) {
+	throw Exception{"Destination square is not reachable"};
+      }
+      if (abs(to.get_row() - cursq.get_row()) == 2 &&
+	  cursq.get_row() != 2) {
+	throw Exception{"Cannot move 2 spaces if not on starting square"};
+      }
+      Rook(b, cursq, color).move(to);
+      cursq = to;
+    } else { // is a capture
+      if (abs(to.get_col() - cursq.get_col()) != 1 ||
+	  abs(to.get_row() - cursq.get_row()) != 1 ||
+	  to.get_row() < cursq.get_row()) {
+	throw Exception{"Destination square is not reachable"};
+      }
+      Bishop(b, cursq, color).move(to);
+      cursq = to;
+    }
+  } else if (color == Color::Black) {
+    if (to.get_col() == cursq.get_col()) { // non-capture
+      if (abs(to.get_row() - cursq.get_row()) > 2 ||
+	  to.get_row() > cursq.get_row()) {
+	throw Exception{"Destination square is not reachable"};
+      }
+      if (abs(to.get_row() - cursq.get_row()) == 2 &&
+	  cursq.get_row() != 7) {
+	throw Exception{"Cannot move 2 spaces if not on starting square"};
+      }
+      Rook(b, cursq, color).move(to);
+      cursq = to;
+    } else { // is a capture
+      if (abs(to.get_col() - cursq.get_col()) != 1 ||
+	  abs(to.get_row() - cursq.get_row()) != 1 ||
+	  to.get_row() > cursq.get_row()) {
+	throw Exception{"Destination square is not reachable"};
+      }
+      Bishop(b, cursq, color).move(to);
+      cursq = to;
+    }
+  }
 }
 
 PieceName Pawn::get_name(void) {
