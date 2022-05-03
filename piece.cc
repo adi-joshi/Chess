@@ -1,6 +1,7 @@
 #include "piece.h"
 #include "exception.h"
 #include "board.h"
+#include <string>
 
 //===Helper===
 int abs(int a) {
@@ -113,6 +114,7 @@ PieceName Knight::get_name(void) {
 //===Bishop===
 
 void Bishop::move(Square to) {
+  // TODO: If cursq = {r,c} and to = {c,r} then explosion
   if (cursq == to) {
     throw Exception{"Destination square is current square"};
   }
@@ -146,8 +148,10 @@ void Bishop::move(Square to) {
       int pcol = b->pieces[i]->get_cursq().get_col();
       if ((cursq.get_row() != prow && cursq.get_col() != pcol) &&
 	  (abs(prow - pcol) == abs(trow - tcol)) &&
-	  (prow < ubrow && prow > lbrow)) {
+	  (prow < ubrow && prow > lbrow) &&
+	  (pcol < ubcol && pcol > lbcol)) {
 	throw Exception{"Piece is blocking the diagonal"};
+	// throw Exception{"Piece is blocking the diagonal " + std::to_string(prow) + " " + std::to_string(pcol) + " and " + std::to_string(trow) + " " + std::to_string(tcol)};
       }
     }
   } else if (abs(trow + tcol) == abs(crow + ccol)) {
@@ -156,7 +160,8 @@ void Bishop::move(Square to) {
       int pcol = b->pieces[i]->get_cursq().get_col();
       if ((cursq.get_row() != prow && cursq.get_col() != pcol) &&
 	  (abs(prow + pcol) == abs(trow + tcol)) &&
-	  (prow < ubrow && prow > lbrow)) {
+	  (prow < ubrow && prow > lbrow) &&
+	  (pcol < ubcol && pcol > lbcol)) {
 	throw Exception{"Piece is blocking the diagonal"};
       }
     }
@@ -221,8 +226,38 @@ PieceName Rook::get_name(void) {
 //===Queen===
 
 void Queen::move(Square to) {
-  // return Rook(cursq, color)->move(to) || Bishop(cursq, color)->move(to);
+  // tries to move like a rook. If it succeeds, escapes the
+  // try catch block, and changes cursq -> to.
+  // If it can't move like a rook, the rook->move function
+  // throws an exception, which is caught in the catch
+  // block. In the catch block, we try to then move like
+  // a bishop. If we can move like a bishop, we use the
+  // goto to go to the end of the function and change
+  // cursq -> to. Otherwise, we throw the exception
+  // raised by the bishop.
+  if (cursq == to) {
+    throw Exception{"Destination square is current square"};
+  }
+  if (cursq.get_row() == to.get_row()) { // moves like a rook
+    Rook(b, cursq, color).move(to);
+  } else {
+    Bishop(b, cursq, color).move(to);
+  }
   cursq = to;
+  /*
+  try {
+    Rook(b, cursq, color).move(to);
+  } catch (Exception &e) {
+    try {
+      Bishop(b, cursq, color).move(to);
+      goto queen_move;
+    } catch (Exception &f) {
+      throw f;
+    }
+  }
+queen_move:
+  cursq = to;
+  */
 }
 
 PieceName Queen::get_name(void) {

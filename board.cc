@@ -1,5 +1,5 @@
 #include "board.h"
-#include <iostream>
+// #include <iostream>
 
 Board::Board(TextDisplay *td) {
   this->td = td;
@@ -78,11 +78,13 @@ bool Board::move(std::string s, Color turn) {
       }
     }
     if (!moved) {
+      /*
       for (int i = 0; i < pieces.size(); i++) {
 	std::cout << pieces[i]->get_cursq().get_row() << " " << pieces[i]->get_cursq().get_col() << std::endl;
       }
       std::cout << "Asked square: " << from.get_row() << " " << from.get_col() << " -> " << to.get_row() << " " << to.get_col() << std::endl;
       std::cout << "Current turn is " << (turn == Color::White ? "White" : "Black") << std::endl;
+      */
       throw Exception{"Invalid Movement Command: No piece on starting square (" + s + ")"};
     }
   } else {
