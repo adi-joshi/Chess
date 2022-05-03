@@ -60,6 +60,7 @@ class Queen : public Piece {
 };
 
 class King : public Piece {
+  bool in_check(Square to);
   public: 
   using Piece::Piece;
   void move(Square to) override;

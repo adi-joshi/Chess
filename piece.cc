@@ -205,7 +205,7 @@ void Rook::move(Square to) {
       throw Exception{"Piece is in the way to destination square"};
     }
   }
-  
+
   int piece_index = -1;
   for (int i = 0; i < b->pieces.size(); i++) {
     if (b->pieces[i]->get_cursq() == to &&
@@ -226,15 +226,6 @@ PieceName Rook::get_name(void) {
 //===Queen===
 
 void Queen::move(Square to) {
-  // tries to move like a rook. If it succeeds, escapes the
-  // try catch block, and changes cursq -> to.
-  // If it can't move like a rook, the rook->move function
-  // throws an exception, which is caught in the catch
-  // block. In the catch block, we try to then move like
-  // a bishop. If we can move like a bishop, we use the
-  // goto to go to the end of the function and change
-  // cursq -> to. Otherwise, we throw the exception
-  // raised by the bishop.
   if (cursq == to) {
     throw Exception{"Destination square is current square"};
   }
@@ -244,20 +235,6 @@ void Queen::move(Square to) {
     Bishop(b, cursq, color).move(to);
   }
   cursq = to;
-  /*
-  try {
-    Rook(b, cursq, color).move(to);
-  } catch (Exception &e) {
-    try {
-      Bishop(b, cursq, color).move(to);
-      goto queen_move;
-    } catch (Exception &f) {
-      throw f;
-    }
-  }
-queen_move:
-  cursq = to;
-  */
 }
 
 PieceName Queen::get_name(void) {
@@ -266,25 +243,34 @@ PieceName Queen::get_name(void) {
 
 //===King===
 
-void King::move(Square to) {
-  /*
-     if (to == cursq) {
-     throw Exception{"Invalid move"};
-     } else if ((abs(to->get_col() - cursq->get_col()) > 1) ||
-     (abs(to->get_row() - cursq->get_row()) > 1)) {
-     throw Exception{"Invalid move"};
-     } else if (this->in_check(to)) {
-     throw Exception{"Invalid move"};
-     }
+bool King::in_check(Square to) {
+  return false;
+}
 
-     for (int i = 0; i < pieces.size(); i++) {
-     if (pieces[i]->cursq == to &&
-     pieces[i]->color == this->color) {
-     throw Exception{"Invalid move"};
-     }
-     }
-     cursq = to;
-     */
+void King::move(Square to) {
+  if (to == cursq) {
+    throw Exception{"Destination square is current square"};
+  } else if ((abs(to.get_col() - cursq.get_col()) > 1) ||
+      (abs(to.get_row() - cursq.get_row()) > 1)) {
+    throw Exception{"Destination square is unreachable"};
+  } else if (this->in_check(to)) {
+    throw Exception{"Invalid move"};
+  }
+
+  int piece_index = -1;
+
+  for (int i = 0; i < b->pieces.size(); i++) {
+    if (b->pieces[i]->get_cursq() == to &&
+	b->pieces[i]->get_color() == this->color) {
+      throw Exception{"Piece of same color already on Square"};
+    } else if (b->pieces[i]->get_cursq() == to &&
+	b->pieces[i]->get_color() != this->color) {
+      piece_index = i;
+    }
+  }
+  if (piece_index != -1) {
+    b->pieces.erase(b->pieces.begin() + piece_index);
+  }
   cursq = to;
 }
 
