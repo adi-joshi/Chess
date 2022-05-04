@@ -34,41 +34,7 @@ Piece::~Piece(void) {}
 //===Pawn===
 
 void Pawn::move(Square to) {
-  /*
-     if (to == cursq) {
-     throw Exception{"Invalid move"};
-     }
-
-     int trow = to->get_row();
-     int tcol = to->get_col();
-     int crow = cursq->get_row();
-     int ccol = cursq->get_col();
-
-     if (color == Color::White) {
-     if ((trow < crow) ||
-     (trow - crow > 2)) {
-     throw Exception{"Invalid move"};
-     }
-     if (tcol == ccol) {
-     Rook(cursq, color)->move(to);
-     } else if (abs(tcol - ccol) > 1) {
-     throw Exception{"Invalid move"};
-     } else { // is a capture-like move
-  // check if it is actually a capture
-  bool is_capture = false;
-  auto last_move = moves[moves.size() - 1]
-  for (int i = 0; i < pieces.size(); i++) {
-  if (pieces[i]->cursq == to && pieces[i]->color != this->color) {
-  auto capture = pieces.remove(pieces[i]);
-  capture->~Piece();
-  is_capture = true;
-  }
-  }
-  if (!is_capture) {
-  throw {"Invalid move"};
-  }
-  } else if (color == Color::Black)
-  */
+  // TODO: Make sure capture actually captures something, and code en passant
   if (cursq == to) {
     throw Exception{"Destination square is current square"};
   }
@@ -82,7 +48,15 @@ void Pawn::move(Square to) {
 	  cursq.get_row() != 2) {
 	throw Exception{"Cannot move 2 spaces if not on starting square"};
       }
-      Rook(b, cursq, color).move(to);
+      for (int i = 0; i < b->pieces.size(); i++) {
+	if (b->pieces[i]->get_cursq() == to) {
+	  throw Exception{"Destination square already has a piece"};
+	} else if (abs(to.get_row() - cursq.get_row()) == 2 &&
+	  b->pieces[i]->get_cursq().get_col() == cursq.get_col() &&
+	  b->pieces[i]->get_cursq().get_row() == cursq.get_row() + 1) {
+	  throw Exception{"Destination square is not reachable"};
+	}
+      }
       cursq = to;
     } else { // is a capture
       if (abs(to.get_col() - cursq.get_col()) != 1 ||
@@ -90,7 +64,21 @@ void Pawn::move(Square to) {
 	  to.get_row() < cursq.get_row()) {
 	throw Exception{"Destination square is not reachable"};
       }
-      Bishop(b, cursq, color).move(to);
+      int piece_index = -1;
+      for (int i = 0; i < b->pieces.size(); i++) {
+	if (b->pieces[i]->get_cursq() == to &&
+	    b->pieces[i]->get_color() == this->color) {
+	  throw Exception{"Piece of same color already on Square"};
+	} else if (b->pieces[i]->get_cursq() == to &&
+	    b->pieces[i]->get_color() != this->color) {
+	  piece_index = i;
+	  break;
+	}
+      }
+      if (piece_index == -1) {
+	throw Exception{"No piece to capture on Square"};
+      }
+      b->pieces.erase(b->pieces.begin() + piece_index);
       cursq = to;
     }
   } else if (color == Color::Black) {
@@ -103,7 +91,15 @@ void Pawn::move(Square to) {
 	  cursq.get_row() != 7) {
 	throw Exception{"Cannot move 2 spaces if not on starting square"};
       }
-      Rook(b, cursq, color).move(to);
+      for (int i = 0; i < b->pieces.size(); i++) {
+	if (b->pieces[i]->get_cursq() == to) {
+	  throw Exception{"Destination square already has a piece"};
+	} else if (abs(to.get_row() - cursq.get_row()) == 2 &&
+	  b->pieces[i]->get_cursq().get_col() == cursq.get_col() &&
+	  b->pieces[i]->get_cursq().get_row() == cursq.get_row() - 1) {
+	  throw Exception{"Destination square is not reachable"};
+	}
+      }
       cursq = to;
     } else { // is a capture
       if (abs(to.get_col() - cursq.get_col()) != 1 ||
@@ -111,7 +107,21 @@ void Pawn::move(Square to) {
 	  to.get_row() > cursq.get_row()) {
 	throw Exception{"Destination square is not reachable"};
       }
-      Bishop(b, cursq, color).move(to);
+      int piece_index = -1;
+      for (int i = 0; i < b->pieces.size(); i++) {
+	if (b->pieces[i]->get_cursq() == to &&
+	    b->pieces[i]->get_color() == this->color) {
+	  throw Exception{"Piece of same color already on Square"};
+	} else if (b->pieces[i]->get_cursq() == to &&
+	    b->pieces[i]->get_color() != this->color) {
+	  piece_index = i;
+	  break;
+	}
+      }
+      if (piece_index == -1) {
+	throw Exception{"No piece to capture on Square"};
+      }
+      b->pieces.erase(b->pieces.begin() + piece_index);
       cursq = to;
     }
   }
