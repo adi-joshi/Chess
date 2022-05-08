@@ -1,5 +1,5 @@
 #include "board.h"
-// #include <iostream>
+#include <iostream>
 
 Board::Board(TextDisplay *td) {
   this->td = td;
@@ -65,11 +65,17 @@ bool Board::move(std::string s, Color turn) {
 	std::tuple<Square, PieceName, Color> before{from, thispiece->get_name(), thispiece->get_color()};
 
 
-	thispiece->move(to); // if this piece captures another piece, it removes it from the pieces vector.
+	auto removepiece = thispiece->move(pieces.begin(), pieces.end(), to); // returns the iterator to the piece to remove, or returns end. 
+
 	td->notify(from, to, thispiece->get_color(), thispiece->get_name());
 
 	std::tuple<Square, PieceName, Color> after{from, thispiece->get_name(), thispiece->get_color()};
 	std::pair<std::tuple<Square, PieceName, Color>, std::tuple<Square, PieceName, Color>> thismove{before, after};
+
+	if (removepiece != pieces.end()) {
+	  pieces.erase(removepiece);
+	}
+	std::cout << "Sup" << std::endl;
 
 	moves.push_back(thismove);
 	moved = true;
@@ -108,12 +114,12 @@ Result Board::winner(void) {
   for (int i = 0; i < pieces.size(); i++) {
     if (pieces[i]->get_name() == PieceName::King) {
       if (pieces[i]->get_color() == Color::White &&
-	pieces[i]->is_checkmated() == true) {
+	pieces[i]->is_checkmated(pieces.begin(), pieces.end(), pieces.end()) == true) {
 	return Result::BlackWins;
       } else if (pieces[i]->get_color() == Color::White &&
-	pieces[i]->is_checkmated() == true) {
+	pieces[i]->is_checkmated(pieces.begin(), pieces.end(), pieces.end()) == true) {
 	return Result::WhiteWins;
-      } else if (pieces[i]->is_stalemated() == true) {
+      } else if (pieces[i]->is_stalemated(pieces.begin(), pieces.end(), pieces.end()) == true) {
 	return Result::DrawByStalemate;
       }
     }
