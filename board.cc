@@ -1,5 +1,4 @@
 #include "board.h"
-#include <iostream>
 
 Board::Board(TextDisplay *td) {
   this->td = td;
@@ -75,7 +74,6 @@ bool Board::move(std::string s, Color turn) {
 	if (removepiece != pieces.end()) {
 	  pieces.erase(removepiece);
 	}
-	std::cout << "Sup" << std::endl;
 
 	moves.push_back(thismove);
 	moved = true;

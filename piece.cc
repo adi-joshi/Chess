@@ -92,8 +92,8 @@ std::vector<Piece *>::iterator Pawn::can_move_to(std::vector<Piece *>::iterator 
 	if ((*temp)->get_cursq() == to) {
 	  throw Exception{"Destination square already has a piece"};
 	} else if (abs(to.get_row() - cursq.get_row()) == 2 &&
-	  (*temp)->get_cursq().get_col() == cursq.get_col() &&
-	  (*temp)->get_cursq().get_row() == cursq.get_row() + 1) {
+	    (*temp)->get_cursq().get_col() == cursq.get_col() &&
+	    (*temp)->get_cursq().get_row() == cursq.get_row() + 1) {
 	  throw Exception{"Destination square is not reachable"};
 	}
 	temp++;
@@ -133,8 +133,8 @@ std::vector<Piece *>::iterator Pawn::can_move_to(std::vector<Piece *>::iterator 
 	if ((*temp)->get_cursq() == to) {
 	  throw Exception{"Destination square already has a piece"};
 	} else if (abs(to.get_row() - cursq.get_row()) == 2 &&
-	  (*temp)->get_cursq().get_col() == cursq.get_col() &&
-	  (*temp)->get_cursq().get_row() == cursq.get_row() - 1) {
+	    (*temp)->get_cursq().get_col() == cursq.get_col() &&
+	    (*temp)->get_cursq().get_row() == cursq.get_row() - 1) {
 	  throw Exception{"Destination square is not reachable"};
 	}
 	temp++;
@@ -373,6 +373,19 @@ bool King::is_checkmated(std::vector<Piece *>::iterator begin,
 bool King::is_stalemated(std::vector<Piece *>::iterator begin,
     std::vector<Piece *>::iterator end,
     std::vector<Piece *>::iterator ignore) {
+  /*
+  auto temp = begin;
+  while(temp != end) {
+    if (temp != ignore) {
+      try {
+	if((*temp)->can_move_to(begin, end, cursq) != end) {
+	  return true;
+	}
+      } catch(...) {}
+    }
+    temp++;
+  }
+  */
   return false;
 }
 
