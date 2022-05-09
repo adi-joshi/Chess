@@ -1,4 +1,5 @@
 #include "board.h"
+#include <iostream>
 
 Board::Board(TextDisplay *td) {
   this->td = td;
@@ -99,9 +100,11 @@ bool Board::move(std::string s, Color turn) {
 
 bool Board::game_end(void) {
   try {
+    std::cout << "In try" << std::endl;
     Result r = this->winner();
     return true;
   } catch (Exception &e) {
+    std::cout << "In catch" << std::endl;
     return false;
   }
 }
@@ -110,18 +113,24 @@ Result Board::winner(void) {
 
   // cases for black wins, white wins or draw by stalemate
   for (int i = 0; i < pieces.size(); i++) {
+    std::cout << 1 << std::endl;
     if (pieces[i]->get_name() == PieceName::King) {
-      if (pieces[i]->get_color() == Color::White &&
+      std::cout << 2 << std::endl;
+      if (pieces[i]->get_color() == Color::Black &&
 	pieces[i]->is_checkmated(pieces.begin(), pieces.end(), pieces.end()) == true) {
+	std::cout << 3 << std::endl;
 	return Result::BlackWins;
       } else if (pieces[i]->get_color() == Color::White &&
 	pieces[i]->is_checkmated(pieces.begin(), pieces.end(), pieces.end()) == true) {
+	std::cout << 4 << std::endl;
 	return Result::WhiteWins;
       } else if (pieces[i]->is_stalemated(pieces.begin(), pieces.end(), pieces.end()) == true) {
+	std::cout << 5 << std::endl;
 	return Result::DrawByStalemate;
       }
     }
   }
+  std::cout << 7 << std::endl;
 
   throw Exception{"No result"};
 

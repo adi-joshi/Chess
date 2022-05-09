@@ -244,7 +244,7 @@ std::vector<Piece *>::iterator Bishop::can_move_to(std::vector<Piece *>::iterato
 	throw Exception{"Piece is blocking the diagonal"};
 	// throw Exception{"Piece is blocking the diagonal " + std::to_string(prow) + " " + std::to_string(pcol) + " and " + std::to_string(trow) + " " + std::to_string(tcol)};
       }
-      temp++;
+      temp2++;
     }
   } else if (abs(trow + tcol) == abs(crow + ccol)) {
     auto temp2 = begin;
