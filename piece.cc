@@ -2,6 +2,7 @@
 #include "exception.h"
 #include "board.h"
 #include <string>
+#include <iostream>
 
 //===Helper===
 int abs(int a) {
@@ -15,6 +16,10 @@ Piece::Piece(Board *b, Square s, Color c)
 
 Square Piece::get_cursq(void) {
   return cursq;
+}
+
+void Piece::set_cursq(Square to) {
+  cursq = to;
 }
 
 Color Piece::get_color(void) {
@@ -46,12 +51,22 @@ std::vector<Piece *>::iterator Piece::move(std::vector<Piece *>::iterator begin,
   }
   auto it = this->can_move_to(begin, end, to);
   auto cur = cursq;
-  (*thispiece)->get_cursq() = to;
-  if ((*king)->is_checkmated(begin, end, it)) {// king->is_checkmated(begin, end, dontinclude)
-    throw Exception{"King would be checkmated"};
+  
+  // TODO: Make it such that the this piece iterator has cursq as to, so that
+  // the king can determine if it is in check.
+  (*thispiece)->set_cursq(to);
+  if ((*king)->in_check(begin, end, it)) {// king->is_checkmated(begin, end, dontinclude)
+    (*thispiece)->set_cursq(cur);
+    throw Exception{"King would be in check"};
   }
   cursq = to;
   return it;
+}
+
+bool Piece::in_check(std::vector<Piece *>::iterator begin,
+    std::vector<Piece *>::iterator end,
+    std::vector<Piece *>::iterator ignore) {
+  return false;
 }
 
 bool Piece::is_checkmated(std::vector<Piece *>::iterator begin,
@@ -73,7 +88,7 @@ Piece::~Piece(void) {}
 std::vector<Piece *>::iterator Pawn::can_move_to(std::vector<Piece *>::iterator begin,
     std::vector<Piece *>::iterator end, Square to) {
 
-  // TODO: Make sure capture actually captures something, and code en passant
+  // TODO: Code en passant
   if (cursq == to) {
     throw Exception{"Destination square is current square"};
   }
@@ -204,7 +219,6 @@ PieceName Knight::get_name(void) {
 
 std::vector<Piece *>::iterator Bishop::can_move_to(std::vector<Piece *>::iterator begin,
     std::vector<Piece *>::iterator end, Square to) {
-  // TODO: If cursq = {r,c} and to = {c,r} then explosion
   if (cursq == to) {
     throw Exception{"Destination square is current square"};
   }
@@ -212,8 +226,8 @@ std::vector<Piece *>::iterator Bishop::can_move_to(std::vector<Piece *>::iterato
   int tcol = to.get_col();
   int crow = cursq.get_row();
   int ccol = cursq.get_col();
-  if ((abs(trow - tcol) != abs(crow - ccol)) &&
-      abs(trow + tcol) != abs(crow + ccol)) {
+  if (trow - tcol != crow - ccol &&
+      trow + tcol != crow + ccol) {
     throw Exception{"Destination square is not on a diagonal"};
   }
   int lbrow = std::min(trow, crow);
@@ -232,13 +246,13 @@ std::vector<Piece *>::iterator Bishop::can_move_to(std::vector<Piece *>::iterato
     }
     temp++;
   }
-  if (abs(trow - tcol) == abs(crow - ccol)) {
+  if (trow - tcol == crow - ccol) {
     auto temp2 = begin;
     while(temp2 != end) {
       int prow = (*temp2)->get_cursq().get_row();
       int pcol = (*temp2)->get_cursq().get_col();
       if ((cursq.get_row() != prow && cursq.get_col() != pcol) &&
-	  (abs(prow - pcol) == abs(trow - tcol)) &&
+	  prow - pcol == trow - tcol &&
 	  (prow < ubrow && prow > lbrow) &&
 	  (pcol < ubcol && pcol > lbcol)) {
 	throw Exception{"Piece is blocking the diagonal"};
@@ -246,13 +260,13 @@ std::vector<Piece *>::iterator Bishop::can_move_to(std::vector<Piece *>::iterato
       }
       temp2++;
     }
-  } else if (abs(trow + tcol) == abs(crow + ccol)) {
+  } else if (trow + tcol == crow + ccol) {
     auto temp2 = begin;
     while(temp2 != end) {
       int prow = (*temp2)->get_cursq().get_row();
       int pcol = (*temp2)->get_cursq().get_col();
       if ((cursq.get_row() != prow && cursq.get_col() != pcol) &&
-	  (abs(prow + pcol) == abs(trow + tcol)) &&
+	  (prow + pcol == trow + tcol) &&
 	  (prow < ubrow && prow > lbrow) &&
 	  (pcol < ubcol && pcol > lbcol)) {
 	throw Exception{"Piece is blocking the diagonal"};
@@ -323,9 +337,9 @@ std::vector<Piece *>::iterator Queen::can_move_to(std::vector<Piece *>::iterator
   }
   if (cursq.get_row() == to.get_row() ||
       cursq.get_col() == to.get_col()) { // moves like a rook
-    return Rook(b, cursq, color).move(begin, end, to);
+    return Rook(b, cursq, color).can_move_to(begin, end, to);
   } else { // moves like a bishop
-    return Bishop(b, cursq, color).move(begin, end, to);
+    return Bishop(b, cursq, color).can_move_to(begin, end, to);
   }
 }
 
@@ -335,7 +349,27 @@ PieceName Queen::get_name(void) {
 
 //===King===
 
-bool King::in_check(Square to) {
+bool King::king_can_move(std::vector<Piece *>::iterator begin,
+    std::vector<Piece *>::iterator end, std::vector<Piece *>::iterator ignore) {
+  std::vector<Square> possible_moves;
+  for (int i = std::max(cursq.get_row() - 1, 1); i < std::min(cursq.get_row() + 1, 8); i++) {
+    for (int j = std::max(cursq.get_col() - 1, 1); j < std::min(cursq.get_col() + 1, 8); j++) {
+      if (i == cursq.get_row() && j == cursq.get_col()) {
+	continue;
+      }
+      Square s{i, j};
+      possible_moves.push_back(s);
+    }
+  }
+
+  for (int i = 0; i < possible_moves.size(); i++) {
+    try {
+      this->can_move_to(begin, end, possible_moves[i]); // if can move, won't throw
+      if (!King(b, possible_moves[i], color).in_check(begin, end, ignore)) {
+	return true;
+      }
+    } catch (...) {}
+  }
   return false;
 }
 
@@ -346,8 +380,6 @@ std::vector<Piece *>::iterator King::can_move_to(std::vector<Piece *>::iterator 
   } else if ((abs(to.get_col() - cursq.get_col()) > 1) ||
       (abs(to.get_row() - cursq.get_row()) > 1)) {
     throw Exception{"Destination square is unreachable"};
-  } else if (this->in_check(to)) {
-    throw Exception{"Invalid move"};
   }
 
   auto temp = begin;
@@ -364,9 +396,29 @@ std::vector<Piece *>::iterator King::can_move_to(std::vector<Piece *>::iterator 
   return temp;
 }
 
+bool King::in_check(std::vector<Piece *>::iterator begin,
+    std::vector<Piece *>::iterator end,
+    std::vector<Piece *>::iterator ignore) {
+  for (auto temp = begin; temp != end; temp++) {
+    if ((*temp)->get_color() != this->color) {
+      try {
+	(*temp)->can_move_to(begin, end, cursq);
+	return true;
+      } catch(Exception &e) {}
+    }
+  }
+  return false;
+}
+
 bool King::is_checkmated(std::vector<Piece *>::iterator begin,
     std::vector<Piece *>::iterator end,
     std::vector<Piece *>::iterator ignore) {
+  // if !this->king_can_move == false && in check, then is_checkmated is true
+  // otherwise, king is not checkmated
+  if (!this->king_can_move(begin, end, ignore) &&
+      this->in_check(begin, end, ignore)) {
+    return true;
+  }
   return false;
 }
 
@@ -374,18 +426,18 @@ bool King::is_stalemated(std::vector<Piece *>::iterator begin,
     std::vector<Piece *>::iterator end,
     std::vector<Piece *>::iterator ignore) {
   /*
-  auto temp = begin;
-  while(temp != end) {
-    if (temp != ignore) {
-      try {
-	if((*temp)->can_move_to(begin, end, cursq) != end) {
-	  return true;
-	}
-      } catch(...) {}
-    }
-    temp++;
-  }
-  */
+     auto temp = begin;
+     while(temp != end) {
+     if (temp != ignore) {
+     try {
+     if((*temp)->can_move_to(begin, end, cursq) != end) {
+     return true;
+     }
+     } catch(...) {}
+     }
+     temp++;
+     }
+     */
   return false;
 }
 

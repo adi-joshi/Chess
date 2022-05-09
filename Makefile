@@ -7,6 +7,9 @@ EXEC=chess
 ${EXEC}: ${OBJECTS}
 	${CXX} ${OBJECTS} -o ${EXEC}
 
+debug: CXXFLAGS += -g
+debug: ${EXEC}
+
 -include ${DEPENDS}
 
 .PHONY: clean
