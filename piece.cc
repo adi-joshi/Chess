@@ -128,8 +128,11 @@ std::vector<Piece *>::iterator Pawn::can_move_to(std::vector<Piece *>::iterator 
 	} else if ((*temp)->get_cursq() == to &&
 	    (*temp)->get_color() != this->color) {
 	  break;
-	}
+	} 
 	temp++;
+      }
+      if (temp == end) {
+	throw Exception{"Move is not a capture"};
       }
       return temp; // this is a capture
     }
@@ -171,6 +174,9 @@ std::vector<Piece *>::iterator Pawn::can_move_to(std::vector<Piece *>::iterator 
 	  break;
 	}
 	temp++;
+      }
+      if (temp == end) {
+	throw Exception{"Move is not a capture"};
       }
       return temp; // this is a capture
     }
