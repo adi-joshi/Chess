@@ -61,21 +61,19 @@ bool Board::move(std::string s, Color turn) {
     for (int i = 0; i < pieces.size(); i++) {
       if (pieces[i]->get_cursq() == from && pieces[i]->get_color() == turn) {
 	auto thispiece = pieces[i];
-	std::tuple<Square, PieceName, Color> before{from, thispiece->get_name(), thispiece->get_color()};
-
+	auto name = thispiece->get_name();
+	auto color = thispiece->get_color();
 
 	auto removepiece = thispiece->move(pieces.begin(), pieces.end(), to); // returns the iterator to the piece to remove, or returns end. 
 
-	td->notify(from, to, thispiece->get_color(), thispiece->get_name());
-
-	std::tuple<Square, PieceName, Color> after{from, thispiece->get_name(), thispiece->get_color()};
-	std::pair<std::tuple<Square, PieceName, Color>, std::tuple<Square, PieceName, Color>> thismove{before, after};
+	td->notify(from, to, color, name);
 
 	if (removepiece != pieces.end()) {
 	  pieces.erase(removepiece);
 	}
 
-	moves.push_back(thismove);
+	Move m{color, name, from, to};
+	moves.push_back(m);
 	moved = true;
 	turn = static_cast<Color>(static_cast<int>(turn) + 1 % 2);
 	return true;

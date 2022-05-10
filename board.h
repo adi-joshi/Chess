@@ -10,8 +10,6 @@
 #include "piece.h"
 #include "move.h"
 
-
-
 class Board {
   // vector <Object *> ob is in Subject class
   TextDisplay *td;
