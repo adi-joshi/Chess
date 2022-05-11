@@ -26,6 +26,5 @@ How to play the game:
 
 ## To do List:
 - Castling
-- En passant
 - Printing moves
 - GUI
