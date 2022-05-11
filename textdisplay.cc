@@ -113,7 +113,7 @@ void TextDisplay::print_board(void) {
   std::cout << "  a b c d e f g h" << std::endl;
 }
 
-void TextDisplay::print_moves(std::vector<Move>::iterator it) {
+void TextDisplay::print_moves(std::vector<Move*>::iterator it) {
   std::cout << "Printing board" << std::endl;
 }
 

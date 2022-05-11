@@ -11,6 +11,7 @@ class Square {
   void set_row(int r);
   void set_col(int c);
   bool operator==(Square &other);
+  bool operator!=(Square other);
   ~Square();
 };
 

@@ -120,16 +120,26 @@ std::vector<Piece *>::iterator Pawn::can_move_to(std::vector<Piece *>::iterator 
 	  to.get_row() < cursq.get_row()) {
 	throw Exception{"Destination square is not reachable"};
       }
+      Move *m = b->get_prev_move();
+      auto need_sq = to;
+      if (m != nullptr) {
+	if (m->get_dst_piecename() == PieceName::Pawn &&
+	    m->get_dst_square().get_row() == cursq.get_row() &&
+	    m->get_dst_square().get_row() == 5 &&
+	    m->get_src_square().get_row() == 7 &&
+	    abs(m->get_dst_square().get_col() - cursq.get_col()) == 1) { // is en passant
+	  need_sq = m->get_dst_square();
+	}
+      }
       auto temp = begin;
-      while(temp != end) {
-	if ((*temp)->get_cursq() == to &&
+      for (; temp != end; temp++) {
+	if ((*temp)->get_cursq() == need_sq &&
 	    (*temp)->get_color() == this->color) {
 	  throw Exception{"Piece of same color already on Square"};
-	} else if ((*temp)->get_cursq() == to &&
+	} else if ((*temp)->get_cursq() == need_sq &&
 	    (*temp)->get_color() != this->color) {
 	  break;
 	} 
-	temp++;
       }
       if (temp == end) {
 	throw Exception{"Move is not a capture"};
@@ -164,16 +174,26 @@ std::vector<Piece *>::iterator Pawn::can_move_to(std::vector<Piece *>::iterator 
 	  to.get_row() > cursq.get_row()) {
 	throw Exception{"Destination square is not reachable"};
       }
+      Move *m = b->get_prev_move();
+      auto need_sq = to;
+      if (m != nullptr) {
+	if (m->get_dst_piecename() == PieceName::Pawn &&
+	    m->get_dst_square().get_row() == cursq.get_row() &&
+	    m->get_dst_square().get_row() == 4 && 
+	    m->get_src_square().get_row() == 2 &&
+	    abs(m->get_dst_square().get_col() - cursq.get_col()) == 1) { // is en passant
+	  need_sq = m->get_dst_square();
+	}
+      }
       auto temp = begin;
-      while(temp != end) {
-	if ((*temp)->get_cursq() == to &&
+      for (; temp != end; temp++) {
+	if ((*temp)->get_cursq() == need_sq &&
 	    (*temp)->get_color() == this->color) {
 	  throw Exception{"Piece of same color already on Square"};
-	} else if ((*temp)->get_cursq() == to &&
+	} else if ((*temp)->get_cursq() == need_sq &&
 	    (*temp)->get_color() != this->color) {
 	  break;
 	}
-	temp++;
       }
       if (temp == end) {
 	throw Exception{"Move is not a capture"};

@@ -1,6 +1,7 @@
 #include "board.h"
 
 Board::Board(TextDisplay *td) {
+  moves.push_back(nullptr);
   this->td = td;
   for (int i = 1; i <= 8; i++) {
     auto white_pawn = new Pawn(this, Square(2,i), Color::White);
@@ -61,18 +62,25 @@ bool Board::move(std::string s, Color turn) {
     for (int i = 0; i < pieces.size(); i++) {
       if (pieces[i]->get_cursq() == from && pieces[i]->get_color() == turn) {
 	auto thispiece = pieces[i];
-	auto name = thispiece->get_name();
+	auto name_before = thispiece->get_name();
 	auto color = thispiece->get_color();
 
 	auto removepiece = thispiece->move(pieces.begin(), pieces.end(), to); // returns the iterator to the piece to remove, or returns end. 
 
-	td->notify(from, to, color, name);
+	auto name_after = thispiece->get_name();
+
+	// the following is a hack to get en passant to display properly on textdisplay
+	if (removepiece != pieces.end() && to != (*removepiece)->get_cursq()) {
+	  td->notify(from, (*removepiece)->get_cursq(), color, name_after);
+	  td->notify((*removepiece)->get_cursq(), from, color, name_after);
+	}
+	td->notify(from, to, color, name_after);
 
 	if (removepiece != pieces.end()) {
 	  pieces.erase(removepiece);
 	}
 
-	Move m{color, name, from, to};
+	Move *m = new Move{color, name_before, from, name_after, to, ""};
 	moves.push_back(m);
 	moved = true;
 	turn = static_cast<Color>(static_cast<int>(turn) + 1 % 2);
@@ -93,6 +101,10 @@ bool Board::move(std::string s, Color turn) {
     throw Exception{"Invalid Movement Command: " + s};
   }
   return false;
+}
+
+Move *Board::get_prev_move(void) {
+  return moves[moves.size() - 1];
 }
 
 bool Board::game_end(void) {
@@ -126,4 +138,10 @@ Result Board::winner(void) {
   // TODO:
   // cases for draw by insufficient material
   // cases for draw by threefold repetition
+}
+
+Board::~Board(void) {
+  for (auto m : moves) {
+    delete m;
+  }
 }

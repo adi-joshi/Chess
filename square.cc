@@ -33,4 +33,8 @@ bool Square::operator==(Square &other) {
   return (this->get_col() == other.get_col()) && (this->get_row() == other.get_row());
 }
 
+bool Square::operator!=(Square other) {
+  return !this->operator==(other);
+}
+
 Square::~Square(void) {}
