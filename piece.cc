@@ -22,6 +22,10 @@ void Piece::set_cursq(Square to) {
   cursq = to;
 }
 
+bool Piece::piece_moved(void) {
+  return moved;
+}
+
 Color Piece::get_color(void) {
   return color;
 }
@@ -51,7 +55,7 @@ std::vector<Piece *>::iterator Piece::move(std::vector<Piece *>::iterator begin,
   }
   auto it = this->can_move_to(begin, end, to);
   auto cur = cursq;
-  
+
   // TODO: Make it such that the this piece iterator has cursq as to, so that
   // the king can determine if it is in check.
   (*thispiece)->set_cursq(to);
@@ -60,6 +64,7 @@ std::vector<Piece *>::iterator Piece::move(std::vector<Piece *>::iterator begin,
     throw Exception{"King would be in check"};
   }
   cursq = to;
+  moved = true;
   return it;
 }
 
@@ -262,7 +267,7 @@ std::vector<Piece *>::iterator Bishop::can_move_to(std::vector<Piece *>::iterato
   int ubcol = std::max(tcol, ccol);
 
   auto temp = begin;
-  while(temp != begin) {
+  while(temp != end) {
     if ((*temp)->get_cursq() == to &&
 	(*temp)->get_color() == this->color) {
       throw Exception{"Piece of same color already on Square"};
@@ -403,6 +408,37 @@ std::vector<Piece *>::iterator King::can_move_to(std::vector<Piece *>::iterator 
     std::vector<Piece *>::iterator end, Square to) {
   if (to == cursq) {
     throw Exception{"Destination square is current square"};
+  } else if (moved == false &&
+      (abs(to.get_row() - cursq.get_row()) == 0) &&
+      (abs(to.get_col() - cursq.get_col()) == 2)) { // castling
+    if (this->in_check(begin, end, end)) {
+      throw Exception{"Cannot castle while in check"};
+    }
+    auto rook = begin;
+    for(; rook != end; rook++) {
+      if ((*rook)->get_color() == this->color &&
+	  (*rook)->get_cursq().get_row() == cursq.get_row() &&
+	  (*rook)->piece_moved() == false &&
+	  (((*rook)->get_cursq().get_col() - cursq.get_col()) *
+	   (to.get_col() - cursq.get_col()) > 0)) {
+	break;
+      }
+    }
+    if (rook == end) {
+      throw Exception{"Cannot castle as rook has moved"};
+    }
+    try {
+      Rook(b, cursq, color).can_move_to(begin, end, {to.get_row(), (to.get_col() + (*rook)->get_cursq().get_col()) / 2}); 
+      if (!this->in_check(begin, end, end) &&
+	  !King(b, {cursq.get_row(), (cursq.get_col() + to.get_col()) / 2}, color).in_check(begin, end, end) &&
+	  !King(b, to, color).in_check(begin, end, end)) {
+	(*rook)->move(begin, end, {to.get_row(), (to.get_col() + cursq.get_col()) / 2});
+	cursq = to;
+      }
+    } catch (...) {
+      throw Exception{"Piece is in the way"};
+    }
+    return end;
   } else if ((abs(to.get_col() - cursq.get_col()) > 1) ||
       (abs(to.get_row() - cursq.get_row()) > 1)) {
     throw Exception{"Destination square is unreachable"};
@@ -419,36 +455,6 @@ std::vector<Piece *>::iterator King::can_move_to(std::vector<Piece *>::iterator 
     temp++;
   }
   return temp;
-  /* else if (moved == false &&
-             (abs(to.get_row() - cursq.get_row()) == 0) &&
-             (abs(to.get_col() - cursq.get_col()) == 2)) { // castling
-    if (this->in_check(begin, end, end)) {
-      throw Exception{"Cannot castle while in check"};
-    }
-    auto rook = begin;
-    for(; rook != end; rook++) {
-      if ((*rook)->get_cursq().get_row() == cursq.get_row() &&
-	  (*rook)->moved == false &&
-	  (((*rook)->get_cursq().get_col() - cursq.get_col()) *
-	   (to.get_col() - cursq.get_col()) >= 0)) {
-	break;
-      }
-    }
-    if (rook == end) {
-      throw Exception{"Cannot castle as rook has moved"};
-    }
-    try {
-      Rook(b, cursq, color).can_move_to({to.get_row(), (to.get_col() + (*rook).get_col()) / 2});
-      if (!this->in_check(begin, end, end) &&
-	  !King(b, {cursq.get_row(), (cursq.get_col() + to.get_col()) / 2}, color)->in_check(begin, end, end) &&
-	  !King(b, to, color)->in_check(begin, end, end)) {
-	(*rook)->set_cursq({to.get_row(), (to.get_col() + cursq.get_col()) / 2});
-	cursq = to;
-    } catch (...) {
-      throw Exception{"Piece is in the way"};
-    }
-  }
-  */
 }
 
 bool King::in_check(std::vector<Piece *>::iterator begin,

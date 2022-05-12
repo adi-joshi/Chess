@@ -14,10 +14,12 @@ class Piece {
   Board *b;
   Square cursq;
   Color color;
+  bool moved = false;
   public:
   Piece(Board *b, Square s, Color c);
   Square get_cursq();
   void set_cursq(Square to);
+  bool piece_moved();
   Color get_color();
 
   // this one called by a King to check if this piece can move to the king's square
