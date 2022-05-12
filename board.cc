@@ -1,4 +1,5 @@
 #include "board.h"
+#include <iostream>
 
 Board::Board(TextDisplay *td) {
   moves.push_back(nullptr);
@@ -43,6 +44,18 @@ Board::Board(TextDisplay *td) {
   pieces.push_back(black_bishop2);
   pieces.push_back(black_knight2);
   pieces.push_back(black_rook2);
+
+  /*
+  auto white_king = new King(this, Square(6, 7), Color::White);
+  auto black_king = new King(this, Square(8, 8), Color::Black);
+  auto white_knight1 = new Knight(this, Square(6, 8), Color::White);
+  auto white_knight2 = new Knight(this, Square(7, 6), Color::White);
+
+  pieces.push_back(white_king);
+  pieces.push_back(black_king);
+  pieces.push_back(white_knight1);
+  pieces.push_back(white_knight2);
+  */
 
   td->draw_board(pieces.cbegin(), pieces.cend());
 
@@ -105,36 +118,29 @@ Move *Board::get_prev_move(void) {
 }
 
 bool Board::game_end(void) {
-  try {
-    Result r = this->winner();
-    return true;
-  } catch (Exception &e) {
-    return false;
-  }
+  return !(this->winner() == Result::NoResult);
 }
 
 Result Board::winner(void) {
-
   // cases for black wins, white wins or draw by stalemate
+  Result r = Result::NoResult;
   for (int i = 0; i < pieces.size(); i++) {
     if (pieces[i]->get_name() == PieceName::King) {
-      if (pieces[i]->get_color() == Color::White &&
-	pieces[i]->is_checkmated(pieces.begin(), pieces.end(), pieces.end()) == true) {
-	return Result::BlackWins;
-      } else if (pieces[i]->get_color() == Color::Black &&
-	pieces[i]->is_checkmated(pieces.begin(), pieces.end(), pieces.end()) == true) {
-	return Result::WhiteWins;
-      } else if (pieces[i]->is_stalemated(pieces.begin(), pieces.end(), pieces.end()) == true) {
-	return Result::DrawByStalemate;
+      if (r == Result::BlackWins ||
+	  r == Result::WhiteWins) {
+	continue;
+      }
+      Result thisresult = pieces[i]->get_result(pieces.begin(), pieces.end(), pieces.end());
+      if (thisresult == Result::WhiteWins ||
+	  thisresult == Result::BlackWins) {
+	r = thisresult;
+      } else if (r == Result::NoResult &&
+	  thisresult != Result::NoResult) {
+	r = thisresult;
       }
     }
   }
-
-  throw Exception{"No result"};
-
-  // TODO:
-  // cases for draw by insufficient material
-  // cases for draw by threefold repetition
+  return r;
 }
 
 Board::~Board(void) {

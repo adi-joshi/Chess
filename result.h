@@ -2,6 +2,7 @@
 #define RESULT_H_
 
 enum class Result {
+  NoResult,
   WhiteWins,
   BlackWins,
   DrawByThreefold,

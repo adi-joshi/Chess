@@ -5,6 +5,7 @@
 #include "square.h"
 #include "color.h"
 #include "piecename.h"
+#include "result.h"
 
 class Board;
 
@@ -37,7 +38,10 @@ class Piece {
   virtual bool is_checkmated(std::vector<Piece *>::iterator it,
       std::vector<Piece *>::iterator end,
       std::vector<Piece *>::iterator ignore);
-  virtual bool is_stalemated(std::vector<Piece *>::iterator it,
+  virtual Result is_stalemated(std::vector<Piece *>::iterator it,
+      std::vector<Piece *>::iterator end,
+      std::vector<Piece *>::iterator ignore);
+  virtual Result get_result(std::vector<Piece *>::iterator begin,
       std::vector<Piece *>::iterator end,
       std::vector<Piece *>::iterator ignore);
   ~Piece();
@@ -104,7 +108,10 @@ class King : public Piece {
   bool is_checkmated(std::vector<Piece *>::iterator begin,
       std::vector<Piece *>::iterator end,
       std::vector<Piece *>::iterator ignore) override;
-  bool is_stalemated(std::vector<Piece *>::iterator begin,
+  Result is_stalemated(std::vector<Piece *>::iterator begin,
+      std::vector<Piece *>::iterator end,
+      std::vector<Piece *>::iterator ignore) override;
+  Result get_result(std::vector<Piece *>::iterator begin,
       std::vector<Piece *>::iterator end,
       std::vector<Piece *>::iterator ignore) override;
 };

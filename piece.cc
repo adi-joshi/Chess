@@ -2,7 +2,6 @@
 #include "exception.h"
 #include "board.h"
 #include <string>
-#include <iostream>
 
 //===Helper===
 int abs(int a) {
@@ -80,10 +79,16 @@ bool Piece::is_checkmated(std::vector<Piece *>::iterator begin,
   return false;
 }
 
-bool Piece::is_stalemated(std::vector<Piece *>::iterator begin,
+Result Piece::is_stalemated(std::vector<Piece *>::iterator begin,
     std::vector<Piece *>::iterator end,
     std::vector<Piece *>::iterator ignore) {
-  return false;
+  return Result::NoResult;
+}
+
+Result Piece::get_result(std::vector<Piece *>::iterator begin,
+    std::vector<Piece *>::iterator end,
+    std::vector<Piece *>::iterator ignore) {
+  return Result::NoResult;
 }
 
 Piece::~Piece(void) {}
@@ -483,47 +488,118 @@ bool King::is_checkmated(std::vector<Piece *>::iterator begin,
       for (int j = 1; j <= 8; j++) {
 	auto temp = begin;
 	for (; temp != end; temp++) {
-	  try {
-	    (*temp)->can_move_to(begin, end, {i,j});
-	    auto sq = (*temp)->get_cursq();
-	    (*temp)->set_cursq({i,j});
-	    if (!this->in_check(begin,end,ignore)) {
+	  if ((*temp)->get_color() == this->color) {
+	    try {
+	      (*temp)->can_move_to(begin, end, {i,j});
+	      auto sq = (*temp)->get_cursq();
+	      (*temp)->set_cursq({i,j});
+	      if (!this->in_check(begin,end,ignore)) {
+		(*temp)->set_cursq(sq);
+		canblock = true;
+		goto outside; // I downloaded all of C++, I'm going to use all of C++
+	      }
 	      (*temp)->set_cursq(sq);
-	      canblock = true;
-	      goto outside; // I downloaded all of C++, I'm going to use all of C++
-	    }
-	    (*temp)->set_cursq(sq);
-	  } catch(...) {}
+	    } catch(...) {}
+	  }
 	}
       }
     }
 outside:
-    if (canblock == true) {
-      return false;
-    } else {
-      return true;
-    }
+    return !canblock;
   }
   return false;
 }
 
-bool King::is_stalemated(std::vector<Piece *>::iterator begin,
+Result King::get_result(std::vector<Piece *>::iterator begin,
     std::vector<Piece *>::iterator end,
     std::vector<Piece *>::iterator ignore) {
-  /*
-     auto temp = begin;
-     while(temp != end) {
-     if (temp != ignore) {
-     try {
-     if((*temp)->can_move_to(begin, end, cursq) != end) {
-     return true;
-     }
-     } catch(...) {}
-     }
-     temp++;
-     }
-     */
-  return false;
+  if (this->is_checkmated(begin, end, ignore) &&
+      color == Color::White) {
+    return Result::BlackWins;
+  } else if (this->is_checkmated(begin, end, ignore) &&
+      color == Color::Black) {
+    return Result::WhiteWins;
+  }
+  return this->is_stalemated(begin, end, ignore); // nothing uses is_stalemated, so change it
+}
+
+Result King::is_stalemated(std::vector<Piece *>::iterator begin,
+    std::vector<Piece *>::iterator end,
+    std::vector<Piece *>::iterator ignore) {
+
+  // draw by stalemate
+  bool canmove = false;
+  for (int i = 1; i <= 8; i++) {
+    for (int j = 1; j <= 8; j++) {
+      for (auto temp = begin; temp != end; temp++) {
+	if ((*temp)->get_color() == this->color) {
+	  try {
+	    auto sq = (*temp)->get_cursq();
+	    (*temp)->move(begin, end, {i, j});
+	    (*temp)->set_cursq(sq);
+	    canmove = true;
+	  } catch(...) {}
+	}
+      }
+    }
+  }
+  if (!canmove) {
+    return Result::DrawByStalemate;
+  }
+
+  // draw by insufficient material
+  std::vector<std::vector<Piece*>::iterator> white;
+  std::vector<std::vector<Piece*>::iterator> black;
+  int white_bishops = 0;
+  int white_knights = 0;
+  int black_bishops = 0;
+  int black_knights = 0;
+  for (auto temp = begin; temp != end; temp++) {
+    if ((*temp)->get_color() == Color::White) {
+      white.push_back(temp);
+      if ((*temp)->get_name() == PieceName::Knight) {
+	white_knights++;
+      } else if ((*temp)->get_name() == PieceName::Bishop) {
+	white_bishops++;
+      }
+    } else if ((*temp)->get_color() == Color::Black) {
+      black.push_back(temp);
+      if ((*temp)->get_name() == PieceName::Knight) {
+	black_knights++;
+      } else if ((*temp)->get_name() == PieceName::Bishop) {
+	black_bishops++;
+      }
+    }
+  }
+  int size = white.size() + black.size();
+  if (size <= 2) {
+    return Result::DrawByInsufficientMaterial;
+  }
+  auto temp = begin;
+  for (; temp != end; temp++) {
+    if ((*temp)->get_name() != PieceName::King) {
+      break;
+    }
+  }
+  if (size == 3 &&
+      (white_bishops == 1 || white_knights == 1 ||
+       black_bishops == 1 || black_knights == 1)) {
+    return Result::DrawByInsufficientMaterial;
+  }
+  if (size == 4 &&
+      (white_knights + black_knights == size - 2)) {
+    return Result::DrawByInsufficientMaterial;
+  }
+  if (size == 5 &&
+      white_knights + black_knights == 5 &&
+      white_knights != 3 &&
+      black_knights != 3) {
+    return Result::DrawByInsufficientMaterial;
+  }
+
+  // TODO: draw by threefold repetition
+
+  return Result::NoResult;
 }
 
 PieceName King::get_name(void) {
