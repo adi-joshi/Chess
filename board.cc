@@ -50,7 +50,7 @@ Board::Board(TextDisplay *td) {
 
 bool Board::move(std::string s, Color turn) {
   if (s.size() == 1 && s[0] == 'p') {
-    td->print_moves(moves.begin());
+    td->print_moves(moves.cbegin(), moves.cend());
     return false;
   }
   if ((s.size() == 4) &&

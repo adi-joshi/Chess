@@ -478,7 +478,31 @@ bool King::is_checkmated(std::vector<Piece *>::iterator begin,
   // otherwise, king is not checkmated
   if (!this->king_can_move(begin, end, ignore) &&
       this->in_check(begin, end, ignore)) {
-    return true;
+    bool canblock = false;
+    for (int i = 1; i <= 8; i++) {
+      for (int j = 1; j <= 8; j++) {
+	auto temp = begin;
+	for (; temp != end; temp++) {
+	  try {
+	    (*temp)->can_move_to(begin, end, {i,j});
+	    auto sq = (*temp)->get_cursq();
+	    (*temp)->set_cursq({i,j});
+	    if (!this->in_check(begin,end,ignore)) {
+	      (*temp)->set_cursq(sq);
+	      canblock = true;
+	      goto outside; // I downloaded all of C++, I'm going to use all of C++
+	    }
+	    (*temp)->set_cursq(sq);
+	  } catch(...) {}
+	}
+      }
+    }
+outside:
+    if (canblock == true) {
+      return false;
+    } else {
+      return true;
+    }
   }
   return false;
 }

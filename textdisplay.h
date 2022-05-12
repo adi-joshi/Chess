@@ -24,7 +24,8 @@ class TextDisplay {
   void draw_board(std::vector<Piece*>::const_iterator begin,
                   std::vector<Piece*>::const_iterator end);
   void print_board();
-  void print_moves(std::vector<Move*>::iterator it);
+  void print_moves(std::vector<Move*>::const_iterator begin,
+                   std::vector<Move*>::const_iterator end);
   void print_error(Exception e);
   void print_winner(Result r);
   ~TextDisplay();

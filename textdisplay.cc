@@ -132,8 +132,8 @@ void TextDisplay::print_board(void) {
   std::cout << "  a b c d e f g h" << std::endl;
 }
 
-void TextDisplay::print_moves(std::vector<Move*>::iterator it) {
-  std::cout << "Printing board" << std::endl;
+void TextDisplay::print_moves(std::vector<Move*>::const_iterator begin,
+                              std::vector<Move*>::const_iterator end) {
 }
 
 void TextDisplay::print_error(Exception e) {
