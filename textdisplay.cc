@@ -72,12 +72,31 @@ std::string TextDisplay::ask_move(Color turn) {
   return retval;
 }
 
+void TextDisplay::clear_board(void) {
+  for (int i = 0; i < board.size(); i++) {
+    for (int j = 0; j < board[0].size(); j++) {
+      board[i][j] = ' ';
+    }
+  }
+}
+
+void TextDisplay::draw_board(std::vector<Piece*>::const_iterator begin,
+                             std::vector<Piece*>::const_iterator end) {
+  this->clear_board();
+  for (auto temp = begin; temp != end; temp++) {
+    auto c = piecename_to_str((*temp)->get_name(), (*temp)->get_color());
+    board[(*temp)->get_cursq().get_row() - 1][(*temp)->get_cursq().get_col() - 1] = c;
+  }
+}
+
+/*
 // makes the move on this->board.
 void TextDisplay::notify(Square from, Square to, Color c, PieceName p) {
   board[from.get_row() - 1][from.get_col() - 1] = ' ';
   char piece = piecename_to_str(p, c);
   board[to.get_row() - 1][to.get_col() - 1] = piece;
 }
+*/
 
 void TextDisplay::print_board(void) {
   /* The board shoud look like this:

@@ -10,6 +10,8 @@
 #include "exception.h"
 #include "result.h"
 #include "move.h"
+#include "piece.h"
+
 
 class TextDisplay {
   std::array<std::array<char, 8>, 8> board;
@@ -18,7 +20,9 @@ class TextDisplay {
   void welcome_msg();
   std::string ask_move(Color turn);
   // called by observer (i.e. Board, after verifying that move is valid)
-  void notify(Square from, Square to, Color c, PieceName p); 
+  void clear_board();
+  void draw_board(std::vector<Piece*>::const_iterator begin,
+                  std::vector<Piece*>::const_iterator end);
   void print_board();
   void print_moves(std::vector<Move*>::iterator it);
   void print_error(Exception e);

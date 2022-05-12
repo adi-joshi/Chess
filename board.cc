@@ -44,6 +44,8 @@ Board::Board(TextDisplay *td) {
   pieces.push_back(black_knight2);
   pieces.push_back(black_rook2);
 
+  td->draw_board(pieces.cbegin(), pieces.cend());
+
 }
 
 bool Board::move(std::string s, Color turn) {
@@ -69,16 +71,11 @@ bool Board::move(std::string s, Color turn) {
 
 	auto name_after = thispiece->get_name();
 
-	// the following is a hack to get en passant to display properly on textdisplay
-	if (removepiece != pieces.end() && to != (*removepiece)->get_cursq()) {
-	  td->notify(from, (*removepiece)->get_cursq(), color, name_after);
-	  td->notify((*removepiece)->get_cursq(), from, color, name_after);
-	}
-	td->notify(from, to, color, name_after);
-
 	if (removepiece != pieces.end()) {
 	  pieces.erase(removepiece);
 	}
+
+	td->draw_board(pieces.cbegin(), pieces.cend());
 
 	Move *m = new Move{color, name_before, from, name_after, to, ""};
 	moves.push_back(m);
