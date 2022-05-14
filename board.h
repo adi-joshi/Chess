@@ -15,6 +15,7 @@ class Board {
   TextDisplay *td;
   std::vector<Piece *> pieces;
   std::vector<Move*> moves;
+  int halfmoves = 0; // the number of moves without a pawn move or capture
   // Stores one move as ({from, name, color}, {to, name, color})
   // e.g. if you play e7e8=Q, then it would be stored as
   // ({e7, Pawn, White}, {e8, Queen, White}).

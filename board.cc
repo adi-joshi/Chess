@@ -1,5 +1,4 @@
 #include "board.h"
-#include <iostream>
 
 Board::Board(TextDisplay *td) {
   moves.push_back(nullptr);
@@ -82,9 +81,16 @@ bool Board::move(std::string s, Color turn) {
 
 	auto removepiece = thispiece->move(pieces.begin(), pieces.end(), to); // returns the iterator to the piece to remove, or returns end. 
 
+	halfmoves++;
+
 	auto name_after = thispiece->get_name();
 
+	if (name_before == PieceName::Pawn) {
+	  halfmoves = 0;
+	}
+
 	if (removepiece != pieces.end()) {
+	  halfmoves = 0;
 	  pieces.erase(removepiece);
 	}
 
@@ -139,6 +145,10 @@ Result Board::winner(void) {
 	r = thisresult;
       }
     }
+  }
+  if (r == Result::NoResult &&
+      halfmoves == 100) {
+    return Result::DrawBy50MoveRule;
   }
   return r;
 }

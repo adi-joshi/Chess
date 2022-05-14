@@ -8,6 +8,7 @@ enum class Result {
   DrawByThreefold,
   DrawByInsufficientMaterial,
   DrawByStalemate,
+  DrawBy50MoveRule
 };
 
 #endif

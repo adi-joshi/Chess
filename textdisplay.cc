@@ -148,6 +148,7 @@ void TextDisplay::print_winner(Result r) {
     case Result::DrawByThreefold: out = "Draw by Threefold Repetition"; break;
     case Result::DrawByInsufficientMaterial: out = "Draw by Insufficient Material"; break;
     case Result::DrawByStalemate: out = "Draw by Stalemate"; break;
+    case Result::DrawBy50MoveRule: out = "Draw by 50 Move Rule"; break;
     default: break;
   }
 
