@@ -80,13 +80,24 @@ void TextDisplay::clear_board(void) {
   }
 }
 
-void TextDisplay::draw_board(std::vector<Piece*>::const_iterator begin,
+// draws the board on screen, and returns the drawn board (in condensed form (pseudo-FEN form)).
+std::string TextDisplay::draw_board(std::vector<Piece*>::const_iterator begin,
                              std::vector<Piece*>::const_iterator end) {
   this->clear_board();
   for (auto temp = begin; temp != end; temp++) {
     auto c = piecename_to_str((*temp)->get_name(), (*temp)->get_color());
     board[(*temp)->get_cursq().get_row() - 1][(*temp)->get_cursq().get_col() - 1] = c;
   }
+  std::string retval;
+  for (int i = board.size() - 1; i >= 0; i--) {
+    for (int j = 0; j < board[0].size() ; j++) {
+      retval += board[i][j];
+    }
+    if (i != 0) {
+      retval += "/";
+    }
+  }
+  return retval;
 }
 
 /*
@@ -145,7 +156,7 @@ void TextDisplay::print_winner(Result r) {
   switch (r) {
     case Result::WhiteWins: out = "White wins!"; break;
     case Result::BlackWins: out = "Black wins!"; break;
-    case Result::DrawByThreefold: out = "Draw by Threefold Repetition"; break;
+    case Result::DrawByThreefoldRepetition: out = "Draw by Threefold Repetition"; break;
     case Result::DrawByInsufficientMaterial: out = "Draw by Insufficient Material"; break;
     case Result::DrawByStalemate: out = "Draw by Stalemate"; break;
     case Result::DrawBy50MoveRule: out = "Draw by 50 Move Rule"; break;

@@ -2,6 +2,7 @@
 #define BOARD_H_
 
 #include <vector>
+#include <map>
 #include <utility>
 #include <tuple>
 #include <string>
@@ -15,6 +16,7 @@ class Board {
   TextDisplay *td;
   std::vector<Piece *> pieces;
   std::vector<Move*> moves;
+  std::map<std::string, int> board_string; // map<board_string, # times it occured> (for 3fold)
   int halfmoves = 0; // the number of moves without a pawn move or capture
   // Stores one move as ({from, name, color}, {to, name, color})
   // e.g. if you play e7e8=Q, then it would be stored as

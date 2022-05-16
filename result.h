@@ -5,7 +5,7 @@ enum class Result {
   NoResult,
   WhiteWins,
   BlackWins,
-  DrawByThreefold,
+  DrawByThreefoldRepetition,
   DrawByInsufficientMaterial,
   DrawByStalemate,
   DrawBy50MoveRule

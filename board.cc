@@ -94,7 +94,8 @@ bool Board::move(std::string s, Color turn) {
 	  pieces.erase(removepiece);
 	}
 
-	td->draw_board(pieces.cbegin(), pieces.cend());
+	std::string curboard = td->draw_board(pieces.cbegin(), pieces.cend());
+	board_string[curboard]++;
 
 	Move *m = new Move{color, name_before, from, name_after, to, ""};
 	moves.push_back(m);
@@ -149,6 +150,12 @@ Result Board::winner(void) {
   if (r == Result::NoResult &&
       halfmoves == 100) {
     return Result::DrawBy50MoveRule;
+  } else if (r == Result::NoResult) {
+    for (auto it = board_string.begin(); it != board_string.end(); it++) {
+      if (it->second >= 3) {
+	return Result::DrawByThreefoldRepetition;
+      }
+    }
   }
   return r;
 }
