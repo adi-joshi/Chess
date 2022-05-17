@@ -20,6 +20,7 @@ class Piece {
   Piece(Board *b, Square s, Color c);
   Square get_cursq();
   void set_cursq(Square to);
+  void set_moved(bool b);
   bool piece_moved();
   Color get_color();
 

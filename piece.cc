@@ -21,6 +21,10 @@ void Piece::set_cursq(Square to) {
   cursq = to;
 }
 
+void Piece::set_moved(bool b) {
+  moved = b;
+}
+
 bool Piece::piece_moved(void) {
   return moved;
 }
@@ -488,7 +492,8 @@ bool King::is_checkmated(std::vector<Piece *>::iterator begin,
       for (int j = 1; j <= 8; j++) {
 	auto temp = begin;
 	for (; temp != end; temp++) {
-	  if ((*temp)->get_color() == this->color) {
+	  if ((*temp)->get_color() == this->color &&
+	      (*temp)->get_name() != PieceName::King) { // king cant block for itself
 	    try {
 	      (*temp)->can_move_to(begin, end, {i,j});
 	      auto sq = (*temp)->get_cursq();
@@ -532,18 +537,21 @@ Result King::is_stalemated(std::vector<Piece *>::iterator begin,
   for (int i = 1; i <= 8; i++) {
     for (int j = 1; j <= 8; j++) {
       for (auto temp = begin; temp != end; temp++) {
-	if ((*temp)->get_color() == this->color) {
+	if ((*temp)->get_color() == this->color &&
+	    (*temp)->get_name() != PieceName::King) {
 	  try {
 	    auto sq = (*temp)->get_cursq();
+	    auto has_moved = (*temp)->piece_moved();
 	    (*temp)->move(begin, end, {i, j});
 	    (*temp)->set_cursq(sq);
+	    (*temp)->set_moved(has_moved);
 	    canmove = true;
 	  } catch(...) {}
 	}
       }
     }
   }
-  if (!canmove) {
+  if (!canmove && !king_can_move(begin, end, ignore)) {
     return Result::DrawByStalemate;
   }
 
