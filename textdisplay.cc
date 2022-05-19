@@ -145,6 +145,21 @@ void TextDisplay::print_board(void) {
 
 void TextDisplay::print_moves(std::vector<Move*>::const_iterator begin,
                               std::vector<Move*>::const_iterator end) {
+  int i = 1;
+  for (auto temp = begin; temp != end; temp++) {
+    std::string p = "";
+    p += piecename_to_str((*temp)->get_src_piecename(), Color::White);
+    Square sq = (*temp)->get_dst_square();
+    std::string prefix = (*temp)->get_suffix();
+    if ((*temp)->get_color() == Color::White) {
+      std::cout << i << ". ";
+    }
+    std::cout << (p == "P" ? "" : p) << prefix << static_cast<char>(sq.get_col() + 'a' - 1) << static_cast<char>(sq.get_row() + '0') << " ";
+    if ((*temp)->get_color() == Color::Black) {
+      i++;
+      std::cout << std::endl;
+    }
+  }
 }
 
 void TextDisplay::print_error(Exception e) {

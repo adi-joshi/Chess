@@ -1,4 +1,5 @@
 #include "board.h"
+#include <iostream>
 
 Board::Board(TextDisplay *td) {
   moves.push_back(nullptr);
@@ -62,7 +63,9 @@ Board::Board(TextDisplay *td) {
 
 bool Board::move(std::string s, Color turn) {
   if (s.size() == 1 && s[0] == 'p') {
-    td->print_moves(moves.cbegin(), moves.cend());
+    auto placeholder = moves.cbegin();
+    placeholder++;
+    td->print_moves(placeholder, moves.cend());
     return false;
   }
   if ((s.size() == 4) &&
@@ -75,6 +78,29 @@ bool Board::move(std::string s, Color turn) {
     bool moved = false;
     for (int i = 0; i < pieces.size(); i++) {
       if (pieces[i]->get_cursq() == from && pieces[i]->get_color() == turn) {
+	std::string prefix_row = "";
+	std::string prefix_col = "";
+	if (pieces[i]->get_name() != PieceName::King) { // assuming that only 1 king on the board
+	  for (int j = 0; j < pieces.size(); j++) {
+	    if (j == i) {
+	      continue;
+	    } else {
+	      if (pieces[j]->get_name() == pieces[i]->get_name() &&
+		  pieces[j]->get_color() == pieces[i]->get_color()) { // another piece of the same type can move to the same square
+		try {
+		  pieces[j]->can_move_to(pieces.begin(), pieces.end(), to);
+		  int r = pieces[j]->get_cursq().get_row();
+		  int c = pieces[j]->get_cursq().get_col();
+		  if (c != from.get_col() && prefix_col == "") {
+		    prefix_col += s[0];
+		  } else if (r != from.get_row() && prefix_row == "") {
+		    prefix_row += s[2];
+		  }
+		} catch(...) {}
+	      }
+	    }
+	  }
+	}
 	auto thispiece = pieces[i];
 	auto name_before = thispiece->get_name();
 	auto color = thispiece->get_color();
@@ -97,10 +123,11 @@ bool Board::move(std::string s, Color turn) {
 	std::string curboard = td->draw_board(pieces.cbegin(), pieces.cend());
 	board_string[curboard]++;
 
-	Move *m = new Move{color, name_before, from, name_after, to, ""};
+	Move *m = new Move{color, name_before, from, name_after, to, prefix_col + prefix_row};
 	moves.push_back(m);
-	moved = true;
+	std::cout << moves.size() << std::endl;
 	turn = static_cast<Color>(static_cast<int>(turn) + 1 % 2);
+	moved = true;
 	return true;
       }
     }

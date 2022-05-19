@@ -9,6 +9,7 @@ This is a command-line chess game.
 Requirements:
 
 - The GCC C++ compiler
+- Make
 - Git
 
 Here are the steps to download the game:
@@ -25,5 +26,5 @@ How to play the game:
 3. The program will notify you if it thinks that your move is invalid, or if it can't read your move.
 
 ## To do List:
-- Printing moves
+- Promotion
 - GUI
