@@ -9,7 +9,7 @@ GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
                 $(GTEST_DIR)/include/gtest/internal/*.h
 GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 GTEST_FILES = gtest-all.o gtest_main.o gtest.a gtest_main.a
-TESTS = $(addprefix testing/tests/, test.o square_tests.o)
+TESTS = $(addprefix testing/tests/, test.o square_tests.o piece_tests.o)
 DEPENDS = ${OBJECTS:.o=.d}
 # TEST_SRCS = ${TEST_DIR}/*.cc
 EXEC=chess
