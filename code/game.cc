@@ -14,7 +14,7 @@ void Game::play(void) {
   while(!b->game_end()) {
     try {
       auto s = td->ask_move(turn);
-      bool moved = b->move(s, turn); 
+      bool moved = b->move(s);
       if (moved) {
 	turn = static_cast<Color>((static_cast<int>(turn) + 1) % 2);
       }

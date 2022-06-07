@@ -18,7 +18,7 @@ class TextDisplay {
   public:
   TextDisplay();
   void welcome_msg();
-  std::string ask_move(Color turn);
+  Move *ask_move(Color turn);
   // called by observer (i.e. Board, after verifying that move is valid)
   void clear_board();
   std::string draw_board(std::vector<Piece*>::const_iterator begin,

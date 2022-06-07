@@ -5,11 +5,42 @@
 #include "piecename.h"
 #include "square.h"
 #include <tuple>
+#include <vector>
 #include <string>
 
 // typename Move std::tuple<Color, std::pair<PieceName, Square>, std::pair<PieceName, Square>, std::string>; // want this
 
+// typedef std::pair<Color, std::pair<std::pair<PieceName, Square>, std::pair<PieceName, Square>>> PieceMove;
 
+
+enum class MoveType { Unknown, Normal, Capture, Promotion, Castling };
+
+enum class InputType { Move, Print };
+
+class Piece;
+
+struct Move {
+  InputType it;
+  MoveType mt = MoveType::Unknown;
+  Color color;
+  Square *from;
+  Square *to;
+  PieceName piecename;
+  std::string pref; // prefix
+  PieceName promoted_to;
+  std::string error_str = "";
+  std::vector<std::vector<Piece*>::iterator> pieces_to_capture;
+
+  /*
+  Move(Color c, Square from, Square to); // For UCI notation, e.g. e2e4
+  Move(Color c, Square from, Square to, PieceName promotion); // for pawn promotion, e.g. e7e8=Q
+  Move(Color c, Square to, PieceName promotion); // SAN promotion
+  Move(Color c, PieceName p, Square to); // For SAN notation e.g. e4
+  */
+};
+
+
+/*
 class Move {
   std::tuple<Color, std::pair<PieceName, Square>, std::pair<PieceName, Square>, std::string> move_comps;
   // The above is the same as
@@ -27,5 +58,6 @@ class Move {
   std::string get_suffix();
   ~Move();
 };
+*/
 
 #endif

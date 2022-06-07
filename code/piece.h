@@ -8,30 +8,32 @@
 #include "result.h"
 
 class Board;
+struct Move;
 
 class Piece {
   // is a friend of class Board
   protected:
   Board *b;
-  Square cursq;
+  Square *cursq;
   Color color;
   bool moved = false;
   public:
-  Piece(Board *b, Square s, Color c);
-  Square get_cursq();
-  void set_cursq(Square to);
+  Piece(Board *b, Square *s, Color c);
+  Square *get_cursq();
+  void set_cursq(Square *to);
   void set_moved(bool b);
   bool piece_moved();
   Color get_color();
 
   // this one called by a King to check if this piece can move to the king's square
-  virtual std::vector<Piece *>::iterator can_move_to(std::vector<Piece *>::iterator begin,
-      std::vector<Piece *>::iterator end, Square to) = 0;
+  virtual bool can_move_to(std::vector<Piece *>::iterator begin,
+      std::vector<Piece *>::iterator end, Move *m) = 0;
 
   // this one checks if piece can move to destination, and then checks if the King of this
   // piece's color will be in check after moving to the destination square.
-  std::vector<Piece *>::iterator move(std::vector<Piece *>::iterator it,
-      std::vector<Piece *>::iterator end, Square to);
+  bool move(std::vector<Piece *>::iterator it,
+      std::vector<Piece *>::iterator end, Move *m);
+
   virtual PieceName get_name() = 0;
   virtual bool in_check(std::vector<Piece *>::iterator begin,
       std::vector<Piece *>::iterator end,
@@ -52,8 +54,8 @@ class Pawn : public Piece{
   public: 
   using Piece::Piece;
   // for usage of can_move_to and move, check the comments in the class Piece defintion.
-  std::vector<Piece *>::iterator can_move_to(std::vector<Piece *>::iterator begin,
-      std::vector<Piece *>::iterator end, Square to) override;
+  bool can_move_to(std::vector<Piece *>::iterator begin,
+      std::vector<Piece *>::iterator end, Move *m) override;
   PieceName get_name() override;
 };
 
@@ -61,8 +63,8 @@ class Knight : public Piece{
   public: 
   using Piece::Piece;
   // for usage of can_move_to and move, check the comments in the class Piece defintion.
-  std::vector<Piece *>::iterator can_move_to(std::vector<Piece *>::iterator begin,
-      std::vector<Piece *>::iterator end, Square to) override;
+  bool can_move_to(std::vector<Piece *>::iterator begin,
+      std::vector<Piece *>::iterator end, Move *m) override;
   PieceName get_name() override;
 };
 
@@ -70,8 +72,8 @@ class Bishop : public Piece {
   public: 
   using Piece::Piece;
   // for usage of can_move_to and move, check the comments in the class Piece defintion.
-  std::vector<Piece *>::iterator can_move_to(std::vector<Piece *>::iterator begin,
-      std::vector<Piece *>::iterator end, Square to) override;
+  bool can_move_to(std::vector<Piece *>::iterator begin,
+      std::vector<Piece *>::iterator end, Move *m) override;
   PieceName get_name() override;
 };
 
@@ -79,8 +81,8 @@ class Rook : public Piece {
   public: 
   using Piece::Piece;
   // for usage of can_move_to and move, check the comments in the class Piece defintion.
-  std::vector<Piece *>::iterator can_move_to(std::vector<Piece *>::iterator begin,
-      std::vector<Piece *>::iterator end, Square to) override;
+  bool can_move_to(std::vector<Piece *>::iterator begin,
+      std::vector<Piece *>::iterator end, Move *m) override;
   PieceName get_name() override;
 };
 
@@ -88,8 +90,8 @@ class Queen : public Piece {
   public: 
   using Piece::Piece;
   // for usage of can_move_to and move, check the comments in the class Piece defintion.
-  std::vector<Piece *>::iterator can_move_to(std::vector<Piece *>::iterator begin,
-      std::vector<Piece *>::iterator end, Square to) override;
+  bool can_move_to(std::vector<Piece *>::iterator begin,
+      std::vector<Piece *>::iterator end, Move *m) override;
   PieceName get_name() override;
 };
 
@@ -100,8 +102,8 @@ class King : public Piece {
   public: 
   using Piece::Piece;
   // for usage of can_move_to and move, check the comments in the class Piece defintion.
-  std::vector<Piece *>::iterator can_move_to(std::vector<Piece *>::iterator begin,
-      std::vector<Piece *>::iterator end, Square to) override;
+  bool can_move_to(std::vector<Piece *>::iterator begin,
+      std::vector<Piece *>::iterator end, Move *m) override;
   PieceName get_name() override;
   bool in_check(std::vector<Piece *>::iterator begin,
       std::vector<Piece *>::iterator end,

@@ -65,11 +65,29 @@ void TextDisplay::welcome_msg(void) {
   std::cout << "Welcome to Chess!" << std::endl;
 }
 
-std::string TextDisplay::ask_move(Color turn) {
-  std::string retval;
+Move *TextDisplay::ask_move(Color turn) {
+  std::string s;
   std::cout << ((turn == Color::White) ? "White" : "Black") << " to move. Please enter your move: " << std::endl;
-  std::cin >> retval;
-  return retval;
+  std::cin >> s;
+  if (s.size() == 1 && s[0] == 'p') {
+    auto m = new Move();
+    m->it = InputType::Print;
+    return m;
+  } else if ((s.size() == 4) &&
+      (s[0] >= 'a' && s[0] <= 'h') &&
+      (s[1] >= '1' && s[1] <= '8') &&
+      (s[2] >= 'a' && s[2] <= 'h') &&
+      (s[3] >= '1' && s[3] <= '8')) {
+    auto from = new Square(s[1] - '0', s[0] - 'a' + 1);
+    auto to = new Square(s[3] - '0', s[2] - 'a' + 1);
+    auto retval = new Move();
+    retval->color = turn;
+    retval->from = from;
+    retval->to = to;
+    return retval;
+  } else {
+    return nullptr;
+  }
 }
 
 void TextDisplay::clear_board(void) {
@@ -86,7 +104,7 @@ std::string TextDisplay::draw_board(std::vector<Piece*>::const_iterator begin,
   this->clear_board();
   for (auto temp = begin; temp != end; temp++) {
     auto c = piecename_to_str((*temp)->get_name(), (*temp)->get_color());
-    board[(*temp)->get_cursq().get_row() - 1][(*temp)->get_cursq().get_col() - 1] = c;
+    board[(*temp)->get_cursq()->get_row() - 1][(*temp)->get_cursq()->get_col() - 1] = c;
   }
   std::string retval;
   for (int i = board.size() - 1; i >= 0; i--) {
@@ -148,14 +166,14 @@ void TextDisplay::print_moves(std::vector<Move*>::const_iterator begin,
   int i = 1;
   for (auto temp = begin; temp != end; temp++) {
     std::string p = "";
-    p += piecename_to_str((*temp)->get_src_piecename(), Color::White);
-    Square sq = (*temp)->get_dst_square();
-    std::string prefix = (*temp)->get_suffix();
-    if ((*temp)->get_color() == Color::White) {
+    p += piecename_to_str((*temp)->piecename, Color::White);
+    auto sq = (*temp)->to;
+    std::string prefix = (*temp)->pref;
+    if ((*temp)->color == Color::White) {
       std::cout << i << ". ";
     }
-    std::cout << (p == "P" ? "" : p) << prefix << static_cast<char>(sq.get_col() + 'a' - 1) << static_cast<char>(sq.get_row() + '0') << " ";
-    if ((*temp)->get_color() == Color::Black) {
+    std::cout << (p == "P" ? "" : p) << prefix << static_cast<char>(sq->get_col() + 'a' - 1) << static_cast<char>(sq->get_row() + '0') << " ";
+    if ((*temp)->color == Color::Black) {
       i++;
       std::cout << std::endl;
     }

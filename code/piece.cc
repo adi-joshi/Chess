@@ -9,15 +9,15 @@ int abs(int a) {
 }
 
 //===Piece===
-Piece::Piece(Board *b, Square s, Color c)
+Piece::Piece(Board *b, Square *s, Color c)
   : b{b}, cursq{s}, color{c}
 {}
 
-Square Piece::get_cursq(void) {
+Square *Piece::get_cursq(void) {
   return cursq;
 }
 
-void Piece::set_cursq(Square to) {
+void Piece::set_cursq(Square *to) {
   cursq = to;
 }
 
@@ -33,8 +33,9 @@ Color Piece::get_color(void) {
   return color;
 }
 
-std::vector<Piece *>::iterator Piece::move(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, Square to) {
+bool Piece::move(std::vector<Piece *>::iterator begin,
+    std::vector<Piece *>::iterator end, Move *m) {
+  auto to = m->to;
   auto king = begin;
   while(king != end) {
     if ((*king)->get_name() == PieceName::King &&
@@ -51,24 +52,31 @@ std::vector<Piece *>::iterator Piece::move(std::vector<Piece *>::iterator begin,
     thispiece++;
   }
   if (king == end) {
-    throw Exception{"Cannot find King"};
+    m->error_str = "Cannot find King";
+    return false;
   }
   if (thispiece == end) {
-    throw Exception{"Cannot find this piece"};
+    m->error_str = "Cannot find this piece";
+    return false;
   }
-  auto it = this->can_move_to(begin, end, to);
-  auto cur = cursq;
+  if (this->can_move_to(begin, end, m)) {
+    auto cur = cursq;
+    (*thispiece)->set_cursq(to);
+    auto it = m->pieces_to_capture.size() == 0 ? end : m->pieces_to_capture[0];
+    if ((*king)->in_check(begin, end, it)) {// king->is_checkmated(begin, end, dontinclude)
+      (*thispiece)->set_cursq(cur);
+      m->error_str = "King would be in check";
+      return false;
+    }
+    m->mt = MoveType::Normal;
+    m->color = this->color;
+    m->from = cursq;
+    m->piecename = this->get_name();
 
-  // TODO: Make it such that the this piece iterator has cursq as to, so that
-  // the king can determine if it is in check.
-  (*thispiece)->set_cursq(to);
-  if ((*king)->in_check(begin, end, it)) {// king->is_checkmated(begin, end, dontinclude)
-    (*thispiece)->set_cursq(cur);
-    throw Exception{"King would be in check"};
+    moved = true;
+    return true;
   }
-  cursq = to;
-  moved = true;
-  return it;
+  return false;
 }
 
 bool Piece::in_check(std::vector<Piece *>::iterator begin,
@@ -99,123 +107,147 @@ Piece::~Piece(void) {}
 
 //===Pawn===
 
-std::vector<Piece *>::iterator Pawn::can_move_to(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, Square to) {
-
-  // TODO: Code en passant
-  if (cursq == to) {
-    throw Exception{"Destination square is current square"};
+bool Pawn::can_move_to(std::vector<Piece *>::iterator begin,
+    std::vector<Piece *>::iterator end, Move *m) {
+  if (m == nullptr) {
+    return false;
+  }
+  auto to = m->to;
+  if (cursq->get_col() == to->get_col() &&
+      cursq->get_row() == to->get_row()) {
+    m->error_str = "Destination square is current square";
+    return false;
   }
   if (color == Color::White) {
-    if (to.get_col() == cursq.get_col()) { // non-capture
-      if (abs(to.get_row() - cursq.get_row()) > 2 ||
-	  to.get_row() < cursq.get_row()) {
-	throw Exception{"Destination square is not reachable"};
+    if (to->get_col() == cursq->get_col()) { // non-capture
+      if (abs(to->get_row() - cursq->get_row()) > 2 ||
+	  to->get_row() < cursq->get_row()) {
+	m->error_str = "Destination square is not reachable";
+	return false;
       }
-      if (abs(to.get_row() - cursq.get_row()) == 2 &&
-	  cursq.get_row() != 2) {
-	throw Exception{"Cannot move 2 spaces if not on starting square"};
+      if (abs(to->get_row() - cursq->get_row()) == 2 &&
+	  cursq->get_row() != 2) {
+	m->error_str = "Cannot move 2 spaces if not on starting square";
+	return false;
       }
       auto temp = begin;
       while(temp != end) {
 	if ((*temp)->get_cursq() == to) {
-	  throw Exception{"Destination square already has a piece"};
-	} else if (abs(to.get_row() - cursq.get_row()) == 2 &&
-	    (*temp)->get_cursq().get_col() == cursq.get_col() &&
-	    (*temp)->get_cursq().get_row() == cursq.get_row() + 1) {
-	  throw Exception{"Destination square is not reachable"};
+	  m->error_str = "Destination square already has a piece";
+	  return false;
+	} else if (abs(to->get_row() - cursq->get_row()) == 2 &&
+	    (*temp)->get_cursq()->get_col() == cursq->get_col() &&
+	    (*temp)->get_cursq()->get_row() == cursq->get_row() + 1) {
+	  m->error_str = "Destination square is not reachable";
+	  return false;
 	}
 	temp++;
       }
-      return end; // this is not a capture.
+      return true; // this is not a capture.
     } else { // is a capture
-      if (abs(to.get_col() - cursq.get_col()) != 1 ||
-	  abs(to.get_row() - cursq.get_row()) != 1 ||
-	  to.get_row() < cursq.get_row()) {
-	throw Exception{"Destination square is not reachable"};
+      if (abs(to->get_col() - cursq->get_col()) != 1 ||
+	  abs(to->get_row() - cursq->get_row()) != 1 ||
+	  to->get_row() < cursq->get_row()) {
+	m->error_str = "Destination square is not reachable";
+	return false;
       }
-      Move *m = b->get_prev_move();
+      Move *prev_move = b->get_prev_move();
       auto need_sq = to;
-      if (m != nullptr) {
-	if (m->get_dst_piecename() == PieceName::Pawn &&
-	    m->get_dst_square().get_row() == cursq.get_row() &&
-	    m->get_dst_square().get_row() == 5 &&
-	    m->get_src_square().get_row() == 7 &&
-	    abs(m->get_dst_square().get_col() - cursq.get_col()) == 1) { // is en passant
-	  need_sq = m->get_dst_square();
+      if (prev_move != nullptr) {
+	if (prev_move->piecename == PieceName::Pawn &&
+	    prev_move->to->get_row() == cursq->get_row() &&
+	    prev_move->to->get_row() == 5 &&
+	    prev_move->from->get_row() == 7 &&
+	    abs(prev_move->to->get_col() - cursq->get_col()) == 1) { // is en passant
+	  need_sq = prev_move->to;
 	}
       }
       auto temp = begin;
       for (; temp != end; temp++) {
-	if ((*temp)->get_cursq() == need_sq &&
+	if ((*temp)->get_cursq()->get_col() == need_sq->get_col() &&
+	    (*temp)->get_cursq()->get_row() == need_sq->get_row() &&
 	    (*temp)->get_color() == this->color) {
-	  throw Exception{"Piece of same color already on Square"};
-	} else if ((*temp)->get_cursq() == need_sq &&
+	  m->error_str = "Piece of same color already on Square";
+	  return false;
+	} else if ((*temp)->get_cursq()->get_col() == need_sq->get_col() &&
+	    (*temp)->get_cursq()->get_row() == need_sq->get_row() &&
 	    (*temp)->get_color() != this->color) {
 	  break;
 	} 
       }
       if (temp == end) {
-	throw Exception{"Move is not a capture"};
+	m->error_str = "Move is not a capture";
+	return false;
       }
-      return temp; // this is a capture
+      m->pieces_to_capture.push_back(temp);
+      return true; // this is a capture
     }
   } else if (color == Color::Black) {
-    if (to.get_col() == cursq.get_col()) { // non-capture
-      if (abs(to.get_row() - cursq.get_row()) > 2 ||
-	  to.get_row() > cursq.get_row()) {
-	throw Exception{"Destination square is not reachable"};
+    if (to->get_col() == cursq->get_col()) { // non-capture
+      if (abs(to->get_row() - cursq->get_row()) > 2 ||
+	  to->get_row() > cursq->get_row()) {
+	m->error_str = "Destination square is not reachable";
+	return false;
       }
-      if (abs(to.get_row() - cursq.get_row()) == 2 &&
-	  cursq.get_row() != 7) {
-	throw Exception{"Cannot move 2 spaces if not on starting square"};
+      if (abs(to->get_row() - cursq->get_row()) == 2 &&
+	  cursq->get_row() != 7) {
+	m->error_str = "Cannot move 2 spaces if not on starting square";
+	return false;
       }
       auto temp = begin;
       while(temp != end) {
 	if ((*temp)->get_cursq() == to) {
-	  throw Exception{"Destination square already has a piece"};
-	} else if (abs(to.get_row() - cursq.get_row()) == 2 &&
-	    (*temp)->get_cursq().get_col() == cursq.get_col() &&
-	    (*temp)->get_cursq().get_row() == cursq.get_row() - 1) {
-	  throw Exception{"Destination square is not reachable"};
+	  m->error_str = "Destination square already has a piece";
+	  return false;
+	} else if (abs(to->get_row() - cursq->get_row()) == 2 &&
+	    (*temp)->get_cursq()->get_col() == cursq->get_col() &&
+	    (*temp)->get_cursq()->get_row() == cursq->get_row() - 1) {
+	  m->error_str = "Destination square is not reachable";
+	  return false;
 	}
 	temp++;
       }
-      return end; // this is not a capture.
+      return true; // this is not a capture.
     } else { // is a capture
-      if (abs(to.get_col() - cursq.get_col()) != 1 ||
-	  abs(to.get_row() - cursq.get_row()) != 1 ||
-	  to.get_row() > cursq.get_row()) {
-	throw Exception{"Destination square is not reachable"};
+      if (abs(to->get_col() - cursq->get_col()) != 1 ||
+	  abs(to->get_row() - cursq->get_row()) != 1 ||
+	  to->get_row() > cursq->get_row()) {
+	m->error_str = "Destination square is not reachable";
+	return false;
       }
-      Move *m = b->get_prev_move();
+      Move *prev_move = b->get_prev_move();
       auto need_sq = to;
-      if (m != nullptr) {
-	if (m->get_dst_piecename() == PieceName::Pawn &&
-	    m->get_dst_square().get_row() == cursq.get_row() &&
-	    m->get_dst_square().get_row() == 4 && 
-	    m->get_src_square().get_row() == 2 &&
-	    abs(m->get_dst_square().get_col() - cursq.get_col()) == 1) { // is en passant
-	  need_sq = m->get_dst_square();
+      if (prev_move != nullptr) {
+	if (prev_move->piecename == PieceName::Pawn &&
+	    prev_move->to->get_row() == cursq->get_row() &&
+	    prev_move->to->get_row() == 4 && 
+	    prev_move->from->get_row() == 2 &&
+	    abs(prev_move->to->get_col() - cursq->get_col()) == 1) { // is en passant
+	  need_sq = prev_move->to;
 	}
       }
       auto temp = begin;
       for (; temp != end; temp++) {
-	if ((*temp)->get_cursq() == need_sq &&
+	if ((*temp)->get_cursq()->get_col() == need_sq->get_col() &&
+	    (*temp)->get_cursq()->get_row() == need_sq->get_row() &&
 	    (*temp)->get_color() == this->color) {
-	  throw Exception{"Piece of same color already on Square"};
-	} else if ((*temp)->get_cursq() == need_sq &&
+	  m->error_str = "Piece of same color already on Square";
+	  return false;
+	} else if ((*temp)->get_cursq()->get_col() == need_sq->get_col() &&
+	    (*temp)->get_cursq()->get_row() == need_sq->get_row() &&
 	    (*temp)->get_color() != this->color) {
 	  break;
 	}
       }
       if (temp == end) {
-	throw Exception{"Move is not a capture"};
+	m->error_str = "Move is not a capture";
+	return false;
       }
-      return temp; // this is a capture
+      m->pieces_to_capture.push_back(temp);
+      return true; // this is a capture
     }
   }
-  return end;
+  return false;
 }
 
 PieceName Pawn::get_name(void) {
@@ -224,31 +256,39 @@ PieceName Pawn::get_name(void) {
 
 //===Knight===
 
-std::vector<Piece *>::iterator Knight::can_move_to(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, Square to) {
-  if (to == cursq) {
-    throw Exception{"Destination square is current square"};
+bool Knight::can_move_to(std::vector<Piece *>::iterator begin,
+    std::vector<Piece *>::iterator end, Move *m) {
+  auto to = m->to;
+  if (to->get_row() == cursq->get_row() &&
+      to->get_col() == cursq->get_col()) {
+    m->error_str = "Destination square is current square";
+    return false;
   }
   auto temp = begin;
   while(temp != end) {
-    if ((*temp)->get_cursq() == to &&
+    if ((*temp)->get_cursq()->get_col() == to->get_col() &&
+	(*temp)->get_cursq()->get_row() == to->get_row() &&
 	(*temp)->get_color() == this->color) {
-      throw Exception{"Piece of same color already on Square"};
-    } else if ((*temp)->get_cursq() == to &&
+      m->error_str = "Piece of same color already on Square";
+      return false;
+    } else if ((*temp)->get_cursq()->get_col() == to->get_col() &&
+	(*temp)->get_cursq()->get_row() == to->get_row() &&
 	(*temp)->get_color() != this->color) {
       break;
     }
     temp++;
   }
-  if ((abs(to.get_row() - cursq.get_row()) + 
-	abs(to.get_col() - cursq.get_col()) == 3) &&
-      ((abs(to.get_row() - cursq.get_row()) != 3 &&
-	abs(to.get_col() - cursq.get_col()) != 3))) {
-    return temp;
+  if ((abs(to->get_row() - cursq->get_row()) + 
+	abs(to->get_col() - cursq->get_col()) == 3) &&
+      ((abs(to->get_row() - cursq->get_row()) != 3 &&
+	abs(to->get_col() - cursq->get_col()) != 3))) {
+    m->pieces_to_capture.push_back(temp);
+    return true;
   } else {
-    throw Exception{"Invalid move"};
+    m->error_str = "Invalid move";
+    return false;
   }
-  return temp;
+  return false;
 }
 
 PieceName Knight::get_name(void) {
@@ -257,18 +297,22 @@ PieceName Knight::get_name(void) {
 
 //===Bishop===
 
-std::vector<Piece *>::iterator Bishop::can_move_to(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, Square to) {
-  if (cursq == to) {
-    throw Exception{"Destination square is current square"};
+bool Bishop::can_move_to(std::vector<Piece *>::iterator begin,
+    std::vector<Piece *>::iterator end, Move *m) {
+  auto to = m->to;
+  if (to->get_row() == cursq->get_row() &&
+      to->get_col() == cursq->get_col()) {
+    m->error_str = "Destination square is current square";
+    return false;
   }
-  int trow = to.get_row();
-  int tcol = to.get_col();
-  int crow = cursq.get_row();
-  int ccol = cursq.get_col();
+  int trow = to->get_row();
+  int tcol = to->get_col();
+  int crow = cursq->get_row();
+  int ccol = cursq->get_col();
   if (trow - tcol != crow - ccol &&
       trow + tcol != crow + ccol) {
-    throw Exception{"Destination square is not on a diagonal"};
+    m->error_str = "Destination square is not on a diagonal";
+    return false;
   }
   int lbrow = std::min(trow, crow);
   int lbcol = std::min(tcol, ccol);
@@ -277,10 +321,13 @@ std::vector<Piece *>::iterator Bishop::can_move_to(std::vector<Piece *>::iterato
 
   auto temp = begin;
   while(temp != end) {
-    if ((*temp)->get_cursq() == to &&
+    if ((*temp)->get_cursq()->get_row() == to->get_row() &&
+	(*temp)->get_cursq()->get_col() == to->get_col() &&
 	(*temp)->get_color() == this->color) {
-      throw Exception{"Piece of same color already on Square"};
-    } else if ((*temp)->get_cursq() == to &&
+      m->error_str = "Piece of same color already on Square";
+      return false;
+    } else if ((*temp)->get_cursq()->get_row() == to->get_row() &&
+	(*temp)->get_cursq()->get_col() == to->get_col() &&
 	(*temp)->get_color() != this->color) {
       break;
     }
@@ -289,13 +336,14 @@ std::vector<Piece *>::iterator Bishop::can_move_to(std::vector<Piece *>::iterato
   if (trow - tcol == crow - ccol) {
     auto temp2 = begin;
     while(temp2 != end) {
-      int prow = (*temp2)->get_cursq().get_row();
-      int pcol = (*temp2)->get_cursq().get_col();
-      if ((cursq.get_row() != prow && cursq.get_col() != pcol) &&
+      int prow = (*temp2)->get_cursq()->get_row();
+      int pcol = (*temp2)->get_cursq()->get_col();
+      if ((cursq->get_row() != prow && cursq->get_col() != pcol) &&
 	  prow - pcol == trow - tcol &&
 	  (prow < ubrow && prow > lbrow) &&
 	  (pcol < ubcol && pcol > lbcol)) {
-	throw Exception{"Piece is blocking the diagonal"};
+	m->error_str = "Piece is blocking the diagonal";
+	return false;
 	// throw Exception{"Piece is blocking the diagonal " + std::to_string(prow) + " " + std::to_string(pcol) + " and " + std::to_string(trow) + " " + std::to_string(tcol)};
       }
       temp2++;
@@ -303,18 +351,20 @@ std::vector<Piece *>::iterator Bishop::can_move_to(std::vector<Piece *>::iterato
   } else if (trow + tcol == crow + ccol) {
     auto temp2 = begin;
     while(temp2 != end) {
-      int prow = (*temp2)->get_cursq().get_row();
-      int pcol = (*temp2)->get_cursq().get_col();
-      if ((cursq.get_row() != prow && cursq.get_col() != pcol) &&
+      int prow = (*temp2)->get_cursq()->get_row();
+      int pcol = (*temp2)->get_cursq()->get_col();
+      if ((cursq->get_row() != prow && cursq->get_col() != pcol) &&
 	  (prow + pcol == trow + tcol) &&
 	  (prow < ubrow && prow > lbrow) &&
 	  (pcol < ubcol && pcol > lbcol)) {
-	throw Exception{"Piece is blocking the diagonal"};
+	m->error_str = "Piece is blocking the diagonal";
+	return false;
       }
       temp2++;
     }
   }
-  return temp;
+  m->pieces_to_capture.push_back(temp);
+  return true;
 }
 
 PieceName Bishop::get_name(void) {
@@ -323,45 +373,55 @@ PieceName Bishop::get_name(void) {
 
 //===Rook===
 
-std::vector<Piece *>::iterator Rook::can_move_to(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, Square to) {
-  if (cursq == to) {
-    throw Exception{"Destination square is current square"};
-  } else if ((to.get_col() != cursq.get_col()) &&
-      to.get_row() != cursq.get_row()) {
-    throw Exception{"Destination square is not on the same row or column"};
+bool Rook::can_move_to(std::vector<Piece *>::iterator begin,
+    std::vector<Piece *>::iterator end, Move *m) {
+  auto to = m->to;
+  if (to->get_row() == cursq->get_row() &&
+      to->get_col() == cursq->get_col()) {
+    m->error_str = "Destination square is current square";
+    return false;
+  } else if ((to->get_col() != cursq->get_col()) &&
+      to->get_row() != cursq->get_row()) {
+    m->error_str = "Destination square is not on the same row or column";
+    return false;
   }
   auto temp = begin;
   while(temp != end) {
-    if ((*temp)->get_cursq() == to &&
+    if ((*temp)->get_cursq()->get_row() == to->get_row() &&
+	(*temp)->get_cursq()->get_col() == to->get_col() &&
 	(*temp)->get_color() == this->color) {
-      throw Exception{"Piece of same color already on Square"};
+      m->error_str = "Piece of same color already on Square";
+      return false;
     }
-    int lbrow = std::min(to.get_row(), cursq.get_row());
-    int lbcol = std::min(to.get_col(), cursq.get_col());
-    int ubrow = std::max(to.get_row(), cursq.get_row());
-    int ubcol = std::max(to.get_col(), cursq.get_col());
-    if ((*temp)->get_cursq().get_col() == cursq.get_col() &&
-	(*temp)->get_cursq().get_row() > lbrow &&
-	(*temp)->get_cursq().get_row() < ubrow) {
-      throw Exception{"Piece is in the way to destination square"};
-    } else if ((*temp)->get_cursq().get_row() == cursq.get_row() &&
-	(*temp)->get_cursq().get_col() > lbcol &&
-	(*temp)->get_cursq().get_col() < ubcol) {
-      throw Exception{"Piece is in the way to destination square"};
+    int lbrow = std::min(to->get_row(), cursq->get_row());
+    int lbcol = std::min(to->get_col(), cursq->get_col());
+    int ubrow = std::max(to->get_row(), cursq->get_row());
+    int ubcol = std::max(to->get_col(), cursq->get_col());
+    if ((*temp)->get_cursq()->get_col() == cursq->get_col() &&
+	(*temp)->get_cursq()->get_row() > lbrow &&
+	(*temp)->get_cursq()->get_row() < ubrow) {
+      m->error_str = "Piece is in the way to destination square";
+      return false;
+    } else if ((*temp)->get_cursq()->get_row() == cursq->get_row() &&
+	(*temp)->get_cursq()->get_col() > lbcol &&
+	(*temp)->get_cursq()->get_col() < ubcol) {
+      m->error_str = "Piece is in the way to destination square";
+      return false;
     }
     temp++;
   }
 
   temp = begin;
   while(temp != end) {
-    if ((*temp)->get_cursq() == to &&
+    if ((*temp)->get_cursq()->get_row() == to->get_row() &&
+	(*temp)->get_cursq()->get_col() == to->get_col() &&
 	(*temp)->get_color() != this->color) {
       break;
     }
     temp++;
   }
-  return temp;
+  m->pieces_to_capture.push_back(temp);
+  return true;
 }
 
 PieceName Rook::get_name(void) {
@@ -370,16 +430,19 @@ PieceName Rook::get_name(void) {
 
 //===Queen===
 
-std::vector<Piece *>::iterator Queen::can_move_to(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, Square to) {
-  if (cursq == to) {
-    throw Exception{"Destination square is current square"};
+bool Queen::can_move_to(std::vector<Piece *>::iterator begin,
+    std::vector<Piece *>::iterator end, Move *m) {
+  auto to = m->to;
+  if (to->get_row() == cursq->get_row() &&
+      to->get_col() == cursq->get_col()) {
+    m->error_str = "Destination square is current square";
+    return false;
   }
-  if (cursq.get_row() == to.get_row() ||
-      cursq.get_col() == to.get_col()) { // moves like a rook
-    return Rook(b, cursq, color).can_move_to(begin, end, to);
+  if (cursq->get_row() == to->get_row() ||
+      cursq->get_col() == to->get_col()) { // moves like a rook
+    return Rook(b, cursq, color).can_move_to(begin, end, m);
   } else { // moves like a bishop
-    return Bishop(b, cursq, color).can_move_to(begin, end, to);
+    return Bishop(b, cursq, color).can_move_to(begin, end, m);
   }
 }
 
@@ -391,79 +454,99 @@ PieceName Queen::get_name(void) {
 
 bool King::king_can_move(std::vector<Piece *>::iterator begin,
     std::vector<Piece *>::iterator end, std::vector<Piece *>::iterator ignore) {
-  std::vector<Square> possible_moves;
-  for (int i = std::max(cursq.get_row() - 1, 1); i < std::min(cursq.get_row() + 1, 8); i++) {
-    for (int j = std::max(cursq.get_col() - 1, 1); j < std::min(cursq.get_col() + 1, 8); j++) {
-      if (i == cursq.get_row() && j == cursq.get_col()) {
+  std::vector<Square*> possible_moves;
+  for (int i = std::max(cursq->get_row() - 1, 1); i < std::min(cursq->get_row() + 1, 8); i++) {
+    for (int j = std::max(cursq->get_col() - 1, 1); j < std::min(cursq->get_col() + 1, 8); j++) {
+      if (i == cursq->get_row() && j == cursq->get_col()) {
 	continue;
       }
-      Square s{i, j};
+      auto s = new Square(i, j);
       possible_moves.push_back(s);
     }
   }
 
   for (int i = 0; i < possible_moves.size(); i++) {
-    try {
-      this->can_move_to(begin, end, possible_moves[i]); // if can move, won't throw
+    auto m = new Move();
+    m->from = this->cursq;
+    m->to = possible_moves[i];
+    if (this->can_move_to(begin, end, m)) {
       if (!King(b, possible_moves[i], color).in_check(begin, end, ignore)) {
 	return true;
       }
-    } catch (...) {}
+    }
   }
   return false;
 }
 
-std::vector<Piece *>::iterator King::can_move_to(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, Square to) {
-  if (to == cursq) {
-    throw Exception{"Destination square is current square"};
+bool King::can_move_to(std::vector<Piece *>::iterator begin,
+    std::vector<Piece *>::iterator end, Move *m) {
+  auto to = m->to;
+  if (to->get_row() == cursq->get_row() &&
+      to->get_col() == cursq->get_col()) {
+    m->error_str = "Destination square is current square";
+    return false;
   } else if (moved == false &&
-      (abs(to.get_row() - cursq.get_row()) == 0) &&
-      (abs(to.get_col() - cursq.get_col()) == 2)) { // castling
+      (abs(to->get_row() - cursq->get_row()) == 0) &&
+      (abs(to->get_col() - cursq->get_col()) == 2)) { // castling
     if (this->in_check(begin, end, end)) {
-      throw Exception{"Cannot castle while in check"};
+      m->error_str = "Cannot castle while in check";
+      return false;
     }
     auto rook = begin;
     for(; rook != end; rook++) {
       if ((*rook)->get_color() == this->color &&
-	  (*rook)->get_cursq().get_row() == cursq.get_row() &&
+	  (*rook)->get_cursq()->get_row() == cursq->get_row() &&
 	  (*rook)->piece_moved() == false &&
-	  (((*rook)->get_cursq().get_col() - cursq.get_col()) *
-	   (to.get_col() - cursq.get_col()) > 0)) {
+	  (((*rook)->get_cursq()->get_col() - cursq->get_col()) *
+	   (to->get_col() - cursq->get_col()) > 0)) {
 	break;
       }
     }
     if (rook == end) {
-      throw Exception{"Cannot castle as rook has moved"};
+      m->error_str = "Cannot castle as rook has moved";
+      return false;
     }
-    try {
-      Rook(b, cursq, color).can_move_to(begin, end, {to.get_row(), (to.get_col() + (*rook)->get_cursq().get_col()) / 2}); 
+    auto m = new Move();
+    m->from = cursq;
+    m->to = new Square(to->get_row(), (to->get_col() + (*rook)->get_cursq()->get_col()) / 2);
+    if (Rook(b, cursq, color).can_move_to(begin, end, m)) {
       if (!this->in_check(begin, end, end) &&
-	  !King(b, {cursq.get_row(), (cursq.get_col() + to.get_col()) / 2}, color).in_check(begin, end, end) &&
+	  !King(b, new Square(cursq->get_row(), (cursq->get_col() + to->get_col()) / 2), color).in_check(begin, end, end) &&
 	  !King(b, to, color).in_check(begin, end, end)) {
-	(*rook)->move(begin, end, {to.get_row(), (to.get_col() + cursq.get_col()) / 2});
+	auto m2 = new Move();
+	m2->from = cursq;
+	m2->to = new Square(to->get_row(), (to->get_col() + cursq->get_col()) / 2);
+	(*rook)->move(begin, end, m); 
 	cursq = to;
+	delete m2;
       }
-    } catch (...) {
-      throw Exception{"Piece is in the way"};
+    delete m;
+    } else {
+      m->error_str = "Piece is in the way";
+      return false;
     }
-    return end;
-  } else if ((abs(to.get_col() - cursq.get_col()) > 1) ||
-      (abs(to.get_row() - cursq.get_row()) > 1)) {
-    throw Exception{"Destination square is unreachable"};
+    return false;
+  } else if ((abs(to->get_col() - cursq->get_col()) > 1) ||
+      (abs(to->get_row() - cursq->get_row()) > 1)) {
+    m->error_str = "Destination square is unreachable";
+    return false;
   }
   auto temp = begin;
   while(temp != end) {
-    if ((*temp)->get_cursq() == to &&
+    if ((*temp)->get_cursq()->get_row() == to->get_row() &&
+	(*temp)->get_cursq()->get_col() == to->get_col() &&
 	(*temp)->get_color() == this->color) {
-      throw Exception{"Piece of same color already on Square"};
-    } else if ((*temp)->get_cursq() == to &&
+      m->error_str = "Piece of same color already on Square";
+      return false;
+    } else if ((*temp)->get_cursq()->get_row() == to->get_row() &&
+	(*temp)->get_cursq()->get_col() == to->get_col() &&
 	(*temp)->get_color() != this->color) {
       break;
     }
     temp++;
   }
-  return temp;
+  m->pieces_to_capture.push_back(temp);
+  return true;
 }
 
 bool King::in_check(std::vector<Piece *>::iterator begin,
@@ -471,10 +554,12 @@ bool King::in_check(std::vector<Piece *>::iterator begin,
     std::vector<Piece *>::iterator ignore) {
   for (auto temp = begin; temp != end; temp++) {
     if ((*temp)->get_color() != this->color) {
-      try {
-	(*temp)->can_move_to(begin, end, cursq);
+      auto m = new Move();
+      m->from = (*temp)->get_cursq();
+      m->to = this->cursq;
+      if ((*temp)->can_move_to(begin, end, m)) {
 	return true;
-      } catch(Exception &e) {}
+      }
     }
   }
   return false;
@@ -494,17 +579,20 @@ bool King::is_checkmated(std::vector<Piece *>::iterator begin,
 	for (; temp != end; temp++) {
 	  if ((*temp)->get_color() == this->color &&
 	      (*temp)->get_name() != PieceName::King) { // king cant block for itself
-	    try {
-	      (*temp)->can_move_to(begin, end, {i,j});
+	    auto m = new Move();
+	    m->from = (*temp)->get_cursq();
+	    m->to = new Square(i, j);
+
+	    if ((*temp)->can_move_to(begin, end, m)) {
 	      auto sq = (*temp)->get_cursq();
-	      (*temp)->set_cursq({i,j});
+	      (*temp)->set_cursq(new Square(i,j));
 	      if (!this->in_check(begin,end,ignore)) {
 		(*temp)->set_cursq(sq);
 		canblock = true;
 		goto outside; // I downloaded all of C++, I'm going to use all of C++
 	      }
 	      (*temp)->set_cursq(sq);
-	    } catch(...) {}
+	    }
 	  }
 	}
       }
@@ -542,7 +630,10 @@ Result King::is_stalemated(std::vector<Piece *>::iterator begin,
 	  try {
 	    auto sq = (*temp)->get_cursq();
 	    auto has_moved = (*temp)->piece_moved();
-	    (*temp)->move(begin, end, {i, j});
+	    auto m = new Move();
+	    m->from = (*temp)->get_cursq();
+	    m->to = new Square(i,j);
+	    (*temp)->move(begin, end, m);
 	    (*temp)->set_cursq(sq);
 	    (*temp)->set_moved(has_moved);
 	    canmove = true;

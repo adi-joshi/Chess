@@ -23,7 +23,7 @@ class Board {
   // ({e7, Pawn, White}, {e8, Queen, White}).
   public:
   Board(TextDisplay *td);
-  bool move(std::string s, Color turn);
+  bool move(Move *m);
   Move *get_prev_move();
   bool game_end();
   Result winner();
