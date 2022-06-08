@@ -1073,3 +1073,56 @@ TEST(KingTests, KingMovementWillBeCheck) {
   m->to = new Square(6,6);
   ASSERT_FALSE(king->move(pieces.begin(), pieces.end(), m));
 }
+
+TEST(KingTests, KingCastling) {
+  auto td = new TextDisplay();
+  auto b = new Board(td);
+  std::vector<Piece*> pieces;
+  {
+    auto king = new King(b, new Square(1,5), Color::White);
+    auto rook1 = new Rook(b, new Square(1,8), Color::White);
+    pieces.push_back(king);
+    pieces.push_back(rook1);
+    auto m = new Move();
+    m->from = new Square(1,5);
+    m->to = new Square(1,7);
+    ASSERT_TRUE(king->can_move_to(pieces.begin(), pieces.end(), m));
+  }
+
+  {
+    auto king = new King(b, new Square(1,5), Color::White);
+    auto rook1 = new Rook(b, new Square(1,1), Color::White);
+    pieces.push_back(king);
+    pieces.push_back(rook1);
+    auto m = new Move();
+    m->from = new Square(1,5);
+    m->to = new Square(1,3);
+    ASSERT_TRUE(king->can_move_to(pieces.begin(), pieces.end(), m));
+  }
+
+  {
+    auto king = new King(b, new Square(2,5), Color::White);
+    auto rook1 = new Rook(b, new Square(1,1), Color::White);
+    pieces.push_back(king);
+    pieces.push_back(rook1);
+    auto m = new Move();
+    m->from = new Square(2,5);
+    m->to = new Square(1,5);
+    king->move(pieces.begin(), pieces.end(), m);
+    m->to = new Square(1,3);
+    ASSERT_FALSE(king->can_move_to(pieces.begin(), pieces.end(), m));
+  }
+
+  {
+    auto king = new King(b, new Square(1,5), Color::White);
+    auto rook1 = new Rook(b, new Square(2,1), Color::White);
+    pieces.push_back(king);
+    pieces.push_back(rook1);
+    auto m = new Move();
+    m->from = new Square(2,1);
+    m->to = new Square(1,1);
+    rook1->move(pieces.begin(), pieces.end(), m);
+    m->to = new Square(1,3);
+    ASSERT_FALSE(king->can_move_to(pieces.begin(), pieces.end(), m));
+  }
+}

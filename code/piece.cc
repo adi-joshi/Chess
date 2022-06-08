@@ -68,7 +68,6 @@ bool Piece::move(std::vector<Piece *>::iterator begin,
       m->error_str = "King would be in check";
       return false;
     }
-    m->mt = MoveType::Normal;
     m->color = this->color;
     m->from = cursq;
     m->piecename = this->get_name();
@@ -143,6 +142,7 @@ bool Pawn::can_move_to(std::vector<Piece *>::iterator begin,
 	}
 	temp++;
       }
+      m->mt = MoveType::Normal;
       return true; // this is not a capture.
     } else { // is a capture
       if (abs(to->get_col() - cursq->get_col()) != 1 ||
@@ -153,6 +153,7 @@ bool Pawn::can_move_to(std::vector<Piece *>::iterator begin,
       }
       Move *prev_move = b->get_prev_move();
       auto need_sq = to;
+      bool is_enpassant = false;
       if (prev_move != nullptr) {
 	if (prev_move->piecename == PieceName::Pawn &&
 	    prev_move->to->get_row() == cursq->get_row() &&
@@ -160,6 +161,7 @@ bool Pawn::can_move_to(std::vector<Piece *>::iterator begin,
 	    prev_move->from->get_row() == 7 &&
 	    abs(prev_move->to->get_col() - cursq->get_col()) == 1) { // is en passant
 	  need_sq = prev_move->to;
+	  is_enpassant = true;
 	}
       }
       auto temp = begin;
@@ -180,6 +182,11 @@ bool Pawn::can_move_to(std::vector<Piece *>::iterator begin,
 	return false;
       }
       m->pieces_to_capture.push_back(temp);
+      if (is_enpassant) {
+	m->mt = MoveType::EnPassant;
+      } else {
+	m->mt = MoveType::Capture;
+      }
       return true; // this is a capture
     }
   } else if (color == Color::Black) {
@@ -207,6 +214,7 @@ bool Pawn::can_move_to(std::vector<Piece *>::iterator begin,
 	}
 	temp++;
       }
+      m->mt = MoveType::Normal;
       return true; // this is not a capture.
     } else { // is a capture
       if (abs(to->get_col() - cursq->get_col()) != 1 ||
@@ -217,6 +225,7 @@ bool Pawn::can_move_to(std::vector<Piece *>::iterator begin,
       }
       Move *prev_move = b->get_prev_move();
       auto need_sq = to;
+      bool is_enpassant = false;
       if (prev_move != nullptr) {
 	if (prev_move->piecename == PieceName::Pawn &&
 	    prev_move->to->get_row() == cursq->get_row() &&
@@ -224,6 +233,7 @@ bool Pawn::can_move_to(std::vector<Piece *>::iterator begin,
 	    prev_move->from->get_row() == 2 &&
 	    abs(prev_move->to->get_col() - cursq->get_col()) == 1) { // is en passant
 	  need_sq = prev_move->to;
+	  is_enpassant = true;
 	}
       }
       auto temp = begin;
@@ -242,6 +252,11 @@ bool Pawn::can_move_to(std::vector<Piece *>::iterator begin,
       if (temp == end) {
 	m->error_str = "Move is not a capture";
 	return false;
+      }
+      if (is_enpassant) {
+	m->mt = MoveType::EnPassant;
+      } else {
+	m->mt = MoveType::Capture;
       }
       m->pieces_to_capture.push_back(temp);
       return true; // this is a capture
@@ -282,7 +297,12 @@ bool Knight::can_move_to(std::vector<Piece *>::iterator begin,
 	abs(to->get_col() - cursq->get_col()) == 3) &&
       ((abs(to->get_row() - cursq->get_row()) != 3 &&
 	abs(to->get_col() - cursq->get_col()) != 3))) {
-    m->pieces_to_capture.push_back(temp);
+    if (temp != end) {
+      m->pieces_to_capture.push_back(temp);
+      m->mt = MoveType::Capture;
+    } else {
+      m->mt = MoveType::Normal;
+    }
     return true;
   } else {
     m->error_str = "Invalid move";
@@ -363,7 +383,12 @@ bool Bishop::can_move_to(std::vector<Piece *>::iterator begin,
       temp2++;
     }
   }
-  m->pieces_to_capture.push_back(temp);
+  if (temp != end) {
+    m->mt = MoveType::Capture;
+    m->pieces_to_capture.push_back(temp);
+  } else {
+    m->mt = MoveType::Normal;
+  }
   return true;
 }
 
@@ -420,7 +445,12 @@ bool Rook::can_move_to(std::vector<Piece *>::iterator begin,
     }
     temp++;
   }
-  m->pieces_to_capture.push_back(temp);
+  if (temp != end) {
+    m->pieces_to_capture.push_back(temp);
+    m->mt = MoveType::Normal;
+  } else {
+    m->mt = MoveType::Capture;
+  }
   return true;
 }
 
@@ -506,21 +536,24 @@ bool King::can_move_to(std::vector<Piece *>::iterator begin,
       m->error_str = "Cannot castle as rook has moved";
       return false;
     }
-    auto m = new Move();
-    m->from = cursq;
-    m->to = new Square(to->get_row(), (to->get_col() + (*rook)->get_cursq()->get_col()) / 2);
-    if (Rook(b, cursq, color).can_move_to(begin, end, m)) {
+    /*
+    auto m2 = new Move();
+    m2->from = (*rook)->get_cursq();
+    m2->to = new Square(to->get_row(), (to->get_col() + (*rook)->get_cursq()->get_col()) / 2);
+    */
+    auto m2 = new Move();
+    m2->from = cursq;
+    m2->to = new Square(to->get_row(), (to->get_col() + cursq->get_col()) / 2);
+    if (Rook(b, cursq, color).can_move_to(begin, end, m2)) {
       if (!this->in_check(begin, end, end) &&
 	  !King(b, new Square(cursq->get_row(), (cursq->get_col() + to->get_col()) / 2), color).in_check(begin, end, end) &&
 	  !King(b, to, color).in_check(begin, end, end)) {
-	auto m2 = new Move();
-	m2->from = cursq;
-	m2->to = new Square(to->get_row(), (to->get_col() + cursq->get_col()) / 2);
-	(*rook)->move(begin, end, m); 
+	(*rook)->move(begin, end, m2);
 	cursq = to;
 	delete m2;
+	m->mt = MoveType::Castling;
+	return true;
       }
-    delete m;
     } else {
       m->error_str = "Piece is in the way";
       return false;
@@ -545,7 +578,12 @@ bool King::can_move_to(std::vector<Piece *>::iterator begin,
     }
     temp++;
   }
-  m->pieces_to_capture.push_back(temp);
+  if (temp != end) {
+    m->pieces_to_capture.push_back(temp);
+    m->mt = MoveType::Capture;
+  } else {
+    m->mt = MoveType::Normal;
+  }
   return true;
 }
 
