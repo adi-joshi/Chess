@@ -2,6 +2,7 @@
 #include "exception.h"
 #include "board.h"
 #include <string>
+#include <iostream>
 
 //===Helper===
 int abs(int a) {
@@ -121,7 +122,7 @@ bool Pawn::can_move_to(std::vector<Piece *>::iterator begin,
     if (to->get_col() == cursq->get_col()) { // non-capture
       if (abs(to->get_row() - cursq->get_row()) > 2 ||
 	  to->get_row() < cursq->get_row()) {
-	m->error_str = "Destination square is not reachable";
+	m->error_str = "Destination square is not reachable 1";
 	return false;
       }
       if (abs(to->get_row() - cursq->get_row()) == 2 &&
@@ -137,18 +138,20 @@ bool Pawn::can_move_to(std::vector<Piece *>::iterator begin,
 	} else if (abs(to->get_row() - cursq->get_row()) == 2 &&
 	    (*temp)->get_cursq()->get_col() == cursq->get_col() &&
 	    (*temp)->get_cursq()->get_row() == cursq->get_row() + 1) {
-	  m->error_str = "Destination square is not reachable";
+	  m->error_str = "Destination square is not reachable 2";
 	  return false;
 	}
 	temp++;
       }
-      m->mt = MoveType::Normal;
-      return true; // this is not a capture.
+      if (m->mt == MoveType::Unknown) {
+	m->mt = MoveType::Normal;
+      }
+      // return true; // this is not a capture
     } else { // is a capture
       if (abs(to->get_col() - cursq->get_col()) != 1 ||
 	  abs(to->get_row() - cursq->get_row()) != 1 ||
 	  to->get_row() < cursq->get_row()) {
-	m->error_str = "Destination square is not reachable";
+	m->error_str = "Destination square is not reachable 3";
 	return false;
       }
       Move *prev_move = b->get_prev_move();
@@ -182,13 +185,26 @@ bool Pawn::can_move_to(std::vector<Piece *>::iterator begin,
 	return false;
       }
       m->pieces_to_capture.push_back(temp);
-      if (is_enpassant) {
-	m->mt = MoveType::EnPassant;
-      } else {
-	m->mt = MoveType::Capture;
+      if (m->mt != MoveType::Unknown) {
+	if (is_enpassant) {
+	  m->mt = MoveType::EnPassant;
+	} else {
+	  m->mt = MoveType::Capture;
+	}
       }
-      return true; // this is a capture
+      // return true; // this is a capture
     }
+    if (to->get_row() == 8 && m->mt != MoveType::Promotion) {
+      m->error_str = "Illegal Promotion";
+      return false;
+    } else if (m->mt == MoveType::Promotion && m->promoted_to == PieceName::King) {
+      m->error_str = "Cannot promote to a King";
+      return false;
+    } else if (m->mt == MoveType::Promotion && m->promoted_to == PieceName::Pawn) {
+      m->error_str = "Cannot promote to a Pawn";
+      return false;
+    }
+    return true;
   } else if (color == Color::Black) {
     if (to->get_col() == cursq->get_col()) { // non-capture
       if (abs(to->get_row() - cursq->get_row()) > 2 ||
@@ -214,8 +230,10 @@ bool Pawn::can_move_to(std::vector<Piece *>::iterator begin,
 	}
 	temp++;
       }
-      m->mt = MoveType::Normal;
-      return true; // this is not a capture.
+      if (m->mt == MoveType::Unknown) {
+	m->mt = MoveType::Normal;
+      }
+      // return true; // this is not a capture.
     } else { // is a capture
       if (abs(to->get_col() - cursq->get_col()) != 1 ||
 	  abs(to->get_row() - cursq->get_row()) != 1 ||
@@ -253,14 +271,27 @@ bool Pawn::can_move_to(std::vector<Piece *>::iterator begin,
 	m->error_str = "Move is not a capture";
 	return false;
       }
-      if (is_enpassant) {
-	m->mt = MoveType::EnPassant;
-      } else {
-	m->mt = MoveType::Capture;
+      if (m->mt == MoveType::Unknown) {
+	if (is_enpassant) {
+	  m->mt = MoveType::EnPassant;
+	} else {
+	  m->mt = MoveType::Capture;
+	}
       }
       m->pieces_to_capture.push_back(temp);
-      return true; // this is a capture
+      // return true; // this is a capture
     }
+    if (to->get_row() == 1 && m->mt != MoveType::Promotion) {
+      m->error_str = "Illegal Promotion";
+      return false;
+    } else if (m->mt == MoveType::Promotion && m->promoted_to == PieceName::King) {
+      m->error_str = "Cannot promote to a King";
+      return false;
+    } else if (m->mt == MoveType::Promotion && m->promoted_to == PieceName::Pawn) {
+      m->error_str = "Cannot promote to a Pawn";
+      return false;
+    }
+    return true;
   }
   return false;
 }

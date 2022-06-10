@@ -73,7 +73,7 @@ Move *TextDisplay::ask_move(Color turn) {
     auto m = new Move();
     m->it = InputType::Print;
     return m;
-  } else if ((s.size() == 4) &&
+  } else if ((s.size() >= 4) &&
       (s[0] >= 'a' && s[0] <= 'h') &&
       (s[1] >= '1' && s[1] <= '8') &&
       (s[2] >= 'a' && s[2] <= 'h') &&
@@ -81,9 +81,27 @@ Move *TextDisplay::ask_move(Color turn) {
     auto from = new Square(s[1] - '0', s[0] - 'a' + 1);
     auto to = new Square(s[3] - '0', s[2] - 'a' + 1);
     auto retval = new Move();
+    retval->mt = MoveType::Unknown;
     retval->color = turn;
     retval->from = from;
     retval->to = to;
+    if ((s.size() == 6) &&
+	((s[5] == 'q' || s[5] == 'Q'))) {
+      retval->mt = MoveType::Promotion;
+      retval->promoted_to = PieceName::Queen;
+    } else if ((s.size() == 6) &&
+	((s[5] == 'r' || s[5] == 'R'))) {
+      retval->mt = MoveType::Promotion;
+      retval->promoted_to = PieceName::Rook;
+    } else if ((s.size() == 6) &&
+	((s[5] == 'b' || s[5] == 'B'))) {
+      retval->mt = MoveType::Promotion;
+      retval->promoted_to = PieceName::Bishop;
+    } else if ((s.size() == 6) &&
+	((s[5] == 'n' || s[5] == 'N'))) {
+      retval->mt = MoveType::Promotion;
+      retval->promoted_to = PieceName::Knight;
+    }
     return retval;
   } else {
     return nullptr;

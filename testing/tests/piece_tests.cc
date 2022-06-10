@@ -67,7 +67,7 @@ TEST(PawnTests, PawnMovementOnEmptyBoard) {
   pieces.push_back(wpeb2);
   m->from = new Square(7,5);
   m->to = new Square(8,5);
-  ASSERT_TRUE(wpeb2->can_move_to(pieces.begin(), pieces.end(), m));
+  ASSERT_FALSE(wpeb2->can_move_to(pieces.begin(), pieces.end(), m));
   m->to = new Square(8,6);
   ASSERT_FALSE(wpeb2->can_move_to(pieces.begin(), pieces.end(), m));
   m->to = new Square(8,4);
@@ -101,7 +101,7 @@ TEST(PawnTests, PawnMovementOnEmptyBoard) {
   pieces.push_back(bpeb2);
   m->from = new Square(2,3);
   m->to = new Square(1,3);
-  ASSERT_TRUE(bpeb2->can_move_to(pieces.begin(), pieces.end(), m));
+  ASSERT_FALSE(bpeb2->can_move_to(pieces.begin(), pieces.end(), m));
   m->to = new Square(1,2);
   ASSERT_FALSE(bpeb2->can_move_to(pieces.begin(), pieces.end(), m));
   m->to = new Square(1,4);
@@ -266,6 +266,74 @@ TEST(PawnTests, PawnMovementWillBeCheck) {
 }
 
 TEST(PawnTests, PawnPromotion) {
+  auto td = new TextDisplay();
+  auto b = new Board(td);
+  auto wp1 = new Pawn(b, new Square(7,1), Color::White);
+  auto wp2 = new Pawn(b, new Square(7,2), Color::White);
+  auto wp3 = new Pawn(b, new Square(7,3), Color::White);
+  auto wp4 = new Pawn(b, new Square(7,4), Color::White);
+  auto bp1 = new Pawn(b, new Square(2,5), Color::Black);
+  auto bp2 = new Pawn(b, new Square(2,6), Color::Black);
+  auto bp3 = new Pawn(b, new Square(2,7), Color::Black);
+  auto bp4 = new Pawn(b, new Square(2,8), Color::Black);
+  std::vector<Piece*> pieces;
+  pieces.push_back(wp1);
+  pieces.push_back(wp2);
+  pieces.push_back(wp3);
+  pieces.push_back(wp4);
+  pieces.push_back(bp1);
+  pieces.push_back(bp2);
+  pieces.push_back(bp3);
+  pieces.push_back(bp4);
+  auto m = new Move();
+  m->mt = MoveType::Promotion;
+  m->from = new Square(7,1);
+  m->to = new Square(8,1);
+  m->promoted_to = PieceName::King;
+  ASSERT_FALSE(wp1->can_move_to(pieces.begin(), pieces.end(), m));
+  m->promoted_to = PieceName::Queen;
+  ASSERT_TRUE(wp1->can_move_to(pieces.begin(), pieces.end(), m));
+
+  m->from = new Square(2,5);
+  m->to = new Square(1,5);
+  m->promoted_to = PieceName::King;
+  ASSERT_FALSE(bp1->can_move_to(pieces.begin(), pieces.end(), m));
+  m->promoted_to = PieceName::Queen;
+  ASSERT_TRUE(bp1->can_move_to(pieces.begin(), pieces.end(), m));
+
+  m->from = new Square(7,2);
+  m->to = new Square(8,2);
+  m->promoted_to = PieceName::Pawn;
+  ASSERT_FALSE(wp2->can_move_to(pieces.begin(), pieces.end(), m));
+  m->promoted_to = PieceName::Rook;
+  ASSERT_TRUE(wp2->can_move_to(pieces.begin(), pieces.end(), m));
+
+  m->from = new Square(2,6);
+  m->to = new Square(1,6);
+  m->promoted_to = PieceName::Pawn;
+  ASSERT_FALSE(bp2->can_move_to(pieces.begin(), pieces.end(), m));
+  m->promoted_to = PieceName::Rook;
+  ASSERT_TRUE(bp2->can_move_to(pieces.begin(), pieces.end(), m));
+
+  m->from = new Square(7,3);
+  m->to = new Square(8,3);
+  m->promoted_to = PieceName::Bishop;
+  ASSERT_TRUE(wp3->can_move_to(pieces.begin(), pieces.end(), m));
+  
+  m->from = new Square(7,4);
+  m->to = new Square(8,4);
+  m->promoted_to = PieceName::Knight;
+  ASSERT_TRUE(wp4->can_move_to(pieces.begin(), pieces.end(), m));
+
+  m->from = new Square(2,7);
+  m->to = new Square(1,7);
+  m->promoted_to = PieceName::Bishop;
+  ASSERT_TRUE(bp3->can_move_to(pieces.begin(), pieces.end(), m));
+
+  m->from = new Square(2,8);
+  m->to = new Square(1,8);
+  m->promoted_to = PieceName::Knight;
+  ASSERT_TRUE(bp4->can_move_to(pieces.begin(), pieces.end(), m));
 }
 
 //=== Knight Tests ===

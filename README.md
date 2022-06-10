@@ -26,5 +26,4 @@ How to play the game:
 3. The program will notify you if it thinks that your move is invalid, or if it can't read your move.
 
 ## To do List:
-- Promotion
 - GUI

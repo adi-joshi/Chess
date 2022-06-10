@@ -119,6 +119,25 @@ bool Board::move(Move *m) {
 	}
       }
 
+      if (m->mt == MoveType::Promotion) {
+	if (m->promoted_to == PieceName::King ||
+	    m->promoted_to == PieceName::Pawn) {
+	  throw Exception{"Invalid promotion"};
+	} else {
+	  auto thissq = new Square(thispiece->get_cursq()->get_row(), thispiece->get_cursq()->get_col());
+	  auto thiscolor = thispiece->get_color();
+	  Piece *p = nullptr;
+	  switch(m->promoted_to) {
+	    case PieceName::Queen: p = new Queen(this, thissq, thiscolor); pieces.push_back(p); break;
+	    case PieceName::Rook: p = new Rook(this, thissq, thiscolor); pieces.push_back(p); break;
+	    case PieceName::Bishop: p = new Bishop(this, thissq, thiscolor); pieces.push_back(p); break;
+	    case PieceName::Knight: p = new Knight(this, thissq, thiscolor); pieces.push_back(p); break;
+	    default: break;
+	  }
+	  pieces.erase(pieces.begin() + i);
+	}
+      }
+
       halfmoves++;
 
       if (name_before == PieceName::Pawn) {
