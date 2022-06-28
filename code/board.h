@@ -6,14 +6,14 @@
 #include <utility>
 #include <tuple>
 #include <string>
-#include "textdisplay.h"
+#include "display.h"
 #include "result.h"
 #include "piece.h"
 #include "move.h"
 
 class Board {
   // vector <Object *> ob is in Subject class
-  TextDisplay *td;
+  Display *td;
   std::vector<Piece *> pieces;
   std::vector<Move*> moves;
   std::map<std::string, int> board_string; // map<board_string, # times it occured> (for 3fold)
@@ -22,7 +22,7 @@ class Board {
   // e.g. if you play e7e8=Q, then it would be stored as
   // ({e7, Pawn, White}, {e8, Queen, White}).
   public:
-  Board(TextDisplay *td);
+  Board(Display *td);
   bool move(Move *m);
   Move *get_prev_move();
   bool game_end();

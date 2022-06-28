@@ -1,7 +1,9 @@
-#include "board.h"
 #include <iostream>
+#include "board.h"
+#include "textdisplay.h"
+#include "gui.h"
 
-Board::Board(TextDisplay *td) {
+Board::Board(Display *td) {
   moves.push_back(nullptr);
   this->td = td;
   for (int i = 1; i <= 8; i++) {

@@ -1,9 +1,16 @@
 #include "game.h"
 #include "exception.h" // exception file
 #include "result.h" // enumeration of Black, White or Draw
+#include "textdisplay.h"
+#include "gui.h"
 
-Game::Game(void) {
-  td = new TextDisplay();
+Game::Game(std::string display) {
+  td = nullptr;
+  if (display == "gui") {
+    td = new GUI();
+  } else {
+    td = new TextDisplay();
+  }
   b = new Board(td);
   turn = Color::White;
 }

@@ -1,6 +1,6 @@
 CXX=g++
-CXXFLAGS= -MMD
-OBJECTS= $(addprefix code/, main.o game.o exception.o color.o board.o result.o textdisplay.o square.o piece.o move.o)
+CXXFLAGS= -MMD -I/usr/local/include/SDL2
+OBJECTS= $(addprefix code/, main.o game.o exception.o color.o board.o result.o textdisplay.o square.o piece.o move.o display.o gui.o)
 GTEST_DIR = testing
 TEST_DIR = testing/tests
 USER_DIR = ../code
@@ -15,7 +15,7 @@ DEPENDS = ${OBJECTS:.o=.d}
 EXEC=chess
 
 ${EXEC}: ${OBJECTS}
-	${CXX} -pthread ${OBJECTS} -o ${EXEC}
+	${CXX} -pthread ${OBJECTS} -lSDL2 -o ${EXEC}
 
 debug: CXXFLAGS += -g
 debug: ${EXEC}

@@ -25,5 +25,9 @@ How to play the game:
 2. You can type in the move in UCI notation (i.e. type the square that the piece is currently on, followed by the square that you want to move it to. For example, if you want to move your Knight from the square g1 to the square f3, then you would type ```g1f3``` and press enter). If you want to promote a pawn, type the move as above, then add an '=' and then the piece name that you want to promote your pawn to (e.g. If your pawn is on g7 and you want to promote it to a Knight on g8, you would type ```g7g8=n``` or ```g7g8=N```. You can similarly type ```g7g8=b, g7g8=B, g7g8=r, g7g8=R, g7g8=q, g7g8=Q```).
 3. The program will notify you if it thinks that your move is invalid, or if it can't read your move.
 
+## References
+- Board image: Made by "the lila authors and pirouetti". Taken from "https://github.com/lichess-org/lila/blob/master/public/images/board/wood.jpg" under the AGPLv3+ license on June 25, 2022.
+- Piece images: Made by "Colin M.L. Burnett". Taken from "https://github.com/lichess-org/lila/blob/master/public/piece/cburnett" under the GPLv2+ license on June 25, 2022.
+
 ## To do List:
 - GUI

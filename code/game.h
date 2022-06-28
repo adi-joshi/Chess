@@ -1,16 +1,17 @@
 #ifndef GAME_H_
 #define GAME_H_
 
+#include <string>
 #include "board.h"
-#include "textdisplay.h"
+#include "display.h"
 #include "color.h" // enumeration of Black or White
 
 class Game {
   Board *b;
-  TextDisplay *td;
+  Display *td;
   Color turn;
   public:
-  Game();
+  Game(std::string display);
   void play();
   ~Game();
 };
