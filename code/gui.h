@@ -8,12 +8,16 @@
 #include "display.h"
 
 class GUI : public Display {
+  struct ScreenPos {
+    int x;
+    int y;
+  };
   const int win_w;
   const int win_h;
   SDL_Window *window;
   SDL_Surface *board;
   std::map<std::pair<Color, PieceName>, SDL_Surface*> piece_surfaces;
-  std::vector<std::tuple<Color, PieceName, Square>> positions;
+  std::vector<std::tuple<Color, PieceName, ScreenPos>> positions;
   public:
   GUI();
   void welcome_msg() override;
