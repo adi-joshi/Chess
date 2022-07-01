@@ -39,4 +39,4 @@ How to play the GUI-based game:
 - Piece images: Made by "Colin M.L. Burnett". Taken from "https://github.com/lichess-org/lila/blob/master/public/piece/cburnett" under the GPLv2+ license on June 25, 2022.
 
 ## To do List:
-- GUI
+- Moves so far in GUI
