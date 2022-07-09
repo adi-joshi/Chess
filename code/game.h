@@ -7,8 +7,8 @@
 #include "color.h" // enumeration of Black or White
 
 class Game {
-  Board *b;
-  Display *td;
+  std::shared_ptr<Board> b;
+  std::shared_ptr<Display> td;
   Color turn;
   public:
   Game(std::string display);

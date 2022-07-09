@@ -11,14 +11,14 @@ class TextDisplay : public Display {
   public:
   TextDisplay();
   void welcome_msg() override;
-  Move *ask_move(Color turn) override;
+  std::shared_ptr<Move> ask_move(Color turn) override;
   // called by observer (i.e. Board, after verifying that move is valid)
   void clear_board() override;
   std::string draw_board(std::vector<Piece*>::const_iterator begin,
                   std::vector<Piece*>::const_iterator end) override;
   void print_board() override;
-  void print_moves(std::vector<Move*>::const_iterator begin,
-                   std::vector<Move*>::const_iterator end) override;
+  void print_moves(std::vector<std::shared_ptr<Move>>::const_iterator begin,
+                   std::vector<std::shared_ptr<Move>>::const_iterator end) override;
   void print_error(Exception e) override;
   void print_winner(Result r) override;
   ~TextDisplay();

@@ -5,13 +5,13 @@
 #include "gui.h"
 
 Game::Game(std::string display) {
-  td = nullptr;
   if (display == "gui") {
-    td = new GUI();
+    td = std::make_shared<GUI>();
   } else {
-    td = new TextDisplay();
+    td = std::make_shared<TextDisplay>();
   }
-  b = new Board(td);
+  b = std::make_shared<Board>(td);
+  b->setup_board();
   turn = Color::White;
 }
 
@@ -34,7 +34,4 @@ void Game::play(void) {
   return;
 }
 
-Game::~Game(void) {
-  delete b;
-  delete td;
-}
+Game::~Game(void) {}

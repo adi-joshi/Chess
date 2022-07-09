@@ -48,8 +48,8 @@ GUI::GUI(void)
 
 void GUI::welcome_msg(void) {}
 
-Move *GUI::ask_move(Color turn) {
-  Move *m = new Move();
+std::shared_ptr<Move> GUI::ask_move(Color turn) {
+  auto m = std::make_shared<Move>();
   m->it = InputType::Move;
   m->color = turn;
   SDL_Event e;
@@ -59,7 +59,7 @@ Move *GUI::ask_move(Color turn) {
     // std::cout << "Hi" << std::endl;
     if (e.type == SDL_QUIT) {
       // std::cout << "Quit" << std::endl;
-      return new Move();
+      return std::make_shared<Move>();
     } else if (e.type == SDL_MOUSEBUTTONDOWN) { // if mouse button is clicked
       // get current position of mouse
       // std::cout << "Mouse button is down" << std::endl;
@@ -81,7 +81,7 @@ Move *GUI::ask_move(Color turn) {
       if (id != -1) { // i.e. clicked a piece
 	// put the piece under the mouse
 	// std::cout << "Got piece" << std::endl;
-	m->from = new Square{ 8 - (y) / (win_h / 8), (x + (win_w/8)) / (win_w / 8) }; 
+	m->from = std::make_shared<Square>( 8 - (y) / (win_h / 8), (x + (win_w/8)) / (win_w / 8) );
 	origpos = std::get<2>(positions[id]);
 	std::get<2>(positions[id]) = { x - win_w / 16, y - win_h / 16 };
 	this->print_board();
@@ -98,7 +98,7 @@ Move *GUI::ask_move(Color turn) {
 	    SDL_GetMouseState(&x, &y);
 	    std::get<2>(positions[id]) = { x - win_w / 16, y - win_h / 16 };
 	    this->print_board();
-	    m->to = new Square{ 8 - (y) / (win_h / 8), (x + (win_w/8)) / (win_w / 8) }; 
+	    m->to = std::make_shared<Square>( 8 - (y) / (win_h / 8), (x + (win_w/8)) / (win_w / 8) );
 	    // std::cout << x << " " << y << ": " << m->to->get_row() << " " << m->to->get_col() << " " << m->from->get_row() << " " << m->from->get_col() << std::endl;
 	    std::get<2>(positions[id]) = origpos;
 	    this->print_board();
@@ -158,8 +158,8 @@ void GUI::print_board(void) {
   // std::cout << "Board drawn helper" << std::endl;
 }
 
-void GUI::print_moves(std::vector<Move*>::const_iterator begin,
-    std::vector<Move*>::const_iterator end) {}
+void GUI::print_moves(std::vector<std::shared_ptr<Move>>::const_iterator begin,
+    std::vector<std::shared_ptr<Move>>::const_iterator end) {}
 
 void GUI::print_error(Exception e) {
   std::cout << e.error() << std::endl;

@@ -3,32 +3,35 @@
 #include "textdisplay.h"
 #include "gui.h"
 
-Board::Board(Display *td) {
+Board::Board(std::shared_ptr<Display> td) {
   moves.push_back(nullptr);
   this->td = td;
+}
+
+void Board::setup_board(void) {
   for (int i = 1; i <= 8; i++) {
-    auto white_pawn = new Pawn(this, new Square(2,i), Color::White);
+    auto white_pawn = new Pawn(shared_from_this(), std::make_shared<Square>(2,i), Color::White);
     pieces.push_back(white_pawn);
-    auto black_pawn = new Pawn(this, new Square(7,i), Color::Black);
+    auto black_pawn = new Pawn(shared_from_this(), std::make_shared<Square>(7,i), Color::Black);
     pieces.push_back(black_pawn);
   }
 
-  auto white_rook1 = new Rook(this, new Square(1, 1), Color::White);
-  auto white_knight1 = new Knight(this, new Square(1, 2), Color::White);
-  auto white_bishop1 = new Bishop(this, new Square(1, 3), Color::White);
-  auto white_queen = new Queen(this, new Square(1, 4), Color::White);
-  auto white_king = new King(this, new Square(1, 5), Color::White);
-  auto white_bishop2 = new Bishop(this, new Square(1, 6), Color::White);
-  auto white_knight2 = new Knight(this, new Square(1, 7), Color::White);
-  auto white_rook2 = new Rook(this, new Square(1, 8), Color::White);
-  auto black_rook1 = new Rook(this, new Square(8, 1), Color::Black);
-  auto black_knight1 = new Knight(this, new Square(8, 2), Color::Black);
-  auto black_bishop1 = new Bishop(this, new Square(8, 3), Color::Black);
-  auto black_queen = new Queen(this, new Square(8, 4), Color::Black);
-  auto black_king = new King(this, new Square(8, 5), Color::Black);
-  auto black_bishop2 = new Bishop(this, new Square(8, 6), Color::Black);
-  auto black_knight2 = new Knight(this, new Square(8, 7), Color::Black);
-  auto black_rook2 = new Rook(this, new Square(8, 8), Color::Black);
+  auto white_rook1 = new Rook(shared_from_this(), std::make_shared<Square>(1, 1), Color::White);
+  auto white_knight1 = new Knight(shared_from_this(), std::make_shared<Square>(1, 2), Color::White);
+  auto white_bishop1 = new Bishop(shared_from_this(), std::make_shared<Square>(1, 3), Color::White);
+  auto white_queen = new Queen(shared_from_this(), std::make_shared<Square>(1, 4), Color::White);
+  auto white_king = new King(shared_from_this(), std::make_shared<Square>(1, 5), Color::White);
+  auto white_bishop2 = new Bishop(shared_from_this(), std::make_shared<Square>(1, 6), Color::White);
+  auto white_knight2 = new Knight(shared_from_this(), std::make_shared<Square>(1, 7), Color::White);
+  auto white_rook2 = new Rook(shared_from_this(), std::make_shared<Square>(1, 8), Color::White);
+  auto black_rook1 = new Rook(shared_from_this(), std::make_shared<Square>(8, 1), Color::Black);
+  auto black_knight1 = new Knight(shared_from_this(), std::make_shared<Square>(8, 2), Color::Black);
+  auto black_bishop1 = new Bishop(shared_from_this(), std::make_shared<Square>(8, 3), Color::Black);
+  auto black_queen = new Queen(shared_from_this(), std::make_shared<Square>(8, 4), Color::Black);
+  auto black_king = new King(shared_from_this(), std::make_shared<Square>(8, 5), Color::Black);
+  auto black_bishop2 = new Bishop(shared_from_this(), std::make_shared<Square>(8, 6), Color::Black);
+  auto black_knight2 = new Knight(shared_from_this(), std::make_shared<Square>(8, 7), Color::Black);
+  auto black_rook2 = new Rook(shared_from_this(), std::make_shared<Square>(8, 8), Color::Black);
 
   pieces.push_back(white_rook1);
   pieces.push_back(white_knight1);
@@ -63,7 +66,11 @@ Board::Board(Display *td) {
 
 }
 
-bool Board::move(Move *m) {
+void Board::setup_board(std::vector<Piece*> pieces) {
+  this->pieces = pieces;
+}
+
+bool Board::move(std::shared_ptr<Move> m) {
   /*
   if (s.size() == 1 && s[0] == 'p') {
     auto placeholder = moves.cbegin();
@@ -126,14 +133,14 @@ bool Board::move(Move *m) {
 	    m->promoted_to == PieceName::Pawn) {
 	  throw Exception{"Invalid promotion"};
 	} else {
-	  auto thissq = new Square(thispiece->get_cursq()->get_row(), thispiece->get_cursq()->get_col());
+	  auto thissq = std::make_shared<Square>(thispiece->get_cursq()->get_row(), thispiece->get_cursq()->get_col());
 	  auto thiscolor = thispiece->get_color();
 	  Piece *p = nullptr;
 	  switch(m->promoted_to) {
-	    case PieceName::Queen: p = new Queen(this, thissq, thiscolor); pieces.push_back(p); break;
-	    case PieceName::Rook: p = new Rook(this, thissq, thiscolor); pieces.push_back(p); break;
-	    case PieceName::Bishop: p = new Bishop(this, thissq, thiscolor); pieces.push_back(p); break;
-	    case PieceName::Knight: p = new Knight(this, thissq, thiscolor); pieces.push_back(p); break;
+	    case PieceName::Queen: p = new Queen(shared_from_this(), thissq, thiscolor); pieces.push_back(p); break;
+	    case PieceName::Rook: p = new Rook(shared_from_this(), thissq, thiscolor); pieces.push_back(p); break;
+	    case PieceName::Bishop: p = new Bishop(shared_from_this(), thissq, thiscolor); pieces.push_back(p); break;
+	    case PieceName::Knight: p = new Knight(shared_from_this(), thissq, thiscolor); pieces.push_back(p); break;
 	    default: break;
 	  }
 	  pieces.erase(pieces.begin() + i);
@@ -179,7 +186,7 @@ bool Board::move(Move *m) {
   return false;
 }
 
-Move *Board::get_prev_move(void) {
+std::shared_ptr<Move> Board::get_prev_move(void) {
   return moves[moves.size() - 1];
 }
 
@@ -219,8 +226,4 @@ Result Board::winner(void) {
   return r;
 }
 
-Board::~Board(void) {
-  for (auto m : moves) {
-    delete m;
-  }
-}
+Board::~Board(void) {}

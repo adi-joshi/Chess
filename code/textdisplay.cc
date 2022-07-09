@@ -65,12 +65,12 @@ void TextDisplay::welcome_msg(void) {
   std::cout << "Welcome to Chess!" << std::endl;
 }
 
-Move *TextDisplay::ask_move(Color turn) {
+std::shared_ptr<Move> TextDisplay::ask_move(Color turn) {
   std::string s;
   std::cout << ((turn == Color::White) ? "White" : "Black") << " to move. Please enter your move: " << std::endl;
   std::cin >> s;
   if (s.size() == 1 && s[0] == 'p') {
-    auto m = new Move();
+    auto m = std::make_shared<Move>();
     m->it = InputType::Print;
     return m;
   } else if ((s.size() >= 4) &&
@@ -78,9 +78,9 @@ Move *TextDisplay::ask_move(Color turn) {
       (s[1] >= '1' && s[1] <= '8') &&
       (s[2] >= 'a' && s[2] <= 'h') &&
       (s[3] >= '1' && s[3] <= '8')) {
-    auto from = new Square(s[1] - '0', s[0] - 'a' + 1);
-    auto to = new Square(s[3] - '0', s[2] - 'a' + 1);
-    auto retval = new Move();
+    auto from = std::make_shared<Square>(s[1] - '0', s[0] - 'a' + 1);
+    auto to = std::make_shared<Square>(s[3] - '0', s[2] - 'a' + 1);
+    auto retval = std::make_shared<Move>();
     retval->mt = MoveType::Unknown;
     retval->color = turn;
     retval->from = from;
@@ -179,8 +179,8 @@ void TextDisplay::print_board(void) {
   std::cout << "  a b c d e f g h" << std::endl;
 }
 
-void TextDisplay::print_moves(std::vector<Move*>::const_iterator begin,
-                              std::vector<Move*>::const_iterator end) {
+void TextDisplay::print_moves(std::vector<std::shared_ptr<Move>>::const_iterator begin,
+                              std::vector<std::shared_ptr<Move>>::const_iterator end) {
   int i = 1;
   for (auto temp = begin; temp != end; temp++) {
     std::string p = "";

@@ -7,6 +7,7 @@
 #include <tuple>
 #include <vector>
 #include <string>
+#include <memory>
 
 // typename Move std::tuple<Color, std::pair<PieceName, Square>, std::pair<PieceName, Square>, std::string>; // want this
 
@@ -29,8 +30,8 @@ struct Move {
   InputType it;
   MoveType mt = MoveType::Unknown;
   Color color;
-  Square *from;
-  Square *to;
+  std::shared_ptr<Square> from;
+  std::shared_ptr<Square> to;
   PieceName piecename;
   std::string pref; // prefix
   PieceName promoted_to;

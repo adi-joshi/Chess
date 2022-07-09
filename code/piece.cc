@@ -10,15 +10,15 @@ int abs(int a) {
 }
 
 //===Piece===
-Piece::Piece(Board *b, Square *s, Color c)
+Piece::Piece(std::shared_ptr<Board> b, std::shared_ptr<Square> s, Color c)
   : b{b}, cursq{s}, color{c}
 {}
 
-Square *Piece::get_cursq(void) {
+std::shared_ptr<Square> Piece::get_cursq(void) {
   return cursq;
 }
 
-void Piece::set_cursq(Square *to) {
+void Piece::set_cursq(std::shared_ptr<Square> to) {
   cursq = to;
 }
 
@@ -35,7 +35,7 @@ Color Piece::get_color(void) {
 }
 
 bool Piece::move(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, Move *m) {
+    std::vector<Piece *>::iterator end, std::shared_ptr<Move> m) {
   auto to = m->to;
   auto king = begin;
   while(king != end) {
@@ -108,7 +108,7 @@ Piece::~Piece(void) {}
 //===Pawn===
 
 bool Pawn::can_move_to(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, Move *m) {
+    std::vector<Piece *>::iterator end, std::shared_ptr<Move> m) {
   if (m == nullptr) {
     return false;
   }
@@ -154,7 +154,7 @@ bool Pawn::can_move_to(std::vector<Piece *>::iterator begin,
 	m->error_str = "Destination square is not reachable 3";
 	return false;
       }
-      Move *prev_move = b->get_prev_move();
+      std::shared_ptr<Move> prev_move = b->get_prev_move();
       auto need_sq = to;
       bool is_enpassant = false;
       if (prev_move != nullptr) {
@@ -241,7 +241,7 @@ bool Pawn::can_move_to(std::vector<Piece *>::iterator begin,
 	m->error_str = "Destination square is not reachable";
 	return false;
       }
-      Move *prev_move = b->get_prev_move();
+      std::shared_ptr<Move> prev_move = b->get_prev_move();
       auto need_sq = to;
       bool is_enpassant = false;
       if (prev_move != nullptr) {
@@ -303,7 +303,7 @@ PieceName Pawn::get_name(void) {
 //===Knight===
 
 bool Knight::can_move_to(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, Move *m) {
+    std::vector<Piece *>::iterator end, std::shared_ptr<Move> m) {
   auto to = m->to;
   if (to->get_row() == cursq->get_row() &&
       to->get_col() == cursq->get_col()) {
@@ -349,7 +349,7 @@ PieceName Knight::get_name(void) {
 //===Bishop===
 
 bool Bishop::can_move_to(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, Move *m) {
+    std::vector<Piece *>::iterator end, std::shared_ptr<Move> m) {
   auto to = m->to;
   if (to->get_row() == cursq->get_row() &&
       to->get_col() == cursq->get_col()) {
@@ -430,7 +430,7 @@ PieceName Bishop::get_name(void) {
 //===Rook===
 
 bool Rook::can_move_to(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, Move *m) {
+    std::vector<Piece *>::iterator end, std::shared_ptr<Move> m) {
   auto to = m->to;
   if (to->get_row() == cursq->get_row() &&
       to->get_col() == cursq->get_col()) {
@@ -492,7 +492,7 @@ PieceName Rook::get_name(void) {
 //===Queen===
 
 bool Queen::can_move_to(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, Move *m) {
+    std::vector<Piece *>::iterator end, std::shared_ptr<Move> m) {
   auto to = m->to;
   if (to->get_row() == cursq->get_row() &&
       to->get_col() == cursq->get_col()) {
@@ -515,19 +515,19 @@ PieceName Queen::get_name(void) {
 
 bool King::king_can_move(std::vector<Piece *>::iterator begin,
     std::vector<Piece *>::iterator end, std::vector<Piece *>::iterator ignore) {
-  std::vector<Square*> possible_moves;
+  std::vector<std::shared_ptr<Square>> possible_moves;
   for (int i = std::max(cursq->get_row() - 1, 1); i < std::min(cursq->get_row() + 1, 8); i++) {
     for (int j = std::max(cursq->get_col() - 1, 1); j < std::min(cursq->get_col() + 1, 8); j++) {
       if (i == cursq->get_row() && j == cursq->get_col()) {
 	continue;
       }
-      auto s = new Square(i, j);
+      auto s = std::make_shared<Square>(i, j);
       possible_moves.push_back(s);
     }
   }
 
   for (int i = 0; i < possible_moves.size(); i++) {
-    auto m = new Move();
+    auto m = std::make_shared<Move>();
     m->from = this->cursq;
     m->to = possible_moves[i];
     if (this->can_move_to(begin, end, m)) {
@@ -540,7 +540,7 @@ bool King::king_can_move(std::vector<Piece *>::iterator begin,
 }
 
 bool King::can_move_to(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, Move *m) {
+    std::vector<Piece *>::iterator end, std::shared_ptr<Move> m) {
   auto to = m->to;
   if (to->get_row() == cursq->get_row() &&
       to->get_col() == cursq->get_col()) {
@@ -572,16 +572,15 @@ bool King::can_move_to(std::vector<Piece *>::iterator begin,
     m2->from = (*rook)->get_cursq();
     m2->to = new Square(to->get_row(), (to->get_col() + (*rook)->get_cursq()->get_col()) / 2);
     */
-    auto m2 = new Move();
+    auto m2 = std::make_shared<Move>();
     m2->from = cursq;
-    m2->to = new Square(to->get_row(), (to->get_col() + cursq->get_col()) / 2);
+    m2->to = std::make_shared<Square>(to->get_row(), (to->get_col() + cursq->get_col()) / 2);
     if (Rook(b, cursq, color).can_move_to(begin, end, m2)) {
       if (!this->in_check(begin, end, end) &&
-	  !King(b, new Square(cursq->get_row(), (cursq->get_col() + to->get_col()) / 2), color).in_check(begin, end, end) &&
+	  !King(b, std::make_shared<Square>(cursq->get_row(), (cursq->get_col() + to->get_col()) / 2), color).in_check(begin, end, end) &&
 	  !King(b, to, color).in_check(begin, end, end)) {
 	(*rook)->move(begin, end, m2);
 	cursq = to;
-	delete m2;
 	m->mt = MoveType::Castling;
 	return true;
       }
@@ -623,7 +622,7 @@ bool King::in_check(std::vector<Piece *>::iterator begin,
     std::vector<Piece *>::iterator ignore) {
   for (auto temp = begin; temp != end; temp++) {
     if ((*temp)->get_color() != this->color) {
-      auto m = new Move();
+      auto m = std::make_shared<Move>();
       m->from = (*temp)->get_cursq();
       m->to = this->cursq;
       if ((*temp)->can_move_to(begin, end, m)) {
@@ -648,13 +647,13 @@ bool King::is_checkmated(std::vector<Piece *>::iterator begin,
 	for (; temp != end; temp++) {
 	  if ((*temp)->get_color() == this->color &&
 	      (*temp)->get_name() != PieceName::King) { // king cant block for itself
-	    auto m = new Move();
+	    auto m = std::make_shared<Move>();
 	    m->from = (*temp)->get_cursq();
-	    m->to = new Square(i, j);
+	    m->to = std::make_shared<Square>(i, j);
 
 	    if ((*temp)->can_move_to(begin, end, m)) {
 	      auto sq = (*temp)->get_cursq();
-	      (*temp)->set_cursq(new Square(i,j));
+	      (*temp)->set_cursq(std::make_shared<Square>(i,j));
 	      if (!this->in_check(begin,end,ignore)) {
 		(*temp)->set_cursq(sq);
 		canblock = true;
@@ -699,9 +698,9 @@ Result King::is_stalemated(std::vector<Piece *>::iterator begin,
 	  try {
 	    auto sq = (*temp)->get_cursq();
 	    auto has_moved = (*temp)->piece_moved();
-	    auto m = new Move();
+	    auto m = std::make_shared<Move>();
 	    m->from = (*temp)->get_cursq();
-	    m->to = new Square(i,j);
+	    m->to = std::make_shared<Square>(i,j);
 	    (*temp)->move(begin, end, m);
 	    (*temp)->set_cursq(sq);
 	    (*temp)->set_moved(has_moved);
