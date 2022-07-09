@@ -119,8 +119,8 @@ void GUI::clear_board(void) {
   positions.clear();
 }
 
-std::string GUI::draw_board(std::vector<Piece*>::const_iterator begin,
-    std::vector<Piece*>::const_iterator end) {
+std::string GUI::draw_board(std::vector<std::shared_ptr<Piece>>::const_iterator begin,
+    std::vector<std::shared_ptr<Piece>>::const_iterator end) {
   positions.clear();
   auto temp = begin;
   while(temp != end) {

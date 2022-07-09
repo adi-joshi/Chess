@@ -14,7 +14,7 @@
 class Board : public std::enable_shared_from_this<Board> { // so that can send shared_ptr<Board> to pieces
   // vector <Object *> ob is in Subject class
   std::shared_ptr<Display> td;
-  std::vector<Piece *> pieces;
+  std::vector<std::shared_ptr<Piece>> pieces;
   std::vector<std::shared_ptr<Move>> moves;
   std::map<std::string, int> board_string; // map<board_string, # times it occured> (for 3fold)
   int halfmoves = 0; // the number of moves without a pawn move or capture
@@ -26,7 +26,7 @@ class Board : public std::enable_shared_from_this<Board> { // so that can send s
 
   // can't setup pieces in constructor, and can't use shared_from_this() in constructor
   void setup_board();
-  void setup_board(std::vector<Piece *> pieces);
+  void setup_board(std::vector<std::shared_ptr<Piece>> pieces);
   bool move(std::shared_ptr<Move> m);
   std::shared_ptr<Move> get_prev_move();
   bool game_end();

@@ -36,7 +36,7 @@ struct Move {
   std::string pref; // prefix
   PieceName promoted_to;
   std::string error_str = "";
-  std::vector<std::vector<Piece*>::iterator> pieces_to_capture;
+  std::vector<std::vector<std::shared_ptr<Piece>>::iterator> pieces_to_capture;
 
   /*
   Move(Color c, Square from, Square to); // For UCI notation, e.g. e2e4

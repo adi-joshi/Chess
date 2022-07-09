@@ -117,8 +117,8 @@ void TextDisplay::clear_board(void) {
 }
 
 // draws the board on screen, and returns the drawn board (in condensed form (pseudo-FEN form)).
-std::string TextDisplay::draw_board(std::vector<Piece*>::const_iterator begin,
-                             std::vector<Piece*>::const_iterator end) {
+std::string TextDisplay::draw_board(std::vector<std::shared_ptr<Piece>>::const_iterator begin,
+                             std::vector<std::shared_ptr<Piece>>::const_iterator end) {
   this->clear_board();
   for (auto temp = begin; temp != end; temp++) {
     auto c = piecename_to_str((*temp)->get_name(), (*temp)->get_color());

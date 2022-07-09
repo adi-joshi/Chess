@@ -34,8 +34,8 @@ Color Piece::get_color(void) {
   return color;
 }
 
-bool Piece::move(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, std::shared_ptr<Move> m) {
+bool Piece::move(std::vector<std::shared_ptr<Piece>>::iterator begin,
+    std::vector<std::shared_ptr<Piece>>::iterator end, std::shared_ptr<Move> m) {
   auto to = m->to;
   auto king = begin;
   while(king != end) {
@@ -79,27 +79,27 @@ bool Piece::move(std::vector<Piece *>::iterator begin,
   return false;
 }
 
-bool Piece::in_check(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end,
-    std::vector<Piece *>::iterator ignore) {
+bool Piece::in_check(std::vector<std::shared_ptr<Piece>>::iterator begin,
+    std::vector<std::shared_ptr<Piece>>::iterator end,
+    std::vector<std::shared_ptr<Piece>>::iterator ignore) {
   return false;
 }
 
-bool Piece::is_checkmated(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end,
-    std::vector<Piece *>::iterator ignore) {
+bool Piece::is_checkmated(std::vector<std::shared_ptr<Piece>>::iterator begin,
+    std::vector<std::shared_ptr<Piece>>::iterator end,
+    std::vector<std::shared_ptr<Piece>>::iterator ignore) {
   return false;
 }
 
-Result Piece::is_stalemated(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end,
-    std::vector<Piece *>::iterator ignore) {
+Result Piece::is_stalemated(std::vector<std::shared_ptr<Piece>>::iterator begin,
+    std::vector<std::shared_ptr<Piece>>::iterator end,
+    std::vector<std::shared_ptr<Piece>>::iterator ignore) {
   return Result::NoResult;
 }
 
-Result Piece::get_result(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end,
-    std::vector<Piece *>::iterator ignore) {
+Result Piece::get_result(std::vector<std::shared_ptr<Piece>>::iterator begin,
+    std::vector<std::shared_ptr<Piece>>::iterator end,
+    std::vector<std::shared_ptr<Piece>>::iterator ignore) {
   return Result::NoResult;
 }
 
@@ -107,8 +107,8 @@ Piece::~Piece(void) {}
 
 //===Pawn===
 
-bool Pawn::can_move_to(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, std::shared_ptr<Move> m) {
+bool Pawn::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
+    std::vector<std::shared_ptr<Piece>>::iterator end, std::shared_ptr<Move> m) {
   if (m == nullptr) {
     return false;
   }
@@ -302,8 +302,8 @@ PieceName Pawn::get_name(void) {
 
 //===Knight===
 
-bool Knight::can_move_to(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, std::shared_ptr<Move> m) {
+bool Knight::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
+    std::vector<std::shared_ptr<Piece>>::iterator end, std::shared_ptr<Move> m) {
   auto to = m->to;
   if (to->get_row() == cursq->get_row() &&
       to->get_col() == cursq->get_col()) {
@@ -348,8 +348,8 @@ PieceName Knight::get_name(void) {
 
 //===Bishop===
 
-bool Bishop::can_move_to(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, std::shared_ptr<Move> m) {
+bool Bishop::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
+    std::vector<std::shared_ptr<Piece>>::iterator end, std::shared_ptr<Move> m) {
   auto to = m->to;
   if (to->get_row() == cursq->get_row() &&
       to->get_col() == cursq->get_col()) {
@@ -429,8 +429,8 @@ PieceName Bishop::get_name(void) {
 
 //===Rook===
 
-bool Rook::can_move_to(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, std::shared_ptr<Move> m) {
+bool Rook::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
+    std::vector<std::shared_ptr<Piece>>::iterator end, std::shared_ptr<Move> m) {
   auto to = m->to;
   if (to->get_row() == cursq->get_row() &&
       to->get_col() == cursq->get_col()) {
@@ -491,8 +491,8 @@ PieceName Rook::get_name(void) {
 
 //===Queen===
 
-bool Queen::can_move_to(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, std::shared_ptr<Move> m) {
+bool Queen::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
+    std::vector<std::shared_ptr<Piece>>::iterator end, std::shared_ptr<Move> m) {
   auto to = m->to;
   if (to->get_row() == cursq->get_row() &&
       to->get_col() == cursq->get_col()) {
@@ -513,8 +513,8 @@ PieceName Queen::get_name(void) {
 
 //===King===
 
-bool King::king_can_move(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, std::vector<Piece *>::iterator ignore) {
+bool King::king_can_move(std::vector<std::shared_ptr<Piece>>::iterator begin,
+    std::vector<std::shared_ptr<Piece>>::iterator end, std::vector<std::shared_ptr<Piece>>::iterator ignore) {
   std::vector<std::shared_ptr<Square>> possible_moves;
   for (int i = std::max(cursq->get_row() - 1, 1); i < std::min(cursq->get_row() + 1, 8); i++) {
     for (int j = std::max(cursq->get_col() - 1, 1); j < std::min(cursq->get_col() + 1, 8); j++) {
@@ -539,8 +539,8 @@ bool King::king_can_move(std::vector<Piece *>::iterator begin,
   return false;
 }
 
-bool King::can_move_to(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end, std::shared_ptr<Move> m) {
+bool King::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
+    std::vector<std::shared_ptr<Piece>>::iterator end, std::shared_ptr<Move> m) {
   auto to = m->to;
   if (to->get_row() == cursq->get_row() &&
       to->get_col() == cursq->get_col()) {
@@ -617,9 +617,9 @@ bool King::can_move_to(std::vector<Piece *>::iterator begin,
   return true;
 }
 
-bool King::in_check(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end,
-    std::vector<Piece *>::iterator ignore) {
+bool King::in_check(std::vector<std::shared_ptr<Piece>>::iterator begin,
+    std::vector<std::shared_ptr<Piece>>::iterator end,
+    std::vector<std::shared_ptr<Piece>>::iterator ignore) {
   for (auto temp = begin; temp != end; temp++) {
     if ((*temp)->get_color() != this->color) {
       auto m = std::make_shared<Move>();
@@ -633,9 +633,9 @@ bool King::in_check(std::vector<Piece *>::iterator begin,
   return false;
 }
 
-bool King::is_checkmated(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end,
-    std::vector<Piece *>::iterator ignore) {
+bool King::is_checkmated(std::vector<std::shared_ptr<Piece>>::iterator begin,
+    std::vector<std::shared_ptr<Piece>>::iterator end,
+    std::vector<std::shared_ptr<Piece>>::iterator ignore) {
   // if !this->king_can_move == false && in check, then is_checkmated is true
   // otherwise, king is not checkmated
   if (!this->king_can_move(begin, end, ignore) &&
@@ -671,9 +671,9 @@ outside:
   return false;
 }
 
-Result King::get_result(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end,
-    std::vector<Piece *>::iterator ignore) {
+Result King::get_result(std::vector<std::shared_ptr<Piece>>::iterator begin,
+    std::vector<std::shared_ptr<Piece>>::iterator end,
+    std::vector<std::shared_ptr<Piece>>::iterator ignore) {
   if (this->is_checkmated(begin, end, ignore) &&
       color == Color::White) {
     return Result::BlackWins;
@@ -684,9 +684,9 @@ Result King::get_result(std::vector<Piece *>::iterator begin,
   return this->is_stalemated(begin, end, ignore); // nothing uses is_stalemated, so change it
 }
 
-Result King::is_stalemated(std::vector<Piece *>::iterator begin,
-    std::vector<Piece *>::iterator end,
-    std::vector<Piece *>::iterator ignore) {
+Result King::is_stalemated(std::vector<std::shared_ptr<Piece>>::iterator begin,
+    std::vector<std::shared_ptr<Piece>>::iterator end,
+    std::vector<std::shared_ptr<Piece>>::iterator ignore) {
 
   // draw by stalemate
   bool canmove = false;
@@ -715,8 +715,8 @@ Result King::is_stalemated(std::vector<Piece *>::iterator begin,
   }
 
   // draw by insufficient material
-  std::vector<std::vector<Piece*>::iterator> white;
-  std::vector<std::vector<Piece*>::iterator> black;
+  std::vector<std::vector<std::shared_ptr<Piece>>::iterator> white;
+  std::vector<std::vector<std::shared_ptr<Piece>>::iterator> black;
   int white_bishops = 0;
   int white_knights = 0;
   int black_bishops = 0;
