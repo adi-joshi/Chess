@@ -3,6 +3,7 @@
 #include "result.h" // enumeration of Black, White or Draw
 #include "textdisplay.h"
 #include "gui.h"
+#include <iostream>
 
 Game::Game(std::string display) {
   if (display == "gui") {
@@ -34,4 +35,6 @@ void Game::play(void) {
   return;
 }
 
-Game::~Game(void) {}
+Game::~Game(void) {
+  delete b.get(); // band aid fix, as not board not freeing properly
+}

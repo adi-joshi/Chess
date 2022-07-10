@@ -12,9 +12,8 @@ int main(int argc, char **argv) {
       display = "tui";
     }
   }
-  Game *g = new Game(display);
+  auto g = std::make_shared<Game>(display);
   g->play();
-  delete g;
   return 0;
 }
 
