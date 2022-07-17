@@ -2,48 +2,63 @@
 #include "gui.h"
 #include "textdisplay.h"
 
-SDL_Surface *load_image(std::string file, const SDL_Surface *window_surface) {
+SDL_Texture *load_image(std::string file, SDL_Renderer *winren) {
   SDL_Surface *img = SDL_LoadBMP(file.c_str());
   if (img == NULL) {
     std::cout << SDL_GetError() << ": " << file << " could not be loaded" << std::endl;
     return nullptr;
   }
-  return img;
+  auto retval = SDL_CreateTextureFromSurface(winren, img);
+  if (retval == NULL) {
+    std::cout << SDL_GetError() << ": " << "Texture could not be created from " << file << std::endl;
+  }
+  SDL_FreeSurface(img);
+  return retval;
+}
+
+void render(SDL_Renderer *ren, SDL_Texture *t, SDL_Rect r) {
+  SDL_RenderCopy(ren, t, NULL, &r);
 }
 
 GUI::GUI(void)
   : win_w{800}, win_h{800}
 {
   SDL_Init(SDL_INIT_EVERYTHING);
-  window = SDL_CreateWindow("Chess", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, win_w, win_h, SDL_WINDOW_SHOWN);
+  auto window = SDL_CreateWindow("Chess", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, win_w, win_h, SDL_WINDOW_SHOWN);
   if (window == NULL) {
     std::cout << SDL_GetError() << std::endl;
   }
-  auto window_surface = SDL_GetWindowSurface(window);
-  board = load_image("images/wood.bmp", window_surface);
+  winren = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+  board = load_image("images/wood.bmp", winren);
   if (board == NULL) {
     std::cout << SDL_GetError() << std::endl;
   }
   std::pair<Color, PieceName> p{Color::White, PieceName::King};
-  piece_surfaces[std::make_pair(Color::White, PieceName::King)] = load_image("images/wK.bmp", window_surface);
-  piece_surfaces[std::pair<Color, PieceName>(Color::White, PieceName::Queen)] = load_image("images/wQ.bmp", window_surface);
-  piece_surfaces[std::pair<Color, PieceName>(Color::White, PieceName::Rook)] = load_image("images/wR.bmp", window_surface);
-  piece_surfaces[std::pair<Color, PieceName>(Color::White, PieceName::Bishop)] = load_image("images/wB.bmp", window_surface);
-  piece_surfaces[std::pair<Color, PieceName>(Color::White, PieceName::Knight)] = load_image("images/wN.bmp", window_surface);
-  piece_surfaces[std::pair<Color, PieceName>(Color::White, PieceName::Pawn)] = load_image("images/wP.bmp", window_surface);
-  piece_surfaces[std::pair<Color, PieceName>(Color::Black, PieceName::King)] = load_image("images/bK.bmp", window_surface);
-  piece_surfaces[std::pair<Color, PieceName>(Color::Black, PieceName::Queen)] = load_image("images/bQ.bmp", window_surface);
-  piece_surfaces[std::pair<Color, PieceName>(Color::Black, PieceName::Rook)] = load_image("images/bR.bmp", window_surface);
-  piece_surfaces[std::pair<Color, PieceName>(Color::Black, PieceName::Bishop)] = load_image("images/bB.bmp", window_surface);
-  piece_surfaces[std::pair<Color, PieceName>(Color::Black, PieceName::Knight)] = load_image("images/bN.bmp", window_surface);
-  piece_surfaces[std::pair<Color, PieceName>(Color::Black, PieceName::Pawn)] = load_image("images/bP.bmp", window_surface);
+  piece_textures[std::make_pair(Color::White, PieceName::King)] = load_image("images/wK.bmp", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::White, PieceName::Queen)] = load_image("images/wQ.bmp", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::White, PieceName::Rook)] = load_image("images/wR.bmp", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::White, PieceName::Bishop)] = load_image("images/wB.bmp", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::White, PieceName::Knight)] = load_image("images/wN.bmp", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::White, PieceName::Pawn)] = load_image("images/wP.bmp", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::King)] = load_image("images/bK.bmp", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::Queen)] = load_image("images/bQ.bmp", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::Rook)] = load_image("images/bR.bmp", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::Bishop)] = load_image("images/bB.bmp", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::Knight)] = load_image("images/bN.bmp", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::Pawn)] = load_image("images/bP.bmp", winren); 
+  /*
   SDL_Rect *cb_rect = new SDL_Rect();
   cb_rect->x = 0; cb_rect->y = 0; cb_rect->w = win_w; cb_rect->h = win_h;
   SDL_BlitScaled(board, NULL, window_surface, cb_rect);
+  */
+  render(winren, board, {0, 0, win_w, win_h});
+  /*
   cb_rect->x = 100; cb_rect->y = 100; cb_rect->w = win_w / 8; cb_rect->h = win_h / 8;
   SDL_BlitScaled(piece_surfaces[std::make_pair(Color::White, PieceName::King)], NULL, window_surface, cb_rect);
-  SDL_UpdateWindowSurface(window);
-  delete cb_rect;
+  */
+  render(winren, piece_textures[std::make_pair(Color::White, PieceName::King)], {100, 100, win_w / 8, win_h / 8});
+  // SDL_UpdateWindowSurface(window);
+  SDL_RenderPresent(winren);
 }
 
 void GUI::welcome_msg(void) {}
@@ -55,7 +70,6 @@ std::shared_ptr<Move> GUI::ask_move(Color turn) {
   SDL_Event e;
   ScreenPos origpos{0,0};
   while(SDL_WaitEvent(&e)) {
-    SDL_Surface *window_surface = SDL_GetWindowSurface(window);
     // std::cout << "Hi" << std::endl;
     if (e.type == SDL_QUIT) {
       // std::cout << "Quit" << std::endl;
@@ -135,26 +149,32 @@ std::string GUI::draw_board(std::vector<std::shared_ptr<Piece>>::const_iterator 
 
 void GUI::print_board(void) {
   int len = positions.size();
-  auto window_surface = SDL_GetWindowSurface(window);
+  /*
   SDL_Rect *cb_rect = new SDL_Rect();
   cb_rect->x = 0;
   cb_rect->y = 0;
   cb_rect->w = win_w;
   cb_rect->h = win_h;
   SDL_BlitScaled(board, NULL, window_surface, cb_rect);
+  */
+  render(winren, board, {0, 0, win_w, win_h});
   for (int i = 0; i < len; i++) {
     // std::cout << std::get<2>(positions[i]).get_row() << " " << std::get<2>(positions[i]).get_col() << std::endl;
+    /*
     cb_rect->x = std::get<2>(positions[i]).x;
     cb_rect->y = std::get<2>(positions[i]).y;
     cb_rect->w = win_w / 8;
     cb_rect->h = win_h / 8;
-    SDL_BlitScaled(piece_surfaces[std::make_pair(std::get<0>(positions[i]), std::get<1>(positions[i]))],
+    SDL_BlitScaled(piece_textures[std::make_pair(std::get<0>(positions[i]), std::get<1>(positions[i]))],
 	NULL,
 	window_surface,
 	cb_rect);
+	*/
+    render(winren, piece_textures[std::make_pair(std::get<0>(positions[i]), std::get<1>(positions[i]))],
+	{ std::get<2>(positions[i]).x, std::get<2>(positions[i]).y, win_w / 8, win_h / 8 });
   }
-  SDL_UpdateWindowSurface(window);
-  delete cb_rect;
+  // SDL_UpdateWindowSurface(window);
+  SDL_RenderPresent(winren);
   // std::cout << "Board drawn helper" << std::endl;
 }
 
@@ -168,10 +188,19 @@ void GUI::print_error(Exception e) {
 void GUI::print_winner(Result r) {}
 
 GUI::~GUI(void) {
-  for (auto surface : piece_surfaces) {
+  /*
+  for (auto surface : piece_textures) {
     SDL_FreeSurface(surface.second);
   }
   SDL_FreeSurface(board);
   SDL_DestroyWindow(window);
+  SDL_Quit();
+  */
+
+  for (auto texture : piece_textures) {
+    SDL_DestroyTexture(texture.second);
+  }
+  SDL_DestroyTexture(board);
+  SDL_DestroyRenderer(winren);
   SDL_Quit();
 }

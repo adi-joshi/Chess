@@ -14,9 +14,9 @@ class GUI : public Display {
   };
   const int win_w;
   const int win_h;
-  SDL_Window *window;
-  SDL_Surface *board;
-  std::map<std::pair<Color, PieceName>, SDL_Surface*> piece_surfaces;
+  SDL_Renderer *winren;
+  SDL_Texture *board;
+  std::map<std::pair<Color, PieceName>, SDL_Texture*> piece_textures;
   std::vector<std::tuple<Color, PieceName, ScreenPos>> positions;
   public:
   GUI();
