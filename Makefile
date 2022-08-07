@@ -15,7 +15,7 @@ DEPENDS = ${OBJECTS:.o=.d}
 EXEC=chess
 
 ${EXEC}: ${OBJECTS}
-	${CXX} -pthread ${OBJECTS} -lSDL2 -o ${EXEC}
+	${CXX} -pthread ${OBJECTS} -lSDL2 -lSDL2_image -o ${EXEC}
 
 debug: CXXFLAGS += -g
 debug: ${EXEC}

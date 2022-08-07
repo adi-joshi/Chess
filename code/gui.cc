@@ -1,9 +1,10 @@
 #include <iostream>
 #include "gui.h"
 #include "textdisplay.h"
+#include "SDL_image.h"
 
 SDL_Texture *load_image(std::string file, SDL_Renderer *winren) {
-  SDL_Surface *img = SDL_LoadBMP(file.c_str());
+  SDL_Surface *img = IMG_Load(file.c_str());
   if (img == NULL) {
     std::cout << SDL_GetError() << ": " << file << " could not be loaded" << std::endl;
     return nullptr;
@@ -29,23 +30,23 @@ GUI::GUI(void)
     std::cout << SDL_GetError() << std::endl;
   }
   winren = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-  board = load_image("images/wood.bmp", winren);
+  board = load_image("images/wood.jpg", winren);
   if (board == NULL) {
     std::cout << SDL_GetError() << std::endl;
   }
   std::pair<Color, PieceName> p{Color::White, PieceName::King};
-  piece_textures[std::make_pair(Color::White, PieceName::King)] = load_image("images/wK.bmp", winren); 
-  piece_textures[std::pair<Color, PieceName>(Color::White, PieceName::Queen)] = load_image("images/wQ.bmp", winren); 
-  piece_textures[std::pair<Color, PieceName>(Color::White, PieceName::Rook)] = load_image("images/wR.bmp", winren); 
-  piece_textures[std::pair<Color, PieceName>(Color::White, PieceName::Bishop)] = load_image("images/wB.bmp", winren); 
-  piece_textures[std::pair<Color, PieceName>(Color::White, PieceName::Knight)] = load_image("images/wN.bmp", winren); 
-  piece_textures[std::pair<Color, PieceName>(Color::White, PieceName::Pawn)] = load_image("images/wP.bmp", winren); 
-  piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::King)] = load_image("images/bK.bmp", winren); 
-  piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::Queen)] = load_image("images/bQ.bmp", winren); 
-  piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::Rook)] = load_image("images/bR.bmp", winren); 
-  piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::Bishop)] = load_image("images/bB.bmp", winren); 
-  piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::Knight)] = load_image("images/bN.bmp", winren); 
-  piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::Pawn)] = load_image("images/bP.bmp", winren); 
+  piece_textures[std::make_pair(Color::White, PieceName::King)] = load_image("images/wK.svg", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::White, PieceName::Queen)] = load_image("images/wQ.svg", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::White, PieceName::Rook)] = load_image("images/wR.svg", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::White, PieceName::Bishop)] = load_image("images/wB.svg", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::White, PieceName::Knight)] = load_image("images/wN.svg", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::White, PieceName::Pawn)] = load_image("images/wP.svg", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::King)] = load_image("images/bK.svg", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::Queen)] = load_image("images/bQ.svg", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::Rook)] = load_image("images/bR.svg", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::Bishop)] = load_image("images/bB.svg", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::Knight)] = load_image("images/bN.svg", winren); 
+  piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::Pawn)] = load_image("images/bP.svg", winren); 
   /*
   SDL_Rect *cb_rect = new SDL_Rect();
   cb_rect->x = 0; cb_rect->y = 0; cb_rect->w = win_w; cb_rect->h = win_h;
