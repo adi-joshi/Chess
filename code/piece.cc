@@ -154,7 +154,7 @@ bool Pawn::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
 	m->error_str = "Destination square is not reachable 3";
 	return false;
       }
-      std::shared_ptr<Move> prev_move = b->get_prev_move();
+      std::shared_ptr<Move> prev_move = b.lock()->get_prev_move();
       auto need_sq = to;
       bool is_enpassant = false;
       if (prev_move != nullptr) {
@@ -241,7 +241,7 @@ bool Pawn::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
 	m->error_str = "Destination square is not reachable";
 	return false;
       }
-      std::shared_ptr<Move> prev_move = b->get_prev_move();
+      std::shared_ptr<Move> prev_move = b.lock()->get_prev_move();
       auto need_sq = to;
       bool is_enpassant = false;
       if (prev_move != nullptr) {
@@ -501,9 +501,9 @@ bool Queen::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
   }
   if (cursq->get_row() == to->get_row() ||
       cursq->get_col() == to->get_col()) { // moves like a rook
-    return Rook(b, cursq, color).can_move_to(begin, end, m);
+    return Rook(b.lock(), cursq, color).can_move_to(begin, end, m);
   } else { // moves like a bishop
-    return Bishop(b, cursq, color).can_move_to(begin, end, m);
+    return Bishop(b.lock(), cursq, color).can_move_to(begin, end, m);
   }
 }
 
@@ -531,7 +531,7 @@ bool King::king_can_move(std::vector<std::shared_ptr<Piece>>::iterator begin,
     m->from = this->cursq;
     m->to = possible_moves[i];
     if (this->can_move_to(begin, end, m)) {
-      if (!King(b, possible_moves[i], color).in_check(begin, end, ignore)) {
+      if (!King(b.lock(), possible_moves[i], color).in_check(begin, end, ignore)) {
 	return true;
       }
     }
@@ -575,10 +575,10 @@ bool King::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
     auto m2 = std::make_shared<Move>();
     m2->from = cursq;
     m2->to = std::make_shared<Square>(to->get_row(), (to->get_col() + cursq->get_col()) / 2);
-    if (Rook(b, cursq, color).can_move_to(begin, end, m2)) {
+    if (Rook(b.lock(), cursq, color).can_move_to(begin, end, m2)) {
       if (!this->in_check(begin, end, end) &&
-	  !King(b, std::make_shared<Square>(cursq->get_row(), (cursq->get_col() + to->get_col()) / 2), color).in_check(begin, end, end) &&
-	  !King(b, to, color).in_check(begin, end, end)) {
+	  !King(b.lock(), std::make_shared<Square>(cursq->get_row(), (cursq->get_col() + to->get_col()) / 2), color).in_check(begin, end, end) &&
+	  !King(b.lock(), to, color).in_check(begin, end, end)) {
 	(*rook)->move(begin, end, m2);
 	cursq = to;
 	m->mt = MoveType::Castling;

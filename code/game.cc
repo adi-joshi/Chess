@@ -35,6 +35,4 @@ void Game::play(void) {
   return;
 }
 
-Game::~Game(void) {
-  delete b.get(); // band aid fix, as not board not freeing properly
-}
+Game::~Game(void) {}

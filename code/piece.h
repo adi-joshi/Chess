@@ -14,7 +14,7 @@ struct Move;
 class Piece {
   // is a friend of class Board
   protected:
-  std::shared_ptr<Board> b;
+  std::weak_ptr<Board> b;
   std::shared_ptr<Square> cursq;
   Color color;
   bool moved = false;
