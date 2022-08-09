@@ -4,16 +4,10 @@
 #include "SDL_image.h"
 
 SDL_Texture *load_image(std::string file, SDL_Renderer *winren) {
-  SDL_Surface *img = IMG_Load(file.c_str());
-  if (img == NULL) {
-    std::cout << SDL_GetError() << ": " << file << " could not be loaded" << std::endl;
-    return nullptr;
-  }
-  auto retval = SDL_CreateTextureFromSurface(winren, img);
+  auto retval = IMG_LoadTexture(winren, file.c_str());
   if (retval == NULL) {
     std::cout << SDL_GetError() << ": " << "Texture could not be created from " << file << std::endl;
   }
-  SDL_FreeSurface(img);
   return retval;
 }
 
@@ -25,6 +19,8 @@ GUI::GUI(void)
   : win_w{800}, win_h{800}
 {
   SDL_Init(SDL_INIT_EVERYTHING);
+  auto b = SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+  std::cout << SDL_GetHint(SDL_HINT_RENDER_SCALE_QUALITY) << std::endl;
   auto window = SDL_CreateWindow("Chess", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, win_w, win_h, SDL_WINDOW_SHOWN);
   if (window == NULL) {
     std::cout << SDL_GetError() << std::endl;
@@ -52,14 +48,14 @@ GUI::GUI(void)
   cb_rect->x = 0; cb_rect->y = 0; cb_rect->w = win_w; cb_rect->h = win_h;
   SDL_BlitScaled(board, NULL, window_surface, cb_rect);
   */
-  render(winren, board, {0, 0, win_w, win_h});
+  // render(winren, board, {0, 0, win_w, win_h});
   /*
   cb_rect->x = 100; cb_rect->y = 100; cb_rect->w = win_w / 8; cb_rect->h = win_h / 8;
   SDL_BlitScaled(piece_surfaces[std::make_pair(Color::White, PieceName::King)], NULL, window_surface, cb_rect);
   */
-  render(winren, piece_textures[std::make_pair(Color::White, PieceName::King)], {100, 100, win_w / 8, win_h / 8});
+  // render(winren, piece_textures[std::make_pair(Color::White, PieceName::Knight)], {100, 100, win_w / 4, win_h / 4});
   // SDL_UpdateWindowSurface(window);
-  SDL_RenderPresent(winren);
+  // SDL_RenderPresent(winren);
 }
 
 void GUI::welcome_msg(void) {}

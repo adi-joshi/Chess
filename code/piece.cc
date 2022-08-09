@@ -621,7 +621,7 @@ bool King::in_check(std::vector<std::shared_ptr<Piece>>::iterator begin,
     std::vector<std::shared_ptr<Piece>>::iterator end,
     std::vector<std::shared_ptr<Piece>>::iterator ignore) {
   for (auto temp = begin; temp != end; temp++) {
-    if ((*temp)->get_color() != this->color) {
+    if ((*temp)->get_color() != this->color && temp != ignore) {
       auto m = std::make_shared<Move>();
       m->from = (*temp)->get_cursq();
       m->to = this->cursq;
