@@ -73,6 +73,10 @@ std::shared_ptr<Move> TextDisplay::ask_move(Color turn) {
     auto m = std::make_shared<Move>();
     m->it = InputType::Print;
     return m;
+  } else if (s == "quit") {
+    auto m = std::make_shared<Move>();
+    m->it = InputType::Quit;
+    return m;
   } else if ((s.size() >= 4) &&
       (s[0] >= 'a' && s[0] <= 'h') &&
       (s[1] >= '1' && s[1] <= '8') &&

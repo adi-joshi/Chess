@@ -13,7 +13,7 @@
 
 // typedef std::pair<Color, std::pair<std::pair<PieceName, Square>, std::pair<PieceName, Square>>> PieceMove;
 
-enum class InputType { Move, Print };
+enum class InputType { Move, Print, Quit };
 
 enum class MoveType {
   Unknown,

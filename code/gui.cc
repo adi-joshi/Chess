@@ -20,7 +20,6 @@ GUI::GUI(void)
 {
   SDL_Init(SDL_INIT_EVERYTHING);
   auto b = SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-  std::cout << SDL_GetHint(SDL_HINT_RENDER_SCALE_QUALITY) << std::endl;
   auto window = SDL_CreateWindow("Chess", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, win_w, win_h, SDL_WINDOW_SHOWN);
   if (window == NULL) {
     std::cout << SDL_GetError() << std::endl;
@@ -70,7 +69,8 @@ std::shared_ptr<Move> GUI::ask_move(Color turn) {
     // std::cout << "Hi" << std::endl;
     if (e.type == SDL_QUIT) {
       // std::cout << "Quit" << std::endl;
-      return std::make_shared<Move>();
+      m->it = InputType::Quit;
+      return m;
     } else if (e.type == SDL_MOUSEBUTTONDOWN) { // if mouse button is clicked
       // get current position of mouse
       // std::cout << "Mouse button is down" << std::endl;
