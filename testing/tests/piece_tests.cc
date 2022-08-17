@@ -1142,6 +1142,23 @@ TEST(KingTests, KingMovementWillBeCheck) {
   ASSERT_FALSE(king->move(pieces.begin(), pieces.end(), m));
 }
 
+TEST(KingTests, CapturingPieceCausingCheck) {
+  auto td = std::make_shared<TextDisplay>();
+  auto b = std::make_shared<Board>(td);
+  auto king = std::make_shared<King>(b, std::make_shared<Square>(5,5), Color::White);
+  auto rook1 = std::make_shared<Rook>(b, std::make_shared<Square>(5,4), Color::White);
+  auto rook2 = std::make_shared<Rook>(b, std::make_shared<Square>(5,1), Color::Black);
+  std::vector<std::shared_ptr<Piece>> pieces;
+  pieces.push_back(king);
+  pieces.push_back(rook1);
+  pieces.push_back(rook2);
+  auto m = std::make_shared<Move>();
+  m->from = std::make_shared<Square>(5,4);
+  m->to = std::make_shared<Square>(5,1);
+  ASSERT_TRUE(rook1->move(pieces.begin(), pieces.end(), m));
+}
+
+
 TEST(KingTests, KingCastling) {
   auto td = std::make_shared<TextDisplay>();
   auto b = std::make_shared<Board>(td);
