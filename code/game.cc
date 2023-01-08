@@ -22,7 +22,9 @@ void Game::play(void) {
   while(!b->game_end()) {
     try {
       auto s = td->ask_move(turn);
-      if (s->it == InputType::Quit) {
+      if (s == nullptr) {
+	      continue;
+      } else if (s->it == InputType::Quit) {
 	return;
       }
       bool moved = b->move(s);
