@@ -106,8 +106,10 @@ std::shared_ptr<Move> TextDisplay::ask_move(Color turn) {
       retval->mt = MoveType::Promotion;
       retval->promoted_to = PieceName::Knight;
     }
+    retval->it = InputType::Move;
     return retval;
   } else {
+    std::cout << "Invalid Move" << std::endl;
     return nullptr;
   }
 }
