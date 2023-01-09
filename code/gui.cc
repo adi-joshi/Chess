@@ -131,7 +131,7 @@ void GUI::clear_board(void) {
   positions.clear();
 }
 
-std::string GUI::draw_board(std::vector<std::shared_ptr<Piece>>::const_iterator begin,
+void GUI::draw_board(std::vector<std::shared_ptr<Piece>>::const_iterator begin,
     std::vector<std::shared_ptr<Piece>>::const_iterator end) {
   positions.clear();
   auto temp = begin;
@@ -141,8 +141,6 @@ std::string GUI::draw_board(std::vector<std::shared_ptr<Piece>>::const_iterator 
     // std::cout << sp.x << " " << sp.y << std::endl;
     temp++;
   }
-  // std::cout << "Board drawn" << std::endl;
-  return TextDisplay().draw_board(begin, end);
 }
 
 void GUI::print_board(void) {

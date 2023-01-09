@@ -3,9 +3,62 @@
 #include "textdisplay.h"
 #include "gui.h"
 
-Board::Board(std::shared_ptr<Display> td) {
+static char piecename_to_str(PieceName p, Color c) {
+  char piece = ' ';
+  if (c == Color::White) {
+    switch(p) {
+      case PieceName::King: piece = 'K'; break;
+      case PieceName::Queen: piece = 'Q'; break;
+      case PieceName::Bishop: piece = 'B'; break;
+      case PieceName::Knight: piece = 'N'; break;
+      case PieceName::Rook: piece = 'R'; break;
+      case PieceName::Pawn: piece = 'P'; break;
+    }
+  } else if (c == Color::Black) {
+    switch(p) {
+      case PieceName::King: piece = 'k'; break;
+      case PieceName::Queen: piece = 'q'; break;
+      case PieceName::Bishop: piece = 'b'; break;
+      case PieceName::Knight: piece = 'n'; break;
+      case PieceName::Rook: piece = 'r'; break;
+      case PieceName::Pawn: piece = 'p'; break;
+    }
+  }
+  return piece;
+}
+
+static std::string get_boardstring(std::vector<std::shared_ptr<Piece>>::const_iterator begin,
+    std::vector<std::shared_ptr<Piece>>::const_iterator end) {
+  std::string piece_positions = "";
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 8; j++) {
+      piece_positions += ' ';
+    }
+  }
+  for (auto temp = begin; temp != end; temp++) {
+    auto c = piecename_to_str((*temp)->get_name(), (*temp)->get_color());
+    piece_positions[(8 - (*temp)->get_cursq()->get_row()) * 8 + (*temp)->get_cursq()->get_col()] = c;
+  }
+  std::string retval = "";
+  for (int i = 0; i < 8; i++) {
+    int blank = 0;
+    for (int j = 0; j < 8; j++) {
+      if (piece_positions[8*i + j] == ' ') {
+        blank++;
+      } else {
+        if (blank != 0) {
+          retval += static_cast<char>(blank);
+        }
+        retval += piece_positions[8*i + j];
+      }
+    }
+    retval += '/';
+  }
+  return retval;
+}
+
+Board::Board(void) {
   moves.push_back(nullptr);
-  this->td = td;
 }
 
 void Board::setup_board(void) {
@@ -62,8 +115,6 @@ void Board::setup_board(void) {
      pieces.push_back(white_knight2);
      */
 
-  td->draw_board(pieces.cbegin(), pieces.cend());
-
 }
 
 void Board::setup_board(std::vector<std::shared_ptr<Piece>> pieces) {
@@ -82,9 +133,6 @@ bool Board::move(std::shared_ptr<Move> m) {
   if (m == nullptr) {
     return false;
   } else if (m->it != InputType::Move) {
-    auto placeholder = moves.cbegin();
-    placeholder++;
-    td->print_moves(placeholder, moves.cend());
     return false;
   }
   auto from = m->from;
@@ -160,7 +208,7 @@ bool Board::move(std::shared_ptr<Move> m) {
         }
       }
 
-      std::string curboard = td->draw_board(pieces.cbegin(), pieces.cend());
+      std::string curboard = get_boardstring(pieces.cbegin(), pieces.cend());
       board_string[curboard]++;
       moves.push_back(m);
 

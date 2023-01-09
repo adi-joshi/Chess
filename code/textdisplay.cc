@@ -4,7 +4,7 @@
 
 //===Helper===
 
-char piecename_to_str(PieceName p, Color c) {
+static char piecename_to_str(PieceName p, Color c) {
   char piece = ' ';
   if (c == Color::White) {
     switch(p) {
@@ -123,23 +123,13 @@ void TextDisplay::clear_board(void) {
 }
 
 // draws the board on screen, and returns the drawn board (in condensed form (pseudo-FEN form)).
-std::string TextDisplay::draw_board(std::vector<std::shared_ptr<Piece>>::const_iterator begin,
+void TextDisplay::draw_board(std::vector<std::shared_ptr<Piece>>::const_iterator begin,
                              std::vector<std::shared_ptr<Piece>>::const_iterator end) {
   this->clear_board();
   for (auto temp = begin; temp != end; temp++) {
     auto c = piecename_to_str((*temp)->get_name(), (*temp)->get_color());
     board[(*temp)->get_cursq()->get_row() - 1][(*temp)->get_cursq()->get_col() - 1] = c;
   }
-  std::string retval;
-  for (int i = board.size() - 1; i >= 0; i--) {
-    for (int j = 0; j < board[0].size() ; j++) {
-      retval += board[i][j];
-    }
-    if (i != 0) {
-      retval += "/";
-    }
-  }
-  return retval;
 }
 
 /*

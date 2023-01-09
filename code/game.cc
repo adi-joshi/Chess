@@ -11,7 +11,7 @@ Game::Game(std::string display) {
   } else {
     td = std::make_shared<TextDisplay>();
   }
-  b = std::make_shared<Board>(td);
+  b = std::make_shared<Board>();
   b->setup_board();
   turn = Color::White;
 }

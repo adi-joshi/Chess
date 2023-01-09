@@ -14,7 +14,7 @@ class TextDisplay : public Display {
   std::shared_ptr<Move> ask_move(Color turn) override;
   // called by observer (i.e. Board, after verifying that move is valid)
   void clear_board() override;
-  std::string draw_board(std::vector<std::shared_ptr<Piece>>::const_iterator begin,
+  void draw_board(std::vector<std::shared_ptr<Piece>>::const_iterator begin,
                   std::vector<std::shared_ptr<Piece>>::const_iterator end) override;
   void print_board() override;
   void print_moves(std::vector<std::shared_ptr<Move>>::const_iterator begin,
