@@ -40,7 +40,7 @@ bool Piece::move(std::vector<std::shared_ptr<Piece>>::iterator begin,
   auto king = begin;
   while(king != end) {
     if ((*king)->get_name() == PieceName::King &&
-	(*king)->get_color() == this->color) {
+        (*king)->get_color() == this->color) {
       break;
     }
     king++;
@@ -113,187 +113,62 @@ bool Pawn::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
     return false;
   }
   auto to = m->to;
-  if (cursq->get_col() == to->get_col() &&
-      cursq->get_row() == to->get_row()) {
-    m->error_str = "Destination square is current square";
+  // Make sure pawn is moving in the correct direction.
+  if ((color == Color::White && to->get_row() <= cursq->get_row()) ||
+      (color == Color::Black && to->get_row() >= cursq->get_row())) {
+    m->error_str = "Pawn is moving in the wrong direction";
     return false;
   }
-  if (color == Color::White) {
-    if (to->get_col() == cursq->get_col()) { // non-capture
-      if (abs(to->get_row() - cursq->get_row()) > 2 ||
-	  to->get_row() < cursq->get_row()) {
-	m->error_str = "Destination square is not reachable 1";
-	return false;
-      }
-      if (abs(to->get_row() - cursq->get_row()) == 2 &&
-	  cursq->get_row() != 2) {
-	m->error_str = "Cannot move 2 spaces if not on starting square";
-	return false;
-      }
-      auto temp = begin;
-      while(temp != end) {
-	if ((*temp)->get_cursq() == to) {
-	  m->error_str = "Destination square already has a piece";
-	  return false;
-	} else if (abs(to->get_row() - cursq->get_row()) == 2 &&
-	    (*temp)->get_cursq()->get_col() == cursq->get_col() &&
-	    (*temp)->get_cursq()->get_row() == cursq->get_row() + 1) {
-	  m->error_str = "Destination square is not reachable 2";
-	  return false;
-	}
-	temp++;
-      }
-      if (m->mt == MoveType::Unknown) {
-	m->mt = MoveType::Normal;
-      }
-      // return true; // this is not a capture
-    } else { // is a capture
-      if (abs(to->get_col() - cursq->get_col()) != 1 ||
-	  abs(to->get_row() - cursq->get_row()) != 1 ||
-	  to->get_row() < cursq->get_row()) {
-	m->error_str = "Destination square is not reachable 3";
-	return false;
-      }
-      std::shared_ptr<Move> prev_move = b.lock()->get_prev_move();
-      auto need_sq = to;
-      bool is_enpassant = false;
-      if (prev_move != nullptr) {
-	if (prev_move->piecename == PieceName::Pawn &&
-	    prev_move->to->get_row() == cursq->get_row() &&
-	    prev_move->to->get_row() == 5 &&
-	    prev_move->from->get_row() == 7 &&
-	    abs(prev_move->to->get_col() - cursq->get_col()) == 1) { // is en passant
-	  need_sq = prev_move->to;
-	  is_enpassant = true;
-	}
-      }
-      auto temp = begin;
-      for (; temp != end; temp++) {
-	if ((*temp)->get_cursq()->get_col() == need_sq->get_col() &&
-	    (*temp)->get_cursq()->get_row() == need_sq->get_row() &&
-	    (*temp)->get_color() == this->color) {
-	  m->error_str = "Piece of same color already on Square";
-	  return false;
-	} else if ((*temp)->get_cursq()->get_col() == need_sq->get_col() &&
-	    (*temp)->get_cursq()->get_row() == need_sq->get_row() &&
-	    (*temp)->get_color() != this->color) {
-	  break;
-	} 
-      }
-      if (temp == end) {
-	m->error_str = "Move is not a capture";
-	return false;
-      }
-      m->pieces_to_capture.push_back(temp);
-      if (m->mt != MoveType::Unknown) {
-	if (is_enpassant) {
-	  m->mt = MoveType::EnPassant;
-	} else {
-	  m->mt = MoveType::Capture;
-	}
-      }
-      // return true; // this is a capture
-    }
-    if (to->get_row() == 8 && m->mt != MoveType::Promotion) {
-      m->error_str = "Illegal Promotion";
-      return false;
-    } else if (m->mt == MoveType::Promotion && m->promoted_to == PieceName::King) {
-      m->error_str = "Cannot promote to a King";
-      return false;
-    } else if (m->mt == MoveType::Promotion && m->promoted_to == PieceName::Pawn) {
-      m->error_str = "Cannot promote to a Pawn";
+
+  // Move is not a capture
+  if (to->get_col() == cursq->get_col()) {
+    if (abs(to->get_row() - cursq->get_row()) > 2) {
+      m->error_str = "Destination square is too far";
       return false;
     }
-    return true;
-  } else if (color == Color::Black) {
-    if (to->get_col() == cursq->get_col()) { // non-capture
-      if (abs(to->get_row() - cursq->get_row()) > 2 ||
-	  to->get_row() > cursq->get_row()) {
-	m->error_str = "Destination square is not reachable";
-	return false;
+    for (auto temp = begin; temp != end; temp++) {
+      if ((*temp)->get_cursq()->get_row() > cursq->get_row() &&
+          (*temp)->get_cursq()->get_row() <= to->get_row()) {
+        m->error_str = "Another piece is in the way";
+        return false;
       }
-      if (abs(to->get_row() - cursq->get_row()) == 2 &&
-	  cursq->get_row() != 7) {
-	m->error_str = "Cannot move 2 spaces if not on starting square";
-	return false;
-      }
-      auto temp = begin;
-      while(temp != end) {
-	if ((*temp)->get_cursq() == to) {
-	  m->error_str = "Destination square already has a piece";
-	  return false;
-	} else if (abs(to->get_row() - cursq->get_row()) == 2 &&
-	    (*temp)->get_cursq()->get_col() == cursq->get_col() &&
-	    (*temp)->get_cursq()->get_row() == cursq->get_row() - 1) {
-	  m->error_str = "Destination square is not reachable";
-	  return false;
-	}
-	temp++;
-      }
-      if (m->mt == MoveType::Unknown) {
-	m->mt = MoveType::Normal;
-      }
-      // return true; // this is not a capture.
-    } else { // is a capture
-      if (abs(to->get_col() - cursq->get_col()) != 1 ||
-	  abs(to->get_row() - cursq->get_row()) != 1 ||
-	  to->get_row() > cursq->get_row()) {
-	m->error_str = "Destination square is not reachable";
-	return false;
-      }
-      std::shared_ptr<Move> prev_move = b.lock()->get_prev_move();
-      auto need_sq = to;
-      bool is_enpassant = false;
-      if (prev_move != nullptr) {
-	if (prev_move->piecename == PieceName::Pawn &&
-	    prev_move->to->get_row() == cursq->get_row() &&
-	    prev_move->to->get_row() == 4 && 
-	    prev_move->from->get_row() == 2 &&
-	    abs(prev_move->to->get_col() - cursq->get_col()) == 1) { // is en passant
-	  need_sq = prev_move->to;
-	  is_enpassant = true;
-	}
-      }
-      auto temp = begin;
-      for (; temp != end; temp++) {
-	if ((*temp)->get_cursq()->get_col() == need_sq->get_col() &&
-	    (*temp)->get_cursq()->get_row() == need_sq->get_row() &&
-	    (*temp)->get_color() == this->color) {
-	  m->error_str = "Piece of same color already on Square";
-	  return false;
-	} else if ((*temp)->get_cursq()->get_col() == need_sq->get_col() &&
-	    (*temp)->get_cursq()->get_row() == need_sq->get_row() &&
-	    (*temp)->get_color() != this->color) {
-	  break;
-	}
-      }
-      if (temp == end) {
-	m->error_str = "Move is not a capture";
-	return false;
-      }
-      if (m->mt == MoveType::Unknown) {
-	if (is_enpassant) {
-	  m->mt = MoveType::EnPassant;
-	} else {
-	  m->mt = MoveType::Capture;
-	}
-      }
-      m->pieces_to_capture.push_back(temp);
-      // return true; // this is a capture
     }
-    if (to->get_row() == 1 && m->mt != MoveType::Promotion) {
-      m->error_str = "Illegal Promotion";
-      return false;
-    } else if (m->mt == MoveType::Promotion && m->promoted_to == PieceName::King) {
-      m->error_str = "Cannot promote to a King";
-      return false;
-    } else if (m->mt == MoveType::Promotion && m->promoted_to == PieceName::Pawn) {
-      m->error_str = "Cannot promote to a Pawn";
+    m->mt = MoveType::Normal;
+  } else { // is a capture
+    if (abs(to->get_col() - cursq->get_col()) > 1 ||
+        abs(to->get_row() - cursq->get_row()) > 1) {
+      m->error_str = "Destination square is too far";
       return false;
     }
-    return true;
+    auto temp = begin;
+    for (; temp != end; temp++) {
+      if ((*temp)->get_color() == this->color &&
+          (*temp)->get_cursq()->get_row() == to->get_row() &&
+          (*temp)->get_cursq()->get_col() == to->get_col()) {
+        m->error_str = "Piece of same color on destination square";
+        return false;
+      } else if ((*temp)->get_color() != this->color &&
+          (*temp)->get_cursq()->get_row() == to->get_row() &&
+          (*temp)->get_cursq()->get_col() == to->get_col()) {
+        break;
+      }
+    }
+    if (temp == end) {
+      m->error_str = "No piece to capture on destination square";
+      return false;
+    }
+    m->mt = MoveType::Capture;
+    m->pieces_to_capture.push_back(temp);
   }
-  return false;
+  if ((color == Color::White && to->get_row() == 8) ||
+      (color == Color::Black && to->get_row() == 1)) {
+    if (m->promoted_to == PieceName::King || m->promoted_to == PieceName::Pawn) {
+      m->error_str = "Cannot promote Pawn to specified piece";
+      return false;
+    }
+    m->mt = MoveType::Promotion;
+  }
+  return true;
 }
 
 PieceName Pawn::get_name(void) {
@@ -313,21 +188,21 @@ bool Knight::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
   auto temp = begin;
   while(temp != end) {
     if ((*temp)->get_cursq()->get_col() == to->get_col() &&
-	(*temp)->get_cursq()->get_row() == to->get_row() &&
-	(*temp)->get_color() == this->color) {
+        (*temp)->get_cursq()->get_row() == to->get_row() &&
+        (*temp)->get_color() == this->color) {
       m->error_str = "Piece of same color already on Square";
       return false;
     } else if ((*temp)->get_cursq()->get_col() == to->get_col() &&
-	(*temp)->get_cursq()->get_row() == to->get_row() &&
-	(*temp)->get_color() != this->color) {
+        (*temp)->get_cursq()->get_row() == to->get_row() &&
+        (*temp)->get_color() != this->color) {
       break;
     }
     temp++;
   }
   if ((abs(to->get_row() - cursq->get_row()) + 
-	abs(to->get_col() - cursq->get_col()) == 3) &&
+        abs(to->get_col() - cursq->get_col()) == 3) &&
       ((abs(to->get_row() - cursq->get_row()) != 3 &&
-	abs(to->get_col() - cursq->get_col()) != 3))) {
+        abs(to->get_col() - cursq->get_col()) != 3))) {
     if (temp != end) {
       m->pieces_to_capture.push_back(temp);
       m->mt = MoveType::Capture;
@@ -373,13 +248,13 @@ bool Bishop::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
   auto temp = begin;
   while(temp != end) {
     if ((*temp)->get_cursq()->get_row() == to->get_row() &&
-	(*temp)->get_cursq()->get_col() == to->get_col() &&
-	(*temp)->get_color() == this->color) {
+        (*temp)->get_cursq()->get_col() == to->get_col() &&
+        (*temp)->get_color() == this->color) {
       m->error_str = "Piece of same color already on Square";
       return false;
     } else if ((*temp)->get_cursq()->get_row() == to->get_row() &&
-	(*temp)->get_cursq()->get_col() == to->get_col() &&
-	(*temp)->get_color() != this->color) {
+        (*temp)->get_cursq()->get_col() == to->get_col() &&
+        (*temp)->get_color() != this->color) {
       break;
     }
     temp++;
@@ -390,12 +265,12 @@ bool Bishop::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
       int prow = (*temp2)->get_cursq()->get_row();
       int pcol = (*temp2)->get_cursq()->get_col();
       if ((cursq->get_row() != prow && cursq->get_col() != pcol) &&
-	  prow - pcol == trow - tcol &&
-	  (prow < ubrow && prow > lbrow) &&
-	  (pcol < ubcol && pcol > lbcol)) {
-	m->error_str = "Piece is blocking the diagonal";
-	return false;
-	// throw Exception{"Piece is blocking the diagonal " + std::to_string(prow) + " " + std::to_string(pcol) + " and " + std::to_string(trow) + " " + std::to_string(tcol)};
+          prow - pcol == trow - tcol &&
+          (prow < ubrow && prow > lbrow) &&
+          (pcol < ubcol && pcol > lbcol)) {
+        m->error_str = "Piece is blocking the diagonal";
+        return false;
+        // throw Exception{"Piece is blocking the diagonal " + std::to_string(prow) + " " + std::to_string(pcol) + " and " + std::to_string(trow) + " " + std::to_string(tcol)};
       }
       temp2++;
     }
@@ -405,11 +280,11 @@ bool Bishop::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
       int prow = (*temp2)->get_cursq()->get_row();
       int pcol = (*temp2)->get_cursq()->get_col();
       if ((cursq->get_row() != prow && cursq->get_col() != pcol) &&
-	  (prow + pcol == trow + tcol) &&
-	  (prow < ubrow && prow > lbrow) &&
-	  (pcol < ubcol && pcol > lbcol)) {
-	m->error_str = "Piece is blocking the diagonal";
-	return false;
+          (prow + pcol == trow + tcol) &&
+          (prow < ubrow && prow > lbrow) &&
+          (pcol < ubcol && pcol > lbcol)) {
+        m->error_str = "Piece is blocking the diagonal";
+        return false;
       }
       temp2++;
     }
@@ -444,8 +319,8 @@ bool Rook::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
   auto temp = begin;
   while(temp != end) {
     if ((*temp)->get_cursq()->get_row() == to->get_row() &&
-	(*temp)->get_cursq()->get_col() == to->get_col() &&
-	(*temp)->get_color() == this->color) {
+        (*temp)->get_cursq()->get_col() == to->get_col() &&
+        (*temp)->get_color() == this->color) {
       m->error_str = "Piece of same color already on Square";
       return false;
     }
@@ -454,13 +329,13 @@ bool Rook::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
     int ubrow = std::max(to->get_row(), cursq->get_row());
     int ubcol = std::max(to->get_col(), cursq->get_col());
     if ((*temp)->get_cursq()->get_col() == cursq->get_col() &&
-	(*temp)->get_cursq()->get_row() > lbrow &&
-	(*temp)->get_cursq()->get_row() < ubrow) {
+        (*temp)->get_cursq()->get_row() > lbrow &&
+        (*temp)->get_cursq()->get_row() < ubrow) {
       m->error_str = "Piece is in the way to destination square";
       return false;
     } else if ((*temp)->get_cursq()->get_row() == cursq->get_row() &&
-	(*temp)->get_cursq()->get_col() > lbcol &&
-	(*temp)->get_cursq()->get_col() < ubcol) {
+        (*temp)->get_cursq()->get_col() > lbcol &&
+        (*temp)->get_cursq()->get_col() < ubcol) {
       m->error_str = "Piece is in the way to destination square";
       return false;
     }
@@ -470,8 +345,8 @@ bool Rook::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
   temp = begin;
   while(temp != end) {
     if ((*temp)->get_cursq()->get_row() == to->get_row() &&
-	(*temp)->get_cursq()->get_col() == to->get_col() &&
-	(*temp)->get_color() != this->color) {
+        (*temp)->get_cursq()->get_col() == to->get_col() &&
+        (*temp)->get_color() != this->color) {
       break;
     }
     temp++;
@@ -519,7 +394,7 @@ bool King::king_can_move(std::vector<std::shared_ptr<Piece>>::iterator begin,
   for (int i = std::max(cursq->get_row() - 1, 1); i < std::min(cursq->get_row() + 1, 8); i++) {
     for (int j = std::max(cursq->get_col() - 1, 1); j < std::min(cursq->get_col() + 1, 8); j++) {
       if (i == cursq->get_row() && j == cursq->get_col()) {
-	continue;
+        continue;
       }
       auto s = std::make_shared<Square>(i, j);
       possible_moves.push_back(s);
@@ -532,7 +407,7 @@ bool King::king_can_move(std::vector<std::shared_ptr<Piece>>::iterator begin,
     m->to = possible_moves[i];
     if (this->can_move_to(begin, end, m)) {
       if (!King(b.lock(), possible_moves[i], color).in_check(begin, end, ignore)) {
-	return true;
+        return true;
       }
     }
   }
@@ -556,11 +431,11 @@ bool King::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
     auto rook = begin;
     for(; rook != end; rook++) {
       if ((*rook)->get_color() == this->color &&
-	  (*rook)->get_cursq()->get_row() == cursq->get_row() &&
-	  (*rook)->piece_moved() == false &&
-	  (((*rook)->get_cursq()->get_col() - cursq->get_col()) *
-	   (to->get_col() - cursq->get_col()) > 0)) {
-	break;
+          (*rook)->get_cursq()->get_row() == cursq->get_row() &&
+          (*rook)->piece_moved() == false &&
+          (((*rook)->get_cursq()->get_col() - cursq->get_col()) *
+           (to->get_col() - cursq->get_col()) > 0)) {
+        break;
       }
     }
     if (rook == end) {
@@ -568,21 +443,21 @@ bool King::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
       return false;
     }
     /*
-    auto m2 = new Move();
-    m2->from = (*rook)->get_cursq();
-    m2->to = new Square(to->get_row(), (to->get_col() + (*rook)->get_cursq()->get_col()) / 2);
-    */
+       auto m2 = new Move();
+       m2->from = (*rook)->get_cursq();
+       m2->to = new Square(to->get_row(), (to->get_col() + (*rook)->get_cursq()->get_col()) / 2);
+       */
     auto m2 = std::make_shared<Move>();
     m2->from = cursq;
     m2->to = std::make_shared<Square>(to->get_row(), (to->get_col() + cursq->get_col()) / 2);
     if (Rook(b.lock(), cursq, color).can_move_to(begin, end, m2)) {
       if (!this->in_check(begin, end, end) &&
-	  !King(b.lock(), std::make_shared<Square>(cursq->get_row(), (cursq->get_col() + to->get_col()) / 2), color).in_check(begin, end, end) &&
-	  !King(b.lock(), to, color).in_check(begin, end, end)) {
-	(*rook)->move(begin, end, m2);
-	cursq = to;
-	m->mt = MoveType::Castling;
-	return true;
+          !King(b.lock(), std::make_shared<Square>(cursq->get_row(), (cursq->get_col() + to->get_col()) / 2), color).in_check(begin, end, end) &&
+          !King(b.lock(), to, color).in_check(begin, end, end)) {
+        (*rook)->move(begin, end, m2);
+        cursq = to;
+        m->mt = MoveType::Castling;
+        return true;
       }
     } else {
       m->error_str = "Piece is in the way";
@@ -597,13 +472,13 @@ bool King::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
   auto temp = begin;
   while(temp != end) {
     if ((*temp)->get_cursq()->get_row() == to->get_row() &&
-	(*temp)->get_cursq()->get_col() == to->get_col() &&
-	(*temp)->get_color() == this->color) {
+        (*temp)->get_cursq()->get_col() == to->get_col() &&
+        (*temp)->get_color() == this->color) {
       m->error_str = "Piece of same color already on Square";
       return false;
     } else if ((*temp)->get_cursq()->get_row() == to->get_row() &&
-	(*temp)->get_cursq()->get_col() == to->get_col() &&
-	(*temp)->get_color() != this->color) {
+        (*temp)->get_cursq()->get_col() == to->get_col() &&
+        (*temp)->get_color() != this->color) {
       break;
     }
     temp++;
@@ -626,7 +501,7 @@ bool King::in_check(std::vector<std::shared_ptr<Piece>>::iterator begin,
       m->from = (*temp)->get_cursq();
       m->to = this->cursq;
       if ((*temp)->can_move_to(begin, end, m)) {
-	return true;
+        return true;
       }
     }
   }
@@ -643,26 +518,26 @@ bool King::is_checkmated(std::vector<std::shared_ptr<Piece>>::iterator begin,
     bool canblock = false;
     for (int i = 1; i <= 8; i++) {
       for (int j = 1; j <= 8; j++) {
-	auto temp = begin;
-	for (; temp != end; temp++) {
-	  if ((*temp)->get_color() == this->color &&
-	      (*temp)->get_name() != PieceName::King) { // king cant block for itself
-	    auto m = std::make_shared<Move>();
-	    m->from = (*temp)->get_cursq();
-	    m->to = std::make_shared<Square>(i, j);
+        auto temp = begin;
+        for (; temp != end; temp++) {
+          if ((*temp)->get_color() == this->color &&
+              (*temp)->get_name() != PieceName::King) { // king cant block for itself
+            auto m = std::make_shared<Move>();
+            m->from = (*temp)->get_cursq();
+            m->to = std::make_shared<Square>(i, j);
 
-	    if ((*temp)->can_move_to(begin, end, m)) {
-	      auto sq = (*temp)->get_cursq();
-	      (*temp)->set_cursq(std::make_shared<Square>(i,j));
-	      if (!this->in_check(begin,end,ignore)) {
-		(*temp)->set_cursq(sq);
-		canblock = true;
-		goto outside; // I downloaded all of C++, I'm going to use all of C++
-	      }
-	      (*temp)->set_cursq(sq);
-	    }
-	  }
-	}
+            if ((*temp)->can_move_to(begin, end, m)) {
+              auto sq = (*temp)->get_cursq();
+              (*temp)->set_cursq(std::make_shared<Square>(i,j));
+              if (!this->in_check(begin,end,ignore)) {
+                (*temp)->set_cursq(sq);
+                canblock = true;
+                goto outside; // I downloaded all of C++, I'm going to use all of C++
+              }
+              (*temp)->set_cursq(sq);
+            }
+          }
+        }
       }
     }
 outside:
@@ -693,20 +568,20 @@ Result King::is_stalemated(std::vector<std::shared_ptr<Piece>>::iterator begin,
   for (int i = 1; i <= 8; i++) {
     for (int j = 1; j <= 8; j++) {
       for (auto temp = begin; temp != end; temp++) {
-	if ((*temp)->get_color() == this->color &&
-	    (*temp)->get_name() != PieceName::King) {
-	  try {
-	    auto sq = (*temp)->get_cursq();
-	    auto has_moved = (*temp)->piece_moved();
-	    auto m = std::make_shared<Move>();
-	    m->from = (*temp)->get_cursq();
-	    m->to = std::make_shared<Square>(i,j);
-	    (*temp)->move(begin, end, m);
-	    (*temp)->set_cursq(sq);
-	    (*temp)->set_moved(has_moved);
-	    canmove = true;
-	  } catch(...) {}
-	}
+        if ((*temp)->get_color() == this->color &&
+            (*temp)->get_name() != PieceName::King) {
+          try {
+            auto sq = (*temp)->get_cursq();
+            auto has_moved = (*temp)->piece_moved();
+            auto m = std::make_shared<Move>();
+            m->from = (*temp)->get_cursq();
+            m->to = std::make_shared<Square>(i,j);
+            (*temp)->move(begin, end, m);
+            (*temp)->set_cursq(sq);
+            (*temp)->set_moved(has_moved);
+            canmove = true;
+          } catch(...) {}
+        }
       }
     }
   }
@@ -725,16 +600,16 @@ Result King::is_stalemated(std::vector<std::shared_ptr<Piece>>::iterator begin,
     if ((*temp)->get_color() == Color::White) {
       white.push_back(temp);
       if ((*temp)->get_name() == PieceName::Knight) {
-	white_knights++;
+        white_knights++;
       } else if ((*temp)->get_name() == PieceName::Bishop) {
-	white_bishops++;
+        white_bishops++;
       }
     } else if ((*temp)->get_color() == Color::Black) {
       black.push_back(temp);
       if ((*temp)->get_name() == PieceName::Knight) {
-	black_knights++;
+        black_knights++;
       } else if ((*temp)->get_name() == PieceName::Bishop) {
-	black_bishops++;
+        black_bishops++;
       }
     }
   }
