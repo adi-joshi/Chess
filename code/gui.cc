@@ -43,15 +43,15 @@ GUI::GUI(void)
   piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::Knight)] = load_image("images/bN.svg", winren); 
   piece_textures[std::pair<Color, PieceName>(Color::Black, PieceName::Pawn)] = load_image("images/bP.svg", winren); 
   /*
-  SDL_Rect *cb_rect = new SDL_Rect();
-  cb_rect->x = 0; cb_rect->y = 0; cb_rect->w = win_w; cb_rect->h = win_h;
-  SDL_BlitScaled(board, NULL, window_surface, cb_rect);
-  */
+     SDL_Rect *cb_rect = new SDL_Rect();
+     cb_rect->x = 0; cb_rect->y = 0; cb_rect->w = win_w; cb_rect->h = win_h;
+     SDL_BlitScaled(board, NULL, window_surface, cb_rect);
+     */
   // render(winren, board, {0, 0, win_w, win_h});
   /*
-  cb_rect->x = 100; cb_rect->y = 100; cb_rect->w = win_w / 8; cb_rect->h = win_h / 8;
-  SDL_BlitScaled(piece_surfaces[std::make_pair(Color::White, PieceName::King)], NULL, window_surface, cb_rect);
-  */
+     cb_rect->x = 100; cb_rect->y = 100; cb_rect->w = win_w / 8; cb_rect->h = win_h / 8;
+     SDL_BlitScaled(piece_surfaces[std::make_pair(Color::White, PieceName::King)], NULL, window_surface, cb_rect);
+     */
   // render(winren, piece_textures[std::make_pair(Color::White, PieceName::Knight)], {100, 100, win_w / 4, win_h / 4});
   // SDL_UpdateWindowSurface(window);
   // SDL_RenderPresent(winren);
@@ -65,57 +65,58 @@ std::shared_ptr<Move> GUI::ask_move(Color turn) {
   m->color = turn;
   SDL_Event e;
   ScreenPos origpos{0,0};
-  while(SDL_WaitEvent(&e)) {
+  while(1) {
     // std::cout << "Hi" << std::endl;
+    SDL_WaitEvent(&e);
     if (e.type == SDL_QUIT) {
       // std::cout << "Quit" << std::endl;
       m->it = InputType::Quit;
       return m;
     } else if (e.type == SDL_MOUSEBUTTONDOWN) { // if mouse button is clicked
-      // get current position of mouse
-      // std::cout << "Mouse button is down" << std::endl;
+                                                // get current position of mouse
+                                                // std::cout << "Mouse button is down" << std::endl;
       int x, y;
       SDL_GetMouseState(&x, &y);
       int id = -1;
       int len = positions.size();
       for (int i = 0; i < len; i++) {
-	auto thispos = std::get<2>(positions[i]);
-	auto thiscolor = std::get<0>(positions[i]);
-	// std::cout << thispos.x << " " << thispos.y << " " << x << " " << y << " " << win_h / 8 << std::endl; 
-	if (thiscolor == turn &&
-	    thispos.x < x && thispos.y < y &&
-	    x < thispos.x + win_w / 8 && y < thispos.y + win_h / 8) {
-	  id = i;
-	  break;
-	}
+        auto thispos = std::get<2>(positions[i]);
+        auto thiscolor = std::get<0>(positions[i]);
+        // std::cout << thispos.x << " " << thispos.y << " " << x << " " << y << " " << win_h / 8 << std::endl; 
+        if (thiscolor == turn &&
+            thispos.x < x && thispos.y < y &&
+            x < thispos.x + win_w / 8 && y < thispos.y + win_h / 8) {
+          id = i;
+          break;
+        }
       }
       if (id != -1) { // i.e. clicked a piece
-	// put the piece under the mouse
-	// std::cout << "Got piece" << std::endl;
-	m->from = std::make_shared<Square>( 8 - (y) / (win_h / 8), (x + (win_w/8)) / (win_w / 8) );
-	origpos = std::get<2>(positions[id]);
-	std::get<2>(positions[id]) = { x - win_w / 16, y - win_h / 16 };
-	this->print_board();
-	while(SDL_WaitEvent(&e)) {
-	  if (e.type == SDL_MOUSEMOTION) { // if mouse is moving, refresh the board to reflect the current position
-	    // std::cout << "Mouse In Motion" << std::endl;
-	    int x, y;
-	    SDL_GetMouseState(&x, &y);
-	    std::get<2>(positions[id]) = { x - win_w / 16, y - win_h / 16 };
-	    this->print_board();
-	  } else if (e.type == SDL_MOUSEBUTTONUP) { // mouse button is now up, so find the square that the current position corresponds to, and return this as the move
-	    // std::cout << "Mouse button is up" << std::endl;
-	    int x, y;
-	    SDL_GetMouseState(&x, &y);
-	    std::get<2>(positions[id]) = { x - win_w / 16, y - win_h / 16 };
-	    this->print_board();
-	    m->to = std::make_shared<Square>( 8 - (y) / (win_h / 8), (x + (win_w/8)) / (win_w / 8) );
-	    // std::cout << x << " " << y << ": " << m->to->get_row() << " " << m->to->get_col() << " " << m->from->get_row() << " " << m->from->get_col() << std::endl;
-	    std::get<2>(positions[id]) = origpos;
-	    this->print_board();
-	    goto outer;
-	  }
-	}
+                      // put the piece under the mouse
+                      // std::cout << "Got piece" << std::endl;
+        m->from = std::make_shared<Square>( 8 - (y) / (win_h / 8), (x + (win_w/8)) / (win_w / 8) );
+        origpos = std::get<2>(positions[id]);
+        std::get<2>(positions[id]) = { x - win_w / 16, y - win_h / 16 };
+        this->print_board();
+        while(SDL_WaitEvent(&e)) {
+          if (e.type == SDL_MOUSEMOTION) { // if mouse is moving, refresh the board to reflect the current position
+                                           // std::cout << "Mouse In Motion" << std::endl;
+            int x, y;
+            SDL_GetMouseState(&x, &y);
+            std::get<2>(positions[id]) = { x - win_w / 16, y - win_h / 16 };
+            this->print_board();
+          } else if (e.type == SDL_MOUSEBUTTONUP) { // mouse button is now up, so find the square that the current position corresponds to, and return this as the move
+                                                    // std::cout << "Mouse button is up" << std::endl;
+            int x, y;
+            SDL_GetMouseState(&x, &y);
+            std::get<2>(positions[id]) = { x - win_w / 16, y - win_h / 16 };
+            this->print_board();
+            m->to = std::make_shared<Square>( 8 - (y) / (win_h / 8), (x + (win_w/8)) / (win_w / 8) );
+            // std::cout << x << " " << y << ": " << m->to->get_row() << " " << m->to->get_col() << " " << m->from->get_row() << " " << m->from->get_col() << std::endl;
+            std::get<2>(positions[id]) = origpos;
+            this->print_board();
+            goto outer;
+          }
+        }
       }
       // std::cout << "Didn't get piece" << std::endl;
     }
@@ -147,28 +148,28 @@ std::string GUI::draw_board(std::vector<std::shared_ptr<Piece>>::const_iterator 
 void GUI::print_board(void) {
   int len = positions.size();
   /*
-  SDL_Rect *cb_rect = new SDL_Rect();
-  cb_rect->x = 0;
-  cb_rect->y = 0;
-  cb_rect->w = win_w;
-  cb_rect->h = win_h;
-  SDL_BlitScaled(board, NULL, window_surface, cb_rect);
-  */
+     SDL_Rect *cb_rect = new SDL_Rect();
+     cb_rect->x = 0;
+     cb_rect->y = 0;
+     cb_rect->w = win_w;
+     cb_rect->h = win_h;
+     SDL_BlitScaled(board, NULL, window_surface, cb_rect);
+     */
   render(winren, board, {0, 0, win_w, win_h});
   for (int i = 0; i < len; i++) {
     // std::cout << std::get<2>(positions[i]).get_row() << " " << std::get<2>(positions[i]).get_col() << std::endl;
     /*
-    cb_rect->x = std::get<2>(positions[i]).x;
-    cb_rect->y = std::get<2>(positions[i]).y;
-    cb_rect->w = win_w / 8;
-    cb_rect->h = win_h / 8;
-    SDL_BlitScaled(piece_textures[std::make_pair(std::get<0>(positions[i]), std::get<1>(positions[i]))],
-	NULL,
-	window_surface,
-	cb_rect);
-	*/
+       cb_rect->x = std::get<2>(positions[i]).x;
+       cb_rect->y = std::get<2>(positions[i]).y;
+       cb_rect->w = win_w / 8;
+       cb_rect->h = win_h / 8;
+       SDL_BlitScaled(piece_textures[std::make_pair(std::get<0>(positions[i]), std::get<1>(positions[i]))],
+       NULL,
+       window_surface,
+       cb_rect);
+       */
     render(winren, piece_textures[std::make_pair(std::get<0>(positions[i]), std::get<1>(positions[i]))],
-	{ std::get<2>(positions[i]).x, std::get<2>(positions[i]).y, win_w / 8, win_h / 8 });
+        { std::get<2>(positions[i]).x, std::get<2>(positions[i]).y, win_w / 8, win_h / 8 });
   }
   // SDL_UpdateWindowSurface(window);
   SDL_RenderPresent(winren);
@@ -186,13 +187,13 @@ void GUI::print_winner(Result r) {}
 
 GUI::~GUI(void) {
   /*
-  for (auto surface : piece_textures) {
-    SDL_FreeSurface(surface.second);
-  }
-  SDL_FreeSurface(board);
-  SDL_DestroyWindow(window);
-  SDL_Quit();
-  */
+     for (auto surface : piece_textures) {
+     SDL_FreeSurface(surface.second);
+     }
+     SDL_FreeSurface(board);
+     SDL_DestroyWindow(window);
+     SDL_Quit();
+     */
 
   for (auto texture : piece_textures) {
     SDL_DestroyTexture(texture.second);
