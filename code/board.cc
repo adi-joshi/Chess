@@ -72,13 +72,13 @@ void Board::setup_board(std::vector<std::shared_ptr<Piece>> pieces) {
 
 bool Board::move(std::shared_ptr<Move> m) {
   /*
-  if (s.size() == 1 && s[0] == 'p') {
-    auto placeholder = moves.cbegin();
-    placeholder++;
-    td->print_moves(placeholder, moves.cend());
-    return false;
-  }
-  */
+     if (s.size() == 1 && s[0] == 'p') {
+     auto placeholder = moves.cbegin();
+     placeholder++;
+     td->print_moves(placeholder, moves.cend());
+     return false;
+     }
+     */
   if (m == nullptr) {
     return false;
   } else if (m->it != InputType::Move) {
@@ -96,68 +96,68 @@ bool Board::move(std::shared_ptr<Move> m) {
       std::string prefix_row = "";
       std::string prefix_col = "";
       if (pieces[i]->get_name() != PieceName::King) { // assuming that only 1 king on the board
-	for (int j = 0; j < pieces.size(); j++) {
-	  if (j == i) {
-	    continue;
-	  } else {
-	    if (pieces[j]->get_name() == pieces[i]->get_name() &&
-		pieces[j]->get_color() == pieces[i]->get_color()) { // another piece of the same type can move to the same square
-	      try {
-		pieces[j]->can_move_to(pieces.begin(), pieces.end(), m);
-		int r = pieces[j]->get_cursq()->get_row();
-		int c = pieces[j]->get_cursq()->get_col();
-		if (c != from->get_col() && prefix_col == "") {
-		  prefix_col += static_cast<char>(from->get_col() + 'a' - 1);
-		} else if (r != from->get_row() && prefix_row == "") {
-		  prefix_row += static_cast<char>(from->get_row() + '0');
-		}
-	      } catch(...) {}
-	    }
-	  }
-	}
+        for (int j = 0; j < pieces.size(); j++) {
+          if (j == i) {
+            continue;
+          } else {
+            if (pieces[j]->get_name() == pieces[i]->get_name() &&
+                pieces[j]->get_color() == pieces[i]->get_color()) { // another piece of the same type can move to the same square
+              try {
+                pieces[j]->can_move_to(pieces.begin(), pieces.end(), m);
+                int r = pieces[j]->get_cursq()->get_row();
+                int c = pieces[j]->get_cursq()->get_col();
+                if (c != from->get_col() && prefix_col == "") {
+                  prefix_col += static_cast<char>(from->get_col() + 'a' - 1);
+                } else if (r != from->get_row() && prefix_row == "") {
+                  prefix_row += static_cast<char>(from->get_row() + '0');
+                }
+              } catch(...) {}
+            }
+          }
+        }
       }
 
       auto thispiece = pieces[i];
       auto name_before = m->piecename;
 
       if (!thispiece->move(pieces.begin(), pieces.end(), m)) { // edits m and returns true, or returns false
-	if (m->error_str != "") {
-	  throw Exception{m->error_str};
-	} else {
-	  throw Exception{"Illegal move"};
-	}
+        if (m->error_str != "") {
+          throw Exception{m->error_str};
+        } else {
+          throw Exception{"Illegal move"};
+        }
       }
 
       if (m->mt == MoveType::Promotion) {
-	if (m->promoted_to == PieceName::King ||
-	    m->promoted_to == PieceName::Pawn) {
-	  throw Exception{"Invalid promotion"};
-	} else {
-	  auto thissq = std::make_shared<Square>(thispiece->get_cursq()->get_row(), thispiece->get_cursq()->get_col());
-	  auto thiscolor = thispiece->get_color();
-	  std::shared_ptr<Piece> p = nullptr;
-	  switch(m->promoted_to) {
-	    case PieceName::Queen: p = std::make_shared<Queen>(shared_from_this(), thissq, thiscolor); pieces.push_back(p); break;
-	    case PieceName::Rook: p = std::make_shared<Rook>(shared_from_this(), thissq, thiscolor); pieces.push_back(p); break;
-	    case PieceName::Bishop: p = std::make_shared<Bishop>(shared_from_this(), thissq, thiscolor); pieces.push_back(p); break;
-	    case PieceName::Knight: p = std::make_shared<Knight>(shared_from_this(), thissq, thiscolor); pieces.push_back(p); break;
-	    default: break;
-	  }
-	  pieces.erase(pieces.begin() + i);
-	}
+        if (m->promoted_to == PieceName::King ||
+            m->promoted_to == PieceName::Pawn) {
+          throw Exception{"Invalid promotion"};
+        } else {
+          auto thissq = std::make_shared<Square>(thispiece->get_cursq()->get_row(), thispiece->get_cursq()->get_col());
+          auto thiscolor = thispiece->get_color();
+          std::shared_ptr<Piece> p = nullptr;
+          switch(m->promoted_to) {
+            case PieceName::Queen: p = std::make_shared<Queen>(shared_from_this(), thissq, thiscolor); pieces.push_back(p); break;
+            case PieceName::Rook: p = std::make_shared<Rook>(shared_from_this(), thissq, thiscolor); pieces.push_back(p); break;
+            case PieceName::Bishop: p = std::make_shared<Bishop>(shared_from_this(), thissq, thiscolor); pieces.push_back(p); break;
+            case PieceName::Knight: p = std::make_shared<Knight>(shared_from_this(), thissq, thiscolor); pieces.push_back(p); break;
+            default: break;
+          }
+          pieces.erase(pieces.begin() + i);
+        }
       }
 
       halfmoves++;
 
       if (name_before == PieceName::Pawn) {
-	halfmoves = 0;
+        halfmoves = 0;
       }
 
       if (m->pieces_to_capture.size() != 0) {
-	halfmoves = 0;
-	for (int i = 0; i < m->pieces_to_capture.size(); i++) {
-	  pieces.erase(m->pieces_to_capture[i]);
-	}
+        halfmoves = 0;
+        for (int i = 0; i < m->pieces_to_capture.size(); i++) {
+          pieces.erase(m->pieces_to_capture[i]);
+        }
       }
 
       std::string curboard = td->draw_board(pieces.cbegin(), pieces.cend());
@@ -200,16 +200,16 @@ Result Board::winner(void) {
   for (int i = 0; i < pieces.size(); i++) {
     if (pieces[i]->get_name() == PieceName::King) {
       if (r == Result::BlackWins ||
-	  r == Result::WhiteWins) {
-	continue;
+          r == Result::WhiteWins) {
+        continue;
       }
       Result thisresult = pieces[i]->get_result(pieces.begin(), pieces.end(), pieces.end());
       if (thisresult == Result::WhiteWins ||
-	  thisresult == Result::BlackWins) {
-	r = thisresult;
+          thisresult == Result::BlackWins) {
+        r = thisresult;
       } else if (r == Result::NoResult &&
-	  thisresult != Result::NoResult) {
-	r = thisresult;
+          thisresult != Result::NoResult) {
+        r = thisresult;
       }
     }
   }
@@ -219,7 +219,7 @@ Result Board::winner(void) {
   } else if (r == Result::NoResult) {
     for (auto it = board_string.begin(); it != board_string.end(); it++) {
       if (it->second >= 3) {
-	return Result::DrawByThreefoldRepetition;
+        return Result::DrawByThreefoldRepetition;
       }
     }
   }
