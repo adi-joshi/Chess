@@ -31,7 +31,6 @@ class Board : public std::enable_shared_from_this<Board> { // so that can send s
   std::shared_ptr<Move> get_prev_move();
   bool game_end();
   Result winner();
-  friend class Piece; // any piece can get the pieces vector and the moves vector by this
   ~Board();
 };
 
