@@ -26,6 +26,8 @@ class Board : public std::enable_shared_from_this<Board> { // so that can send s
   // can't setup pieces in constructor, and can't use shared_from_this() in constructor
   void setup_board();
   void setup_board(std::vector<std::shared_ptr<Piece>> pieces);
+  std::vector<std::shared_ptr<Piece>>::const_iterator get_pieces_cbegin(void);
+  std::vector<std::shared_ptr<Piece>>::const_iterator get_pieces_cend(void);
   bool move(std::shared_ptr<Move> m);
   std::shared_ptr<Move> get_prev_move();
   bool game_end();

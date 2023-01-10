@@ -121,6 +121,14 @@ void Board::setup_board(std::vector<std::shared_ptr<Piece>> pieces) {
   this->pieces = pieces;
 }
 
+std::vector<std::shared_ptr<Piece>>::const_iterator Board::get_pieces_cbegin(void) {
+  return pieces.cbegin();
+}
+
+std::vector<std::shared_ptr<Piece>>::const_iterator Board::get_pieces_cend(void) {
+  return pieces.cend();
+}
+
 bool Board::move(std::shared_ptr<Move> m) {
   /*
      if (s.size() == 1 && s[0] == 'p') {
@@ -203,7 +211,9 @@ bool Board::move(std::shared_ptr<Move> m) {
 
       if (m->pieces_to_capture.size() != 0) {
         halfmoves = 0;
+        std::cout << "# pieces to capture: " << m->pieces_to_capture.size() << std::endl;
         for (int i = 0; i < m->pieces_to_capture.size(); i++) {
+          
           pieces.erase(m->pieces_to_capture[i]);
         }
       }

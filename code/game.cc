@@ -13,6 +13,9 @@ Game::Game(std::string display) {
   }
   b = std::make_shared<Board>();
   b->setup_board();
+  auto begin = b->get_pieces_cbegin();
+  auto end = b->get_pieces_cend();
+  td->draw_board(begin, end);
   turn = Color::White;
 }
 
@@ -23,13 +26,16 @@ void Game::play(void) {
     try {
       auto s = td->ask_move(turn);
       if (s == nullptr) {
-	      continue;
+        continue;
       } else if (s->it == InputType::Quit) {
-	return;
+        return;
       }
       bool moved = b->move(s);
       if (moved) {
-	turn = static_cast<Color>((static_cast<int>(turn) + 1) % 2);
+        turn = static_cast<Color>((static_cast<int>(turn) + 1) % 2);
+        auto begin = b->get_pieces_cbegin();
+        auto end = b->get_pieces_cend();
+        td->draw_board(begin, end);
       }
       td->print_board();
     } catch (Exception &e) {
