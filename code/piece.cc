@@ -127,8 +127,13 @@ bool Pawn::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
       return false;
     }
     for (auto temp = begin; temp != end; temp++) {
-      if ((*temp)->get_cursq()->get_row() > cursq->get_row() &&
-          (*temp)->get_cursq()->get_row() <= to->get_row()) {
+      if ((*temp)->get_cursq()->get_col() == to->get_col() &&
+          (*temp)->get_cursq()->get_row() == to->get_row()) {
+        m->error_str = "Another piece is already on the destination square";
+        return false;
+      } else if ((*temp)->get_cursq()->get_col() == to->get_col() &&
+          abs((*temp)->get_cursq()->get_row() - to->get_row()) == 1 &&
+          abs((*temp)->get_cursq()->get_row() - cursq->get_row()) == 1) {
         m->error_str = "Another piece is in the way";
         return false;
       }
