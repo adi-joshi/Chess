@@ -175,6 +175,7 @@ bool Board::move(std::shared_ptr<Move> m) {
 
       auto thispiece = pieces[i];
       auto name_before = m->piecename;
+      m->pieces_to_capture.clear();
 
       if (!thispiece->move(pieces.begin(), pieces.end(), m)) { // edits m and returns true, or returns false
         if (m->error_str != "") {
@@ -211,10 +212,8 @@ bool Board::move(std::shared_ptr<Move> m) {
 
       if (m->pieces_to_capture.size() != 0) {
         halfmoves = 0;
-        std::cout << "# pieces to capture: " << m->pieces_to_capture.size() << std::endl;
-        for (int i = 0; i < m->pieces_to_capture.size(); i++) {
-          
-          pieces.erase(m->pieces_to_capture[i]);
+        for (int j = 0; j < m->pieces_to_capture.size(); j++) {
+          pieces.erase(m->pieces_to_capture[j]);
         }
       }
 

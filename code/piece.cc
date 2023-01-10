@@ -163,6 +163,7 @@ bool Pawn::can_move_to(std::vector<std::shared_ptr<Piece>>::iterator begin,
       return false;
     }
     m->mt = MoveType::Capture;
+    std::cout << m->pieces_to_capture.size() << std::endl;
     m->pieces_to_capture.push_back(temp);
   }
   if ((color == Color::White && to->get_row() == 8) ||
