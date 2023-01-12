@@ -37,10 +37,10 @@ void Game::play(void) {
         auto end = b->get_pieces_cend();
         td->draw_board(begin, end);
       }
-      td->print_board();
     } catch (Exception &e) {
       td->print_error(e);
     }
+    td->print_board();
   }
   td->print_winner(b->winner());
   return;

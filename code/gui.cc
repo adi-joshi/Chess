@@ -73,8 +73,7 @@ std::shared_ptr<Move> GUI::ask_move(Color turn) {
       m->it = InputType::Quit;
       return m;
     } else if (e.type == SDL_MOUSEBUTTONDOWN) { // if mouse button is clicked
-                                                // get current position of mouse
-                                                // std::cout << "Mouse button is down" << std::endl;
+      // get current position of mouse
       int x, y;
       SDL_GetMouseState(&x, &y);
       int id = -1;
@@ -92,7 +91,6 @@ std::shared_ptr<Move> GUI::ask_move(Color turn) {
       }
       if (id != -1) { // i.e. clicked a piece
                       // put the piece under the mouse
-                      // std::cout << "Got piece" << std::endl;
         m->from = std::make_shared<Square>( 8 - (y) / (win_h / 8), (x + (win_w/8)) / (win_w / 8) );
         origpos = std::get<2>(positions[id]);
         std::get<2>(positions[id]) = { x - win_w / 16, y - win_h / 16 };
@@ -113,7 +111,7 @@ std::shared_ptr<Move> GUI::ask_move(Color turn) {
             m->to = std::make_shared<Square>( 8 - (y) / (win_h / 8), (x + (win_w/8)) / (win_w / 8) );
             // std::cout << x << " " << y << ": " << m->to->get_row() << " " << m->to->get_col() << " " << m->from->get_row() << " " << m->from->get_col() << std::endl;
             std::get<2>(positions[id]) = origpos;
-            this->print_board();
+            // this->print_board();
             goto outer;
           }
         }
