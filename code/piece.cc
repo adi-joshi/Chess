@@ -396,8 +396,8 @@ PieceName Queen::get_name(void) {
 bool King::king_can_move(std::vector<std::shared_ptr<Piece>>::iterator begin,
     std::vector<std::shared_ptr<Piece>>::iterator end, std::vector<std::shared_ptr<Piece>>::iterator ignore) {
   std::vector<std::shared_ptr<Square>> possible_moves;
-  for (int i = std::max(cursq->get_row() - 1, 1); i < std::min(cursq->get_row() + 1, 8); i++) {
-    for (int j = std::max(cursq->get_col() - 1, 1); j < std::min(cursq->get_col() + 1, 8); j++) {
+  for (int i = std::max(cursq->get_row() - 1, 1); i <= std::min(cursq->get_row() + 1, 8); i++) {
+    for (int j = std::max(cursq->get_col() - 1, 1); j <= std::min(cursq->get_col() + 1, 8); j++) {
       if (i == cursq->get_row() && j == cursq->get_col()) {
         continue;
       }
