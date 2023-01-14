@@ -6,20 +6,19 @@
 #include <map>
 #include "SDL.h"
 #include "display.h"
+#include "guiboard.h"
 
 class GUI : public Display {
-  struct ScreenPos {
-    int x;
-    int y;
-  };
   const int win_w;
   const int win_h;
+  SDL_Window *window;
   SDL_Renderer *winren;
-  SDL_Texture *board;
-  std::map<std::pair<Color, PieceName>, SDL_Texture*> piece_textures;
-  std::vector<std::tuple<Color, PieceName, ScreenPos>> positions;
+  std::shared_ptr<Board> b;
+  std::unique_ptr<GUIBoard> gb;
   public:
-  GUI();
+  GUI(std::shared_ptr<Board> b);
+  void handle_input(void);
+  /*
   void welcome_msg() override;
   std::shared_ptr<Move> ask_move(Color turn) override;
   // called by observer (i.e. Board, after verifying that move is valid)
@@ -29,8 +28,9 @@ class GUI : public Display {
   void print_board() override;
   void print_moves(std::vector<std::shared_ptr<Move>>::const_iterator begin,
                    std::vector<std::shared_ptr<Move>>::const_iterator end) override;
-  void print_error(Exception e) override;
   void print_winner(Result r) override;
+  */
+  void print_error(Exception e) override;
   ~GUI();
 };
 

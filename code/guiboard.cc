@@ -40,12 +40,13 @@ void GUIBoard::handle(SDL_Renderer *r) {
   if (r == nullptr) {
     return;
   }
-  std::shared_ptr<Move> m;
+  auto m = std::make_shared<Move>();
   SDL_Event e;
   ScreenPos origpos{0,0};
   while(1) {
     SDL_WaitEvent(&e);
     if (e.type == SDL_QUIT) {
+      exit(0);
       return;
     } else if (e.type == SDL_MOUSEBUTTONDOWN) { // if mouse button is clicked
       // get current position of mouse
@@ -56,9 +57,10 @@ void GUIBoard::handle(SDL_Renderer *r) {
       for (int i = 0; i < len; i++) {
         auto thispos = std::get<2>(positions[i]);
         auto thiscolor = std::get<0>(positions[i]);
+        auto turn = b->whose_move();
         // std::cout << thispos.x << " " << thispos.y << " " << x << " " << y << " " << win_h / 8 << std::endl; 
         // GUI shouldn't care about whose turn it is.
-        if (//thiscolor == turn &&
+        if (thiscolor == turn &&
             thispos.x < x && thispos.y < y &&
             x < thispos.x + win_w / 8 && y < thispos.y + win_h / 8) {
           id = i;
@@ -68,6 +70,7 @@ void GUIBoard::handle(SDL_Renderer *r) {
       if (id != -1) { // i.e. clicked a piece
                       // put the piece under the mouse
         m->from = std::make_shared<Square>( 8 - (y) / (win_h / 8), (x + (win_w/8)) / (win_w / 8) );
+        m->color = b->whose_move();
         origpos = std::get<2>(positions[id]);
         std::get<2>(positions[id]) = { x - win_w / 16, y - win_h / 16 };
         this->draw_board(r);
@@ -132,4 +135,11 @@ void GUIBoard::draw_board(SDL_Renderer *r) {
   }
   SDL_RenderPresent(r);
   return;
+}
+
+GUIBoard::~GUIBoard(void) {
+  for (auto p : piece_textures) {
+    SDL_DestroyTexture(std::get<1>(p));
+  }
+  SDL_DestroyTexture(board);
 }

@@ -31,7 +31,9 @@ static char piecename_to_str(PieceName p, Color c) {
 //===
 
 
-TextDisplay::TextDisplay(void) {
+TextDisplay::TextDisplay(std::shared_ptr<Board> b)
+  : Display(b)
+{
   for (int i = 0; i < 8; i++) {
     for (int j = 0; j < 8; j++) {
       board[i][j] = ' ';
@@ -59,59 +61,78 @@ TextDisplay::TextDisplay(void) {
   board[7][5] = 'b';
   board[7][6] = 'n';
   board[7][7] = 'r';
-}
 
-void TextDisplay::welcome_msg(void) {
+  // welcome message
   std::cout << "Welcome to Chess!" << std::endl;
 }
 
-std::shared_ptr<Move> TextDisplay::ask_move(Color turn) {
-  std::string s;
-  std::cout << ((turn == Color::White) ? "White" : "Black") << " to move. Please enter your move: " << std::endl;
-  std::cin >> s;
-  if (s.size() == 1 && s[0] == 'p') {
-    auto m = std::make_shared<Move>();
-    m->it = InputType::Print;
-    return m;
-  } else if (s == "quit") {
-    auto m = std::make_shared<Move>();
-    m->it = InputType::Quit;
-    return m;
-  } else if ((s.size() >= 4) &&
-      (s[0] >= 'a' && s[0] <= 'h') &&
-      (s[1] >= '1' && s[1] <= '8') &&
-      (s[2] >= 'a' && s[2] <= 'h') &&
-      (s[3] >= '1' && s[3] <= '8')) {
-    auto from = std::make_shared<Square>(s[1] - '0', s[0] - 'a' + 1);
-    auto to = std::make_shared<Square>(s[3] - '0', s[2] - 'a' + 1);
-    auto retval = std::make_shared<Move>();
-    retval->mt = MoveType::Unknown;
-    retval->color = turn;
-    retval->from = from;
-    retval->to = to;
-    if ((s.size() == 6) &&
-	((s[5] == 'q' || s[5] == 'Q'))) {
-      retval->mt = MoveType::Promotion;
-      retval->promoted_to = PieceName::Queen;
-    } else if ((s.size() == 6) &&
-	((s[5] == 'r' || s[5] == 'R'))) {
-      retval->mt = MoveType::Promotion;
-      retval->promoted_to = PieceName::Rook;
-    } else if ((s.size() == 6) &&
-	((s[5] == 'b' || s[5] == 'B'))) {
-      retval->mt = MoveType::Promotion;
-      retval->promoted_to = PieceName::Bishop;
-    } else if ((s.size() == 6) &&
-	((s[5] == 'n' || s[5] == 'N'))) {
-      retval->mt = MoveType::Promotion;
-      retval->promoted_to = PieceName::Knight;
+/*
+void TextDisplay::welcome_msg(void) {
+  std::cout << "Welcome to Chess!" << std::endl;
+}
+*/
+
+void TextDisplay::handle_input(void) {
+  while(!b->game_end()) {
+    std::string s;
+    auto turn = b->whose_move();
+    std::cout << ((turn == Color::White) ? "White" : "Black") << " to move. Please enter your move: " << std::endl;
+    std::cin >> s;
+    if (s.size() == 1 && s[0] == 'p') {
+      auto m = std::make_shared<Move>();
+      m->it = InputType::Print;
+      auto begin = b->get_moves_cbegin();
+      auto end = b->get_moves_cend();
+      this->print_moves(begin, end);
+    } else if (s == "quit") {
+      auto m = std::make_shared<Move>();
+      m->it = InputType::Quit;
+      return;
+    } else if ((s.size() >= 4) &&
+        (s[0] >= 'a' && s[0] <= 'h') &&
+        (s[1] >= '1' && s[1] <= '8') &&
+        (s[2] >= 'a' && s[2] <= 'h') &&
+        (s[3] >= '1' && s[3] <= '8')) {
+      auto from = std::make_shared<Square>(s[1] - '0', s[0] - 'a' + 1);
+      auto to = std::make_shared<Square>(s[3] - '0', s[2] - 'a' + 1);
+      auto retval = std::make_shared<Move>();
+      retval->mt = MoveType::Unknown;
+      retval->color = turn;
+      retval->from = from;
+      retval->to = to;
+      if ((s.size() == 6) &&
+    ((s[5] == 'q' || s[5] == 'Q'))) {
+        retval->mt = MoveType::Promotion;
+        retval->promoted_to = PieceName::Queen;
+      } else if ((s.size() == 6) &&
+    ((s[5] == 'r' || s[5] == 'R'))) {
+        retval->mt = MoveType::Promotion;
+        retval->promoted_to = PieceName::Rook;
+      } else if ((s.size() == 6) &&
+    ((s[5] == 'b' || s[5] == 'B'))) {
+        retval->mt = MoveType::Promotion;
+        retval->promoted_to = PieceName::Bishop;
+      } else if ((s.size() == 6) &&
+    ((s[5] == 'n' || s[5] == 'N'))) {
+        retval->mt = MoveType::Promotion;
+        retval->promoted_to = PieceName::Knight;
+      }
+      retval->it = InputType::Move;
+      try {
+        b->move(retval);
+      } catch(...) {}
+      this->clear_board();
+      auto begin = b->get_pieces_cbegin();
+      auto end = b->get_pieces_cend();
+      this->draw_board(begin, end);
+      this->print_board();
+    } else {
+      std::cout << "Invalid Move" << std::endl;
+      continue;
     }
-    retval->it = InputType::Move;
-    return retval;
-  } else {
-    std::cout << "Invalid Move" << std::endl;
-    return nullptr;
   }
+  this->print_winner(b->winner());
+  return;
 }
 
 void TextDisplay::clear_board(void) {
