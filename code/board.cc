@@ -129,6 +129,18 @@ std::vector<std::shared_ptr<Piece>>::const_iterator Board::get_pieces_cend(void)
   return pieces.cend();
 }
 
+std::vector<std::shared_ptr<Move>>::const_iterator Board::get_moves_cbegin(void) {
+  return moves.cbegin()++; // as moves.cbegin() is nullptr
+}
+
+std::vector<std::shared_ptr<Move>>::const_iterator Board::get_moves_cend(void) {
+  return moves.cend();
+}
+
+Color Board::whose_move(void) {
+  return turn;
+}
+
 bool Board::move(std::shared_ptr<Move> m) {
   /*
      if (s.size() == 1 && s[0] == 'p') {
@@ -221,7 +233,7 @@ bool Board::move(std::shared_ptr<Move> m) {
       board_string[curboard]++;
       moves.push_back(m);
 
-      turn = static_cast<Color>(static_cast<int>(turn) + 1 % 2);
+      this->turn = static_cast<Color>((static_cast<int>(this->turn) + 1) % 2);
       moved = true;
       return true;
     }

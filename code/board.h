@@ -16,6 +16,7 @@ class Board : public std::enable_shared_from_this<Board> { // so that can send s
   std::vector<std::shared_ptr<Piece>> pieces;
   std::vector<std::shared_ptr<Move>> moves;
   std::map<std::string, int> board_string; // map<board_string, # times it occured> (for 3fold)
+  Color turn = Color::White;
   int halfmoves = 0; // the number of moves without a pawn move or capture
   // Stores one move as ({from, name, color}, {to, name, color})
   // e.g. if you play e7e8=Q, then it would be stored as
@@ -28,6 +29,9 @@ class Board : public std::enable_shared_from_this<Board> { // so that can send s
   void setup_board(std::vector<std::shared_ptr<Piece>> pieces);
   std::vector<std::shared_ptr<Piece>>::const_iterator get_pieces_cbegin(void);
   std::vector<std::shared_ptr<Piece>>::const_iterator get_pieces_cend(void);
+  std::vector<std::shared_ptr<Move>>::const_iterator get_moves_cbegin(void);
+  std::vector<std::shared_ptr<Move>>::const_iterator get_moves_cend(void);
+  Color whose_move(void);
   bool move(std::shared_ptr<Move> m);
   std::shared_ptr<Move> get_prev_move();
   bool game_end();
