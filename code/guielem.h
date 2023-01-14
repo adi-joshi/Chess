@@ -1,18 +1,17 @@
 #ifndef GUIELEM_H_
 #define GUIELEM_H_
 
+#include <memory>
 #include "observer.h"
 #include "subject.h"
 #include "board.h"
-#include <memory>
+#include "SDL.h"
 
 class GUIElem : public Observer, Subject {
-  int w;
-  int h;
   std::shared_ptr<Board> b;
   public:
-  GUIElem(int w, int h, Board *b);
-  virtual void handle(void);
+  GUIElem(std::shared_ptr<Board> b);
+  virtual void handle(SDL_Renderer *r) = 0;
   ~GUIElem(void);
 };
 
