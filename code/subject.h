@@ -2,6 +2,7 @@
 #define SUBJECT_H_
 
 #include "observer.h"
+#include "SDL.h"
 #include <vector>
 #include <memory>
 
@@ -10,7 +11,7 @@ class Subject {
   public:
   void add_observer(std::shared_ptr<Observer> ob);
   void remove_observer(std::shared_ptr<Observer> ob);
-  void notify_observers(void);
+  void notify_observers(SDL_Renderer *r);
 };
 
 #endif

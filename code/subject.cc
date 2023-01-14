@@ -13,8 +13,8 @@ void Subject::remove_observer(std::shared_ptr<Observer> ob) {
   }
 }
 
-void Subject::notify_observers(void) {
+void Subject::notify_observers(SDL_Renderer *r) {
   for (auto o : obs) {
-    o->update();
+    o->update(r);
   }
 }
