@@ -1,6 +1,6 @@
 CXX=g++
 CXXFLAGS= -MMD -I/usr/include/SDL2
-OBJECTS= $(addprefix code/, main.o game.o exception.o color.o board.o result.o textdisplay.o square.o piece.o move.o display.o gui.o guielem.o subject.o observer.o )
+OBJECTS= $(addprefix code/, main.o game.o exception.o color.o board.o result.o textdisplay.o square.o piece.o move.o display.o gui.o guielem.o subject.o observer.o guiboard.o )
 GTEST_DIR = testing
 TEST_DIR = testing/tests
 USER_DIR = ../code
