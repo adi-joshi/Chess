@@ -4,10 +4,19 @@
 #include "guielem.h"
 
 class GUIBoard : public GUIElem {
+  struct ScreenPos {
+    int x;
+    int y;
+  };
+  std::map<std::pair<Color, PieceName>, SDL_Texture*> piece_textures;
+  std::vector<std::tuple<Color, PieceName, ScreenPos>> positions;
+  SDL_Texture *board;
+  void draw_board(SDL_Renderer *r);
   public:
-  using GUIElem::GUIElem;
+  GUIBoard(int win_w, int win_h, std::shared_ptr<Board> b);
   void handle(SDL_Renderer *r) override;
-  void update(void) override;
+  void load_assets(SDL_Renderer *r) override;
+  void update(SDL_Renderer *r) override;
   ~GUIBoard(void);
 };
 
