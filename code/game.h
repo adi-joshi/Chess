@@ -9,7 +9,6 @@
 class Game {
   std::shared_ptr<Board> b;
   std::shared_ptr<Display> td;
-  Color turn;
   public:
   Game(std::string display);
   void play();

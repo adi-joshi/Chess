@@ -6,20 +6,24 @@
 #include <iostream>
 
 Game::Game(std::string display) {
-  if (display == "gui") {
-    td = std::make_shared<GUI>();
-  } else {
-    td = std::make_shared<TextDisplay>();
-  }
   b = std::make_shared<Board>();
   b->setup_board();
+  if (display == "gui") {
+    td = std::make_shared<GUI>(b);
+  } else {
+    td = std::make_shared<TextDisplay>(b);
+  }
+  /*
   auto begin = b->get_pieces_cbegin();
   auto end = b->get_pieces_cend();
   td->draw_board(begin, end);
   turn = Color::White;
+  */
 }
 
 void Game::play(void) {
+  td->handle_input();
+  /*
   td->welcome_msg();
   td->print_board();
   while(!b->game_end()) {
@@ -43,6 +47,7 @@ void Game::play(void) {
     td->print_board();
   }
   td->print_winner(b->winner());
+  */
   return;
 }
 
