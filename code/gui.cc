@@ -14,13 +14,18 @@ GUI::GUI(std::shared_ptr<Board> b)
     std::cout << SDL_GetError() << std::endl;
   }
   winren = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-  gb = std::make_unique<GUIBoard>(win_w, win_h, b);
+  gb = std::make_unique<GUIBoard>(b);
   gb->load_assets(winren);
+  SDL_Rect r = {0, 0, 800, 400};
+  gb->set_viewport(&r);
+  //SDL_RenderSetViewport(winren, &r);
   gb->update(winren);
 }
 
 void GUI::handle_input(void) {
   while(1) {
+    SDL_Rect r = {0, 0, 800, 400};
+    SDL_RenderSetViewport(winren, &r);
     gb->handle(winren);
   }
 }
