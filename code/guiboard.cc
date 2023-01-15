@@ -19,19 +19,19 @@ GUIBoard::GUIBoard(std::shared_ptr<Board> b)
 {}
 
 void GUIBoard::load_assets(SDL_Renderer *r) {
-  board = load_image("images/wood.jpg", r);
-  piece_textures[std::make_pair(Color::White, PieceName::King)] = load_image("images/wK.svg", r); 
-  piece_textures[std::make_pair(Color::White, PieceName::Queen)] = load_image("images/wQ.svg", r); 
-  piece_textures[std::make_pair(Color::White, PieceName::Rook)] = load_image("images/wR.svg", r); 
-  piece_textures[std::make_pair(Color::White, PieceName::Bishop)] = load_image("images/wB.svg", r); 
-  piece_textures[std::make_pair(Color::White, PieceName::Knight)] = load_image("images/wN.svg", r); 
-  piece_textures[std::make_pair(Color::White, PieceName::Pawn)] = load_image("images/wP.svg", r); 
-  piece_textures[std::make_pair(Color::Black, PieceName::King)] = load_image("images/bK.svg", r); 
-  piece_textures[std::make_pair(Color::Black, PieceName::Queen)] = load_image("images/bQ.svg", r); 
-  piece_textures[std::make_pair(Color::Black, PieceName::Rook)] = load_image("images/bR.svg", r); 
-  piece_textures[std::make_pair(Color::Black, PieceName::Bishop)] = load_image("images/bB.svg", r); 
-  piece_textures[std::make_pair(Color::Black, PieceName::Knight)] = load_image("images/bN.svg", r); 
-  piece_textures[std::make_pair(Color::Black, PieceName::Pawn)] = load_image("images/bP.svg", r); 
+  board = load_image("assets/images/wood.jpg", r);
+  piece_textures[std::make_pair(Color::White, PieceName::King)] = load_image("assets/images/wK.svg", r); 
+  piece_textures[std::make_pair(Color::White, PieceName::Queen)] = load_image("assets/images/wQ.svg", r); 
+  piece_textures[std::make_pair(Color::White, PieceName::Rook)] = load_image("assets/images/wR.svg", r); 
+  piece_textures[std::make_pair(Color::White, PieceName::Bishop)] = load_image("assets/images/wB.svg", r); 
+  piece_textures[std::make_pair(Color::White, PieceName::Knight)] = load_image("assets/images/wN.svg", r); 
+  piece_textures[std::make_pair(Color::White, PieceName::Pawn)] = load_image("assets/images/wP.svg", r); 
+  piece_textures[std::make_pair(Color::Black, PieceName::King)] = load_image("assets/images/bK.svg", r); 
+  piece_textures[std::make_pair(Color::Black, PieceName::Queen)] = load_image("assets/images/bQ.svg", r); 
+  piece_textures[std::make_pair(Color::Black, PieceName::Rook)] = load_image("assets/images/bR.svg", r); 
+  piece_textures[std::make_pair(Color::Black, PieceName::Bishop)] = load_image("assets/images/bB.svg", r); 
+  piece_textures[std::make_pair(Color::Black, PieceName::Knight)] = load_image("assets/images/bN.svg", r); 
+  piece_textures[std::make_pair(Color::Black, PieceName::Pawn)] = load_image("assets/images/bP.svg", r); 
 }
 
 // handles input and edits the GUI board as required.
