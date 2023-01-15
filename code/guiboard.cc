@@ -121,13 +121,23 @@ void GUIBoard::update(SDL_Renderer *r) {
   auto end = b->get_pieces_cend();
   positions.clear();
   auto temp = begin;
+  auto board_drawing_rect = this->board_drawing_specs();
   while(temp != end) {
-    ScreenPos sp{ ((*temp)->get_cursq()->get_col() - 1) * (win_h / 8), (win_w - ((*temp)->get_cursq()->get_row() * (win_w / 8))) };
+    ScreenPos sp{ board_drawing_rect.x + ((*temp)->get_cursq()->get_col() - 1) * (board_drawing_rect.h / 8),
+                  board_drawing_rect.y + (board_drawing_rect.w - ((*temp)->get_cursq()->get_row() * (board_drawing_rect.w / 8))) };
     positions.push_back(std::tuple<Color, PieceName, ScreenPos>((*temp)->get_color(), (*temp)->get_name(), sp));
     temp++;
   }
   this->draw_board(r);
   return;
+}
+
+SDL_Rect GUIBoard::board_drawing_specs(void) {
+  auto board_size = std::min(viewport->w, viewport->h);
+  return {(viewport->w / 2) - (board_size / 2),
+          (viewport->h / 2) - (board_size / 2),
+          board_size,
+          board_size };
 }
 
 // draws the board on the screen.
@@ -136,10 +146,15 @@ void GUIBoard::draw_board(SDL_Renderer *r) {
   auto win_w = viewport->w;
   SDL_RenderSetViewport(r, viewport);
   int len = positions.size();
-  render(r, board, {0, 0, win_w, win_h});
+
+  // rendering board
+  auto board_drawing_rect = this->board_drawing_specs();
+  render(r, board, board_drawing_rect);
+
   for (int i = 0; i < len; i++) {
     render(r, piece_textures[std::make_pair(std::get<0>(positions[i]), std::get<1>(positions[i]))],
-        { std::get<2>(positions[i]).x, std::get<2>(positions[i]).y, win_w / 8, win_h / 8 });
+        { std::get<2>(positions[i]).x, std::get<2>(positions[i]).y,
+        board_drawing_rect.w / 8, board_drawing_rect.h / 8});
   }
   SDL_RenderPresent(r);
   return;
