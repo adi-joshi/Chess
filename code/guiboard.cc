@@ -14,8 +14,8 @@ static void render(SDL_Renderer *ren, SDL_Texture *t, SDL_Rect r) {
   SDL_RenderCopy(ren, t, NULL, &r);
 }
 
-GUIBoard::GUIBoard(int win_w, int win_h, std::shared_ptr<Board> b)
-  : GUIElem(win_w, win_h, b)
+GUIBoard::GUIBoard(std::shared_ptr<Board> b)
+  : GUIElem(b)
 {}
 
 void GUIBoard::load_assets(SDL_Renderer *r) {
@@ -35,11 +35,13 @@ void GUIBoard::load_assets(SDL_Renderer *r) {
 }
 
 // handles input and edits the GUI board as required.
-// TODO
 void GUIBoard::handle(SDL_Renderer *r) {
   if (r == nullptr) {
     return;
   }
+  auto win_h = viewport->h;
+  auto win_w = viewport->w;
+  SDL_RenderSetViewport(r, viewport);
   auto m = std::make_shared<Move>();
   SDL_Event e;
   ScreenPos origpos{0,0};
@@ -112,6 +114,9 @@ outer:
 // gets info that this element needs from Board class, and then
 // call draw_board.
 void GUIBoard::update(SDL_Renderer *r) {
+  auto win_h = viewport->h;
+  auto win_w = viewport->w;
+  SDL_RenderSetViewport(r, viewport);
   auto begin = b->get_pieces_cbegin();
   auto end = b->get_pieces_cend();
   positions.clear();
@@ -127,6 +132,9 @@ void GUIBoard::update(SDL_Renderer *r) {
 
 // draws the board on the screen.
 void GUIBoard::draw_board(SDL_Renderer *r) {
+  auto win_h = viewport->h;
+  auto win_w = viewport->w;
+  SDL_RenderSetViewport(r, viewport);
   int len = positions.size();
   render(r, board, {0, 0, win_w, win_h});
   for (int i = 0; i < len; i++) {

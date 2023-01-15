@@ -9,13 +9,18 @@
 
 class GUIElem : public Observer, public Subject {
   protected:
-  int win_w;
-  int win_h;
+  // the window area on which to display is determined by the renderer.
   std::shared_ptr<Board> b;
+  SDL_Rect *viewport;
   public:
-  GUIElem(int win_w, int win_h, std::shared_ptr<Board> b);
+  GUIElem(std::shared_ptr<Board> b);
   virtual void load_assets(SDL_Renderer *r) = 0;
   virtual void handle(SDL_Renderer *r) = 0;
+  // copies this->viewport and then returns it.
+  SDL_Rect get_viewport(void);
+
+  // changes values of this->viewport to vp
+  void set_viewport(SDL_Rect *vp);
   ~GUIElem(void);
 };
 

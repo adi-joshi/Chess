@@ -13,7 +13,7 @@ class GUIBoard : public GUIElem {
   SDL_Texture *board;
   void draw_board(SDL_Renderer *r);
   public:
-  GUIBoard(int win_w, int win_h, std::shared_ptr<Board> b);
+  GUIBoard(std::shared_ptr<Board> b);
   void handle(SDL_Renderer *r) override;
   void load_assets(SDL_Renderer *r) override;
   void update(SDL_Renderer *r) override;
