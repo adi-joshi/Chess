@@ -15,8 +15,8 @@ class GUI : public Display {
   SDL_Window *window;
   SDL_Renderer *winren;
   std::shared_ptr<Board> b;
-  std::unique_ptr<GUIBoard> gb;
-  std::unique_ptr<GUIMoves> gm;
+  std::shared_ptr<GUIBoard> gb;
+  std::shared_ptr<GUIMoves> gm;
   public:
   GUI(std::shared_ptr<Board> b);
   void handle_input(void);
