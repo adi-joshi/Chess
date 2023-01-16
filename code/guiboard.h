@@ -12,12 +12,13 @@ class GUIBoard : public GUIElem {
   std::vector<std::tuple<Color, PieceName, ScreenPos>> positions;
   SDL_Texture *board;
   void draw_board(SDL_Renderer *r);
-  SDL_Rect board_drawing_specs(void);
+  SDL_Rect board_region;
   public:
   GUIBoard(std::shared_ptr<Board> b);
   void handle(SDL_Renderer *r) override;
   void load_assets(SDL_Renderer *r) override;
   void update(SDL_Renderer *r) override;
+  void set_viewport(SDL_Rect *vp) override;
   ~GUIBoard(void);
 };
 
