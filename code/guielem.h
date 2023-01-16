@@ -20,7 +20,7 @@ class GUIElem : public Observer, public Subject {
   SDL_Rect get_viewport(void);
 
   // changes values of this->viewport to vp
-  void set_viewport(SDL_Rect *vp);
+  virtual void set_viewport(SDL_Rect *vp);
   ~GUIElem(void);
 };
 
