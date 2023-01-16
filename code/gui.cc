@@ -15,17 +15,20 @@ GUI::GUI(std::shared_ptr<Board> b)
     std::cout << SDL_GetError() << std::endl;
   }
   winren = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-  gb = std::make_unique<GUIBoard>(b);
+  gb = std::make_shared<GUIBoard>(b);
   gb->load_assets(winren);
   SDL_Rect r = {0, 0, 400, 800};
   gb->set_viewport(&r);
   gb->update(winren);
 
-  gm = std::make_unique<GUIMoves>(b);
+  gm = std::make_shared<GUIMoves>(b);
   gm->load_assets(winren);
   r = {400, 0, 400, 800};
   gm->set_viewport(&r);
   gm->update(winren);
+
+  gb->add_observer(gm);
+  gm->add_observer(gb);
 }
 
 void GUI::handle_input(void) {
