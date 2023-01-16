@@ -130,7 +130,9 @@ std::vector<std::shared_ptr<Piece>>::const_iterator Board::get_pieces_cend(void)
 }
 
 std::vector<std::shared_ptr<Move>>::const_iterator Board::get_moves_cbegin(void) {
-  return moves.cbegin()++; // as moves.cbegin() is nullptr
+  auto begin = moves.cbegin();
+  begin++;
+  return begin;
 }
 
 std::vector<std::shared_ptr<Move>>::const_iterator Board::get_moves_cend(void) {
