@@ -7,6 +7,7 @@
 #include "SDL.h"
 #include "display.h"
 #include "guiboard.h"
+#include "guimoves.h"
 
 class GUI : public Display {
   const int win_w;
@@ -15,6 +16,7 @@ class GUI : public Display {
   SDL_Renderer *winren;
   std::shared_ptr<Board> b;
   std::unique_ptr<GUIBoard> gb;
+  std::unique_ptr<GUIMoves> gm;
   public:
   GUI(std::shared_ptr<Board> b);
   void handle_input(void);

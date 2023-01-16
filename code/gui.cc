@@ -3,6 +3,7 @@
 #include "textdisplay.h"
 #include "SDL_image.h"
 #include "guiboard.h"
+#include "guimoves.h"
 
 GUI::GUI(std::shared_ptr<Board> b)
   : Display(b), win_w{800}, win_h{800}
@@ -16,16 +17,19 @@ GUI::GUI(std::shared_ptr<Board> b)
   winren = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
   gb = std::make_unique<GUIBoard>(b);
   gb->load_assets(winren);
-  SDL_Rect r = {0, 0, 800, 400};
+  SDL_Rect r = {0, 0, 400, 800};
   gb->set_viewport(&r);
-  //SDL_RenderSetViewport(winren, &r);
   gb->update(winren);
+
+  gm = std::make_unique<GUIMoves>(b);
+  gm->load_assets(winren);
+  r = {400, 0, 400, 800};
+  gm->set_viewport(&r);
+  gm->update(winren);
 }
 
 void GUI::handle_input(void) {
   while(1) {
-    SDL_Rect r = {0, 0, 800, 400};
-    SDL_RenderSetViewport(winren, &r);
     gb->handle(winren);
   }
 }
