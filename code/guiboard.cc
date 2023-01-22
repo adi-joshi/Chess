@@ -51,7 +51,7 @@ void GUIBoard::handle(SDL_Renderer *r) {
   }
   auto win_h = viewport->h;
   auto win_w = viewport->w;
-  SDL_RenderSetViewport(r, viewport);
+  SDL_RenderSetViewport(r, &board_region);
   auto m = std::make_shared<Move>();
   SDL_Event e;
   ScreenPos origpos{0,0};
@@ -64,14 +64,15 @@ void GUIBoard::handle(SDL_Renderer *r) {
       // get current position of mouse
       int x, y;
       SDL_GetMouseState(&x, &y);
+      // SDL_GetRelativeMouseState(&x, &y);
       int id = -1;
       int len = positions.size();
+      x -= board_region.x;
+      y -= board_region.y;
       for (int i = 0; i < len; i++) {
         auto thispos = std::get<2>(positions[i]);
         auto thiscolor = std::get<0>(positions[i]);
         auto turn = b->whose_move();
-        // std::cout << thispos.x << " " << thispos.y << " " << x << " " << y << " " << win_h / 8 << std::endl; 
-        // GUI shouldn't care about whose turn it is.
         if (thiscolor == turn &&
             thispos.x < x && thispos.y < y &&
             x < thispos.x + board_region.w / 8 && y < thispos.y + board_region.h / 8) {
@@ -81,7 +82,7 @@ void GUIBoard::handle(SDL_Renderer *r) {
       }
       if (id != -1) { // i.e. clicked a piece
                       // put the piece under the mouse
-        m->from = std::make_shared<Square>( 8 - (y - board_region.y) / (board_region.h / 8), (x - board_region.x + (board_region.w / 8)) / (board_region.w / 8) );
+        m->from = std::make_shared<Square>( 8 - y / (board_region.h / 8), (x + (board_region.w / 8)) / (board_region.w / 8) );
         m->color = b->whose_move();
         origpos = std::get<2>(positions[id]);
         std::get<2>(positions[id]) = { x - board_region.w / 16, y - board_region.h / 16 };
@@ -91,15 +92,19 @@ void GUIBoard::handle(SDL_Renderer *r) {
                                            // std::cout << "Mouse In Motion" << std::endl;
             int x, y;
             SDL_GetMouseState(&x, &y);
+	    x -= board_region.x;
+	    y -= board_region.y;
             std::get<2>(positions[id]) = { x - board_region.w / 16, y - board_region.h / 16 };
             this->draw_board(r);
           } else if (e.type == SDL_MOUSEBUTTONUP) { // mouse button is now up, so find the square that the current position corresponds to, and return this as the move
                                                     // std::cout << "Mouse button is up" << std::endl;
             int x, y;
             SDL_GetMouseState(&x, &y);
+	    x -= board_region.x;
+	    y -= board_region.y;
             std::get<2>(positions[id]) = { x - board_region.w / 16, y - board_region.h / 16 };
             this->draw_board(r);
-            m->to = std::make_shared<Square>( 8 - (y - board_region.y) / (board_region.h / 8), (x - board_region.x + (board_region.w / 8)) / (board_region.w / 8) );
+            m->to = std::make_shared<Square>( 8 - y / (board_region.h / 8), (x + (board_region.w / 8)) / (board_region.w / 8) );
             // std::cout << x << " " << y << ": " << m->to->get_row() << " " << m->to->get_col() << " " << m->from->get_row() << " " << m->from->get_col() << std::endl;
             std::get<2>(positions[id]) = origpos;
             // this->print_board();
@@ -126,14 +131,14 @@ outer:
 void GUIBoard::update(SDL_Renderer *r) {
   auto win_h = viewport->h;
   auto win_w = viewport->w;
-  SDL_RenderSetViewport(r, viewport);
+  SDL_RenderSetViewport(r, &board_region);
   auto begin = b->get_pieces_cbegin();
   auto end = b->get_pieces_cend();
   positions.clear();
   auto temp = begin;
   while(temp != end) {
-    ScreenPos sp{ board_region.x + ((*temp)->get_cursq()->get_col() - 1) * (board_region.h / 8),
-                  board_region.y + (board_region.w - ((*temp)->get_cursq()->get_row() * (board_region.w / 8))) };
+    ScreenPos sp{ ((*temp)->get_cursq()->get_col() - 1) * (board_region.h / 8),
+                  (board_region.w - ((*temp)->get_cursq()->get_row() * (board_region.w / 8))) };
     positions.push_back(std::tuple<Color, PieceName, ScreenPos>((*temp)->get_color(), (*temp)->get_name(), sp));
     temp++;
   }
@@ -145,11 +150,11 @@ void GUIBoard::update(SDL_Renderer *r) {
 void GUIBoard::draw_board(SDL_Renderer *r) {
   auto win_h = viewport->h;
   auto win_w = viewport->w;
-  SDL_RenderSetViewport(r, viewport);
+  SDL_RenderSetViewport(r, &board_region);
   int len = positions.size();
 
   // rendering board
-  render(r, board, board_region);
+  render(r, board, { 0, 0, board_region.w, board_region.h });
 
   for (int i = 0; i < len; i++) {
     render(r, piece_textures[std::make_pair(std::get<0>(positions[i]), std::get<1>(positions[i]))],
