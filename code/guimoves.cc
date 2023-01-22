@@ -78,7 +78,7 @@ void GUIMoves::update(SDL_Renderer *r) {
     movestring += " ";
   }
   SDL_RenderSetViewport(r, viewport);
-  auto text_surface = TTF_RenderText_Solid_Wrapped(f, movestring.c_str() , { 255,255,255, 255 }, 300);
+  auto text_surface = TTF_RenderText_Solid_Wrapped(f, movestring.c_str() , { 0, 0, 0, 255 }, 300);
   if (text_surface == nullptr) {
     return;
   }
