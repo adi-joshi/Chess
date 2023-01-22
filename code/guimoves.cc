@@ -33,7 +33,7 @@ GUIMoves::GUIMoves(std::shared_ptr<Board> b)
   if(TTF_Init() != 0) {
     exit(1);
   }
-  this->f = TTF_OpenFont("assets/fonts/FreeSerif.ttf", 20);
+  this->f = TTF_OpenFont("assets/fonts/OpenSans-Regular.ttf", 20);
 }
 
 void GUIMoves::load_assets(SDL_Renderer *r) {

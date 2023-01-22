@@ -37,7 +37,7 @@ How to play the GUI-based game:
 ## References
 - Board image: Made by "the lila authors and pirouetti". Taken from "https://github.com/lichess-org/lila/blob/master/public/images/board/wood.jpg" under the AGPLv3+ license on June 25, 2022.
 - Piece images: Made by "Colin M.L. Burnett". Taken from "https://github.com/lichess-org/lila/blob/master/public/piece/cburnett" under the GPLv2+ license on June 25, 2022.
-- Fonts: Are the "Free UCS Scalable Fonts". Taken from "http://ftp.gnu.org/gnu/freefont/" on Jan 15, 2023.
+- Fonts: The Open Sans font is used. Made by "Steve Matteson". Taken from "https://www.1001fonts.com/open-sans-font.html" under the Apache License, Version 2.0.
 
 ## To do List:
 - Moves so far in GUI
