@@ -81,8 +81,7 @@ void TextDisplay::handle_input(void) {
     if (s.size() == 1 && s[0] == 'p') {
       auto m = std::make_shared<Move>();
       m->it = InputType::Print;
-      auto begin = b->get_moves_cbegin();
-      auto end = b->get_moves_cend();
+      auto [begin, end] = b->get_moves_const_iter();
       this->print_moves(begin, end);
     } else if (s == "quit") {
       auto m = std::make_shared<Move>();
@@ -122,8 +121,7 @@ void TextDisplay::handle_input(void) {
         b->move(retval);
       } catch(...) {}
       this->clear_board();
-      auto begin = b->get_pieces_cbegin();
-      auto end = b->get_pieces_cend();
+      auto [begin, end] = b->get_pieces_const_iter();
       this->draw_board(begin, end);
       this->print_board();
     } else {

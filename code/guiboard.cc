@@ -126,8 +126,7 @@ void GUIBoard::update(SDL_Renderer *r) {
   auto win_h = viewport->h;
   auto win_w = viewport->w;
   SDL_RenderSetViewport(r, &board_region);
-  auto begin = b->get_pieces_cbegin();
-  auto end = b->get_pieces_cend();
+  auto [begin, end] = b->get_pieces_const_iter();
   positions.clear();
   auto temp = begin;
   while(temp != end) {

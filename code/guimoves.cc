@@ -53,8 +53,7 @@ void GUIMoves::handle(SDL_Renderer *r, SDL_Event *e) {
 }
 
 void GUIMoves::update(SDL_Renderer *r) {
-  auto begin = b->get_moves_cbegin();
-  auto end = b->get_moves_cend();
+  auto [begin, end] = b->get_moves_const_iter();
   std::string movestring = "";
   int i = 1;
   for (auto temp = begin; temp != end; temp++) {

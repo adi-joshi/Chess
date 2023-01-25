@@ -121,22 +121,16 @@ void Board::setup_board(std::vector<std::shared_ptr<Piece>> pieces) {
   this->pieces = pieces;
 }
 
-std::vector<std::shared_ptr<Piece>>::const_iterator Board::get_pieces_cbegin(void) {
-  return pieces.cbegin();
+std::pair<Piece_CIter, Piece_CIter> Board::get_pieces_const_iter(void) {
+  return std::make_pair<Piece_CIter, Piece_CIter>(pieces.cbegin(),
+      pieces.cend());
 }
 
-std::vector<std::shared_ptr<Piece>>::const_iterator Board::get_pieces_cend(void) {
-  return pieces.cend();
-}
-
-std::vector<std::shared_ptr<Move>>::const_iterator Board::get_moves_cbegin(void) {
+std::pair<Move_CIter, Move_CIter> Board::get_moves_const_iter(void) {
   auto begin = moves.cbegin();
   begin++;
-  return begin;
-}
-
-std::vector<std::shared_ptr<Move>>::const_iterator Board::get_moves_cend(void) {
-  return moves.cend();
+  auto end = moves.cend();
+  return std::make_pair<Move_CIter, Move_CIter>(std::move(begin), std::move(end));
 }
 
 Color Board::whose_move(void) {

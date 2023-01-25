@@ -11,6 +11,9 @@
 #include "piece.h"
 #include "move.h"
 
+typedef std::vector<std::shared_ptr<Piece>>::const_iterator Piece_CIter;
+typedef std::vector<std::shared_ptr<Move>>::const_iterator Move_CIter;
+
 class Board : public std::enable_shared_from_this<Board> { // so that can send shared_ptr<Board> to pieces
   // vector <Object *> ob is in Subject class
   std::vector<std::shared_ptr<Piece>> pieces;
@@ -27,10 +30,8 @@ class Board : public std::enable_shared_from_this<Board> { // so that can send s
   // can't setup pieces in constructor, and can't use shared_from_this() in constructor
   void setup_board();
   void setup_board(std::vector<std::shared_ptr<Piece>> pieces);
-  std::vector<std::shared_ptr<Piece>>::const_iterator get_pieces_cbegin(void);
-  std::vector<std::shared_ptr<Piece>>::const_iterator get_pieces_cend(void);
-  std::vector<std::shared_ptr<Move>>::const_iterator get_moves_cbegin(void);
-  std::vector<std::shared_ptr<Move>>::const_iterator get_moves_cend(void);
+  std::pair<Piece_CIter, Piece_CIter> get_pieces_const_iter(void);
+  std::pair<Move_CIter, Move_CIter> get_moves_const_iter(void);
   Color whose_move(void);
   bool move(std::shared_ptr<Move> m);
   std::shared_ptr<Move> get_prev_move();
