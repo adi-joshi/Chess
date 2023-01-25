@@ -33,7 +33,8 @@ GUIMoves::GUIMoves(std::shared_ptr<Board> b)
   if(TTF_Init() != 0) {
     exit(1);
   }
-  this->f = TTF_OpenFont("assets/fonts/OpenSans-Regular.ttf", 20);
+  this->reg = TTF_OpenFont("assets/fonts/OpenSans-Regular.ttf", 20);
+  this->bold = TTF_OpenFont("assets/fonts/OpenSans-Bold.ttf", 20);
 }
 
 void GUIMoves::load_assets(SDL_Renderer *r) {
@@ -44,7 +45,7 @@ void GUIMoves::handle(SDL_Renderer *r, SDL_Event *e) {
   return;
   std::cout << "This function is called" << std::endl;
   SDL_RenderSetViewport(r, viewport);
-  auto text_surface = TTF_RenderText_Solid_Wrapped(f, "Helloaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", { 255,255,255, 255 }, 300);
+  auto text_surface = TTF_RenderText_Solid_Wrapped(reg, "Helloaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", { 255,255,255, 255 }, 300);
   auto text_texture = SDL_CreateTextureFromSurface(r, text_surface);
   SDL_Rect rect = {0, 0, text_surface->w, text_surface->h};
   SDL_RenderCopy(r, text_texture, NULL, &rect);
@@ -77,7 +78,7 @@ void GUIMoves::update(SDL_Renderer *r) {
     movestring += " ";
   }
   SDL_RenderSetViewport(r, viewport);
-  auto text_surface = TTF_RenderText_Solid_Wrapped(f, movestring.c_str() , { 0, 0, 0, 255 }, 300);
+  auto text_surface = TTF_RenderText_Solid_Wrapped(reg, movestring.c_str() , { 0, 0, 0, 255 }, 300);
   if (text_surface == nullptr) {
     return;
   }
@@ -89,6 +90,7 @@ void GUIMoves::update(SDL_Renderer *r) {
 }
 
 GUIMoves::~GUIMoves(void) {
-  TTF_CloseFont(f);
+  TTF_CloseFont(reg);
+  TTF_CloseFont(bold);
   TTF_Quit();
 }

@@ -5,7 +5,8 @@
 #include "SDL_ttf.h"
 
 class GUIMoves : public GUIElem {
-  TTF_Font *f;
+  TTF_Font *reg; // regular font
+  TTF_Font *bold; // bold font
   public:
   GUIMoves(std::shared_ptr<Board> b);
   void load_assets(SDL_Renderer *r) override;
