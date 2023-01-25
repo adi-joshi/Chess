@@ -108,19 +108,16 @@ void GUIBoard::handle(SDL_Renderer *r, SDL_Event *e) {
       // std::cout << x << " " << y << ": " << m->to->get_row() << " " << m->to->get_col() << " " << m->from->get_row() << " " << m->from->get_col() << std::endl;
       std::get<2>(positions[id]) = origpos;
       id = -1;
-      goto outer;
+      try {
+	b->move(m);
+	auto temp = m;
+	m = std::make_shared<Move>();
+      } catch(...) {}
+      this->update(r);
+      this->notify_observers(r);
+      return;
     default: return;
   }
-outer:
-  // TODO: Make b->move just return true or false, and not throw. Will be faster.
-  try {
-    b->move(m);
-    auto temp = m;
-    m = std::make_shared<Move>();
-  } catch(...) {}
-  this->update(r);
-  this->notify_observers(r);
-  return;
 }
 
 // gets info that this element needs from Board class, and then
