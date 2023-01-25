@@ -15,7 +15,7 @@ class GUIElem : public Observer, public Subject {
   public:
   GUIElem(std::shared_ptr<Board> b);
   virtual void load_assets(SDL_Renderer *r) = 0;
-  virtual void handle(SDL_Renderer *r) = 0;
+  virtual void handle(SDL_Renderer *r, SDL_Event *e) = 0;
   // copies this->viewport and then returns it.
   SDL_Rect get_viewport(void);
 

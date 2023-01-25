@@ -40,7 +40,7 @@ void GUIMoves::load_assets(SDL_Renderer *r) {
   return;
 }
 
-void GUIMoves::handle(SDL_Renderer *r) {
+void GUIMoves::handle(SDL_Renderer *r, SDL_Event *e) {
   return;
   std::cout << "This function is called" << std::endl;
   SDL_RenderSetViewport(r, viewport);

@@ -34,9 +34,22 @@ GUI::GUI(std::shared_ptr<Board> b)
 }
 
 void GUI::handle_input(void) {
+  SDL_Event e;
   while(1) {
-    gb->handle(winren);
+    SDL_WaitEvent(&e);
+    switch (e.type) {
+      case SDL_QUIT: goto outer; break;
+      case SDL_MOUSEBUTTONDOWN:
+      case SDL_MOUSEMOTION:
+      case SDL_MOUSEBUTTONUP:
+		     gb->handle(winren, &e); break;
+      case SDL_KEYDOWN:
+		     gm->handle(winren, &e); break;
+      default: break;
+    }
   }
+outer:
+  return;
 }
 
 void GUI::print_error(Exception e) {
