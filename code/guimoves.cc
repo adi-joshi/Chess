@@ -42,14 +42,24 @@ void GUIMoves::load_assets(SDL_Renderer *r) {
 }
 
 void GUIMoves::handle(SDL_Renderer *r, SDL_Event *e) {
-  return;
-  std::cout << "This function is called" << std::endl;
-  SDL_RenderSetViewport(r, viewport);
-  auto text_surface = TTF_RenderText_Solid_Wrapped(reg, "Helloaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", { 255,255,255, 255 }, 300);
-  auto text_texture = SDL_CreateTextureFromSurface(r, text_surface);
-  SDL_Rect rect = {0, 0, text_surface->w, text_surface->h};
-  SDL_RenderCopy(r, text_texture, NULL, &rect);
-  SDL_RenderPresent(r);
+  if (r == nullptr || e == nullptr) {
+    return;
+  }
+  switch(e->type) {
+    case SDL_KEYDOWN:
+      switch(e->key.keysym.sym) {
+	case SDLK_LEFT:
+	  b->move_back();
+	  break;
+	case SDLK_RIGHT:
+	  b->move_forward(0); // change this to ask for which move to move forward to (among different variations)
+	  break;
+	default:
+	  break;
+      }
+  }
+  this->update(r);
+  this->notify_observers(r);
   return;
 }
 

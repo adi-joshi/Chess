@@ -60,7 +60,6 @@ void GUIBoard::handle(SDL_Renderer *r, SDL_Event *e) {
   int len = positions.size();
   switch(e->type) {
     case SDL_MOUSEBUTTONDOWN:
-      std::cout << "Mouse Button Down" << std::endl;
       // get current position of mouse
       SDL_GetMouseState(&x, &y);
       id = -1;
@@ -87,7 +86,6 @@ void GUIBoard::handle(SDL_Renderer *r, SDL_Event *e) {
       }
       return;
     case SDL_MOUSEMOTION:
-      std::cout << "Mouse Motion" << std::endl;
       if (id < 0) {
 	return;
       }
@@ -98,7 +96,6 @@ void GUIBoard::handle(SDL_Renderer *r, SDL_Event *e) {
       this->draw_board(r);
       return;
     case SDL_MOUSEBUTTONUP:
-      std::cout << "Mouse Button Up" << std::endl;
       SDL_GetMouseState(&x, &y);
       x -= board_region.x;
       y -= board_region.y;

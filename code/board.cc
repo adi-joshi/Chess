@@ -27,6 +27,27 @@ static char piecename_to_str(PieceName p, Color c) {
   return piece;
 }
 
+static std::pair<PieceName, Color> str_to_piecename(char c) {
+  PieceName p = PieceName::King;
+  Color col = Color::White;
+  switch (c) {
+    case 'K': p = PieceName::King; col = Color::White; break;
+    case 'Q': p = PieceName::Queen; col = Color::White; break;
+    case 'R': p = PieceName::Rook; col = Color::White; break;
+    case 'B': p = PieceName::Bishop; col = Color::White; break;
+    case 'N': p = PieceName::Knight; col = Color::White; break;
+    case 'P': p = PieceName::Pawn; col = Color::White; break;
+    case 'k': p = PieceName::King; col = Color::Black; break;
+    case 'q': p = PieceName::Queen; col = Color::Black; break;
+    case 'r': p = PieceName::Rook; col = Color::Black; break;
+    case 'b': p = PieceName::Bishop; col = Color::Black; break;
+    case 'n': p = PieceName::Knight; col = Color::Black; break;
+    case 'p': p = PieceName::Pawn; col = Color::Black; break;
+    default: break;
+  }
+  return std::make_pair<PieceName, Color>(std::move(p),std::move(col));
+}
+
 static std::string get_boardstring(std::vector<std::shared_ptr<Piece>>::const_iterator begin,
     std::vector<std::shared_ptr<Piece>>::const_iterator end) {
   std::string piece_positions = "";
@@ -37,31 +58,65 @@ static std::string get_boardstring(std::vector<std::shared_ptr<Piece>>::const_it
   }
   for (auto temp = begin; temp != end; temp++) {
     auto c = piecename_to_str((*temp)->get_name(), (*temp)->get_color());
-    piece_positions[(8 - (*temp)->get_cursq()->get_row()) * 8 + (*temp)->get_cursq()->get_col()] = c;
+    piece_positions[(8 - (*temp)->get_cursq()->get_row()) * 8 + ((*temp)->get_cursq()->get_col() - 1)] = c;
   }
-  std::string retval = "";
+  std::string retval = "/";
   for (int i = 0; i < 8; i++) {
     int blank = 0;
     for (int j = 0; j < 8; j++) {
       if (piece_positions[8*i + j] == ' ') {
         blank++;
-      } else {
-        if (blank != 0) {
-          retval += static_cast<char>(blank);
-        }
-        retval += piece_positions[8*i + j];
+	continue;
       }
+      if (blank != 0) {
+	char c = static_cast<char>(blank + '0');
+	retval += c;
+	blank = 0;
+      }
+      retval += piece_positions[8*i + j];
+    }
+    if (blank != 0) {
+      char c = static_cast<char>(blank + '0');
+      retval += c;
     }
     retval += '/';
   }
   return retval;
 }
 
+std::vector<std::shared_ptr<Piece>> Board::get_pieces_from_board_string(std::string board_string) {
+  std::vector<std::shared_ptr<Piece>> retval;
+  int square = 0;
+  for (auto c : board_string) {
+    if (c == '/') {
+      continue;
+    } else if (c >= '0' && c <= '9') {
+      square = square + c - '0';
+    } else if ((c >= 'a' && c <= 'z') ||
+	       (c >= 'A' && c <= 'Z')) {
+      auto [piecename, color] = str_to_piecename(c);
+      auto cursq = std::make_shared<Square>(8 - (square / 8), (square % 8) + 1);
+      switch(piecename) {
+	case PieceName::King: retval.push_back(std::make_shared<King>(shared_from_this(), cursq, color)); break;
+	case PieceName::Queen: retval.push_back(std::make_shared<Queen>(shared_from_this(), cursq, color)); break;
+	case PieceName::Rook: retval.push_back(std::make_shared<Rook>(shared_from_this(), cursq, color)); break;
+	case PieceName::Bishop: retval.push_back(std::make_shared<Bishop>(shared_from_this(), cursq, color)); break;
+	case PieceName::Knight: retval.push_back(std::make_shared<Knight>(shared_from_this(), cursq, color)); break;
+	case PieceName::Pawn: retval.push_back(std::make_shared<Pawn>(shared_from_this(), cursq, color)); break;
+      }
+      square++;
+    }
+  }
+  return retval;
+}
+
 Board::Board(void) {
   moves.push_back(nullptr);
+  moves_id = 0;
 }
 
 void Board::setup_board(void) {
+  pieces.clear();
   for (int i = 1; i <= 8; i++) {
     auto white_pawn = std::make_shared<Pawn>(shared_from_this(), std::make_shared<Square>(2,i), Color::White);
     pieces.push_back(white_pawn);
@@ -131,6 +186,31 @@ std::pair<Move_CIter, Move_CIter> Board::get_moves_const_iter(void) {
   begin++;
   auto end = moves.cend();
   return std::make_pair<Move_CIter, Move_CIter>(std::move(begin), std::move(end));
+}
+
+void Board::move_back(void) {
+  if (moves_id <= 0) {
+    return;
+  } else if (moves_id == 1) {
+    moves_id--;
+    this->setup_board();
+    return;
+  } else {
+    moves_id--;
+    this->setup_board(this->get_pieces_from_board_string(moves[moves_id]->board_string));
+    return;
+  }
+  // mt->prev_move();
+}
+
+void Board::move_forward(int variation) {
+  if (moves_id >= moves.size() - 1) {
+    return;
+  }
+  moves_id++;
+  this->setup_board(this->get_pieces_from_board_string(moves[moves_id]->board_string));
+  return;
+  // mt->next_move();
 }
 
 Color Board::whose_move(void) {
@@ -226,8 +306,10 @@ bool Board::move(std::shared_ptr<Move> m) {
       }
 
       std::string curboard = get_boardstring(pieces.cbegin(), pieces.cend());
+      m->board_string = curboard;
       board_string[curboard]++;
       moves.push_back(m);
+      moves_id++;
 
       this->turn = static_cast<Color>((static_cast<int>(this->turn) + 1) % 2);
       moved = true;
