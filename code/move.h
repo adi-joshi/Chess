@@ -37,6 +37,7 @@ struct Move {
   PieceName promoted_to;
   std::string error_str = "";
   std::vector<std::vector<std::shared_ptr<Piece>>::iterator> pieces_to_capture;
+  std::string board_string;
 
   /*
   Move(Color c, Square from, Square to); // For UCI notation, e.g. e2e4
