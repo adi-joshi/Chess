@@ -226,9 +226,8 @@ bool Board::move(std::shared_ptr<Move> m) {
      return false;
      }
      */
-  if (m == nullptr) {
-    return false;
-  } else if (m->it != InputType::Move) {
+  if (m == nullptr || m->it != InputType::Move ||
+      m->from == nullptr || m->to == nullptr) {
     return false;
   }
   auto from = m->from;
