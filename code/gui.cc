@@ -19,13 +19,13 @@ GUI::GUI(std::shared_ptr<Board> b)
   SDL_RenderClear(winren);
   gb = std::make_shared<GUIBoard>(b);
   gb->load_assets(winren);
-  SDL_Rect r = {0, 0, 400, 800};
+  SDL_Rect r = {0, 0, win_w / 2, win_h};
   gb->set_viewport(&r);
   gb->update(winren);
 
   gm = std::make_shared<GUIMoves>(b);
   gm->load_assets(winren);
-  r = {400, 0, 400, 800};
+  r = {win_w / 2, 0, win_w / 2, win_h};
   gm->set_viewport(&r);
   gm->update(winren);
 
@@ -38,13 +38,29 @@ void GUI::handle_input(void) {
   while(1) {
     SDL_WaitEvent(&e);
     switch (e.type) {
-      case SDL_QUIT: goto outer; break;
+      case SDL_QUIT:
+	goto outer;
+	break;
+      case SDL_WINDOWEVENT:
+	switch(e.window.event) {
+	  case SDL_WINDOWEVENT_RESIZED:
+	    win_w = e.window.data1;
+	    win_h = e.window.data2;
+	    SDL_SetRenderDrawColor(winren, 255, 255, 255, 255);
+	    SDL_RenderClear(winren);
+	    SDL_Rect r = {0, 0, win_w / 2, win_h};
+	    gb->set_viewport(&r);
+	    r = {win_w / 2, 0, win_w / 2, win_h};
+	    gm->set_viewport(&r);
+	    gb->update(winren);
+	    gm->update(winren);
+	}
       case SDL_MOUSEBUTTONDOWN:
       case SDL_MOUSEMOTION:
       case SDL_MOUSEBUTTONUP:
-		     gb->handle(winren, &e); break;
+	gb->handle(winren, &e); break;
       case SDL_KEYDOWN:
-		     gm->handle(winren, &e); break;
+	gm->handle(winren, &e); break;
       default: break;
     }
   }

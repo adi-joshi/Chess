@@ -10,8 +10,8 @@
 #include "guimoves.h"
 
 class GUI : public Display {
-  const int win_w;
-  const int win_h;
+  int win_w;
+  int win_h;
   SDL_Window *window;
   SDL_Renderer *winren;
   std::shared_ptr<Board> b;
