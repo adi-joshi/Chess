@@ -194,8 +194,8 @@ void TextDisplay::print_board(void) {
   std::cout << "  a b c d e f g h" << std::endl;
 }
 
-void TextDisplay::print_moves(std::vector<std::shared_ptr<Move>>::const_iterator begin,
-                              std::vector<std::shared_ptr<Move>>::const_iterator end) {
+void TextDisplay::print_moves(MoveTree::const_iterator begin,
+                              MoveTree::const_iterator end) {
   int i = 1;
   for (auto temp = begin; temp != end; temp++) {
     std::string p = "";

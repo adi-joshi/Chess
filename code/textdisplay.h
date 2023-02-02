@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include "display.h"
+#include "movetree.h"
 
 class TextDisplay : public Display {
   std::array<std::array<std::string, 8>, 8> board;
@@ -12,8 +13,8 @@ class TextDisplay : public Display {
   void draw_board(std::vector<std::shared_ptr<Piece>>::const_iterator begin,
                   std::vector<std::shared_ptr<Piece>>::const_iterator end);
   void print_board(void);
-  void print_moves(std::vector<std::shared_ptr<Move>>::const_iterator begin,
-                   std::vector<std::shared_ptr<Move>>::const_iterator end);
+  void print_moves(MoveTree::const_iterator begin,
+                   MoveTree::const_iterator end);
   void print_winner(Result r);
   public:
   TextDisplay(std::shared_ptr<Board> b);
