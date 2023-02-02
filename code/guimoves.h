@@ -7,6 +7,14 @@
 class GUIMoves : public GUIElem {
   TTF_Font *reg; // regular font
   TTF_Font *bold; // bold font
+  struct Node {
+    SDL_Texture *t;
+    std::shared_ptr<const Move> m;
+    std::shared_ptr<Node> parent;
+    int next_node_idx = -1;
+    std::vector<std::shared_ptr<Node>> children;
+  };
+  std::shared_ptr<Node> root;
   public:
   GUIMoves(std::shared_ptr<Board> b);
   void load_assets(SDL_Renderer *r) override;

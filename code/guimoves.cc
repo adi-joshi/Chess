@@ -26,6 +26,23 @@ static char piecename_to_str(PieceName p, Color c) {
   return piece;
 }
 
+static std::string move_to_str(std::shared_ptr<const Move> m) {
+  std::string movestring = "";
+  char name = piecename_to_str(m->piecename, Color::White);
+  if (name != 'P') {
+    movestring += name;
+  }
+  movestring += m->pref;
+  if (m->mt == MoveType::Capture) {
+      movestring += "x";
+  }
+  char col = 'a' - 1 + m->to->get_col();
+  char row = '0' + m->to->get_row();
+  movestring += col;
+  movestring += row;
+  movestring += " ";
+  return movestring;
+}
 
 GUIMoves::GUIMoves(std::shared_ptr<Board> b)
   : GUIElem(b)
@@ -33,8 +50,10 @@ GUIMoves::GUIMoves(std::shared_ptr<Board> b)
   if(TTF_Init() != 0) {
     exit(1);
   }
-  this->reg = TTF_OpenFont("assets/fonts/OpenSans-Regular.ttf", 20);
-  this->bold = TTF_OpenFont("assets/fonts/OpenSans-Bold.ttf", 20);
+  this->reg = TTF_OpenFontDPI("assets/fonts/OpenSans-Regular.ttf", 7, 250, 250);
+  this->bold = TTF_OpenFontDPI("assets/fonts/OpenSans-Bold.ttf", 7, 250, 250);
+  root = std::make_shared<Node>();
+  root->parent = nullptr;
 }
 
 void GUIMoves::load_assets(SDL_Renderer *r) {
@@ -64,37 +83,113 @@ void GUIMoves::handle(SDL_Renderer *r, SDL_Event *e) {
 }
 
 void GUIMoves::update(SDL_Renderer *r) {
-  auto [begin, end] = b->get_moves_const_iter();
-  std::string movestring = "";
-  int i = 1;
-  for (auto temp = begin; temp != end; temp++) {
-    char name = piecename_to_str((*temp)->piecename, Color::White);
-    if ((*temp)->color == Color::White) {
-      movestring += static_cast<char>('0' + i);
-      movestring += ". ";
-      i++;
-    }
-    if (name != 'P') {
-      movestring += name;
-    }
-    movestring += (*temp)->pref;
-    if ((*temp)->mt == MoveType::Capture) {
-        movestring += "x";
-    }
-    char c = 'a' - 1 + (*temp)->to->get_col();
-    char r = '0' + (*temp)->to->get_row();
-    movestring += c;
-    movestring += r;
-    movestring += " ";
-  }
   SDL_RenderSetViewport(r, viewport);
-  auto text_surface = TTF_RenderText_Solid_Wrapped(reg, movestring.c_str() , { 0, 0, 0, 255 }, 300);
-  if (text_surface == nullptr) {
-    return;
+  auto [begin, end] = b->get_moves_const_iter();
+  int move_num = 0;
+  while(root->parent != nullptr) {
+    root = root->parent;
   }
-  auto text_texture = SDL_CreateTextureFromSurface(r, text_surface);
-  SDL_Rect rect = {0, 0, text_surface->w, text_surface->h};
-  SDL_RenderCopy(r, text_texture, NULL, &rect);
+  for (auto temp = begin; temp != end; ++temp) {
+    if (temp.get_tree_traversal() == TreeTraversal::NewNode) {
+      int i = 0;
+      for (; i < root->children.size(); i++) {
+	if ((*temp) == root->children[i]->m) {
+	  break;
+	}
+      }
+      if (i < root->children.size()) {
+	root->next_node_idx = root->children.size() > 1;
+	root = root->children[i];
+	if (root->m->color == Color::White) {
+	  move_num++;
+	}
+	continue;
+      }
+      bool is_main_variation = root->children.size() == 0;
+      root->next_node_idx = root->children.size() > 0;
+      auto node = std::make_shared<Node>();
+      node->m = (*temp);
+      node->parent = root;
+      root->children.push_back(node);
+      root = node;
+      std::string move = "";
+      if (node->m->color == Color::White) {
+	move_num++;
+	move = move + std::to_string(move_num) + ". ";
+      }
+      move += move_to_str(node->m);
+      auto text_surface = TTF_RenderText_Blended_Wrapped(is_main_variation ? bold : reg, move.c_str() , { 0, 0, 0, 255 }, 300);
+      auto text_texture = SDL_CreateTextureFromSurface(r, text_surface);
+      root->t = text_texture;
+    } else if (temp.get_tree_traversal() == TreeTraversal::Backtrack) {
+      root = root->parent;
+      if ((*temp)->color == Color::Black) {
+	move_num--;
+      }
+    }
+  }
+
+  // now present the above info in a nice way on the screen.
+  while(root->parent != nullptr) {
+    if (root->t == nullptr) {
+      std::cout << "Texture is Null" << std::endl;
+    }
+    root = root->parent;
+  }
+
+  std::cout << "Next Node Idx:" << root->next_node_idx << std::endl;
+  
+  int total_height = 0;
+  int total_width = 0;
+  bool is_backtrack = false;
+  SDL_SetRenderDrawColor(r, 255, 255, 255, 255);
+  SDL_Rect thisrect = {0, 0, viewport->w, viewport->h};
+  SDL_RenderFillRect(r, &thisrect);
+  while(1) {
+    if (!is_backtrack) {
+      int w;
+      int h;
+      if (SDL_QueryTexture(root->t, NULL, NULL, &w, &h) == 0) {
+	SDL_Rect rect = { total_width, total_height, w, h };
+	SDL_RenderCopy(r, root->t, NULL, &rect);
+	if (total_width + w > viewport->w) {
+	  total_width = 0;
+	  total_height += h;
+	} else {
+	  total_width += w;
+	}
+	std::cout << "Total width" << total_width << std::endl;
+      }
+    }
+    if (root->parent == nullptr &&
+	(root->children.size() == 0 || root->next_node_idx == -1)) {
+      std::cout << "Parent is Null and all children visited" << std::endl;
+      break;
+    } else if (root->children.size() == 0 || root->next_node_idx == -1) {
+      std::cout << "All children visited" << std::endl;
+      root = root->parent;
+      is_backtrack = true;
+    } else {
+      is_backtrack = false;
+      std::cout << "Going to child node " << root->next_node_idx << std::endl;
+      auto temp = root->next_node_idx;
+      if (root->next_node_idx == 0) {
+	std::cout << "Next_node_idx = -1" << std::endl;
+	root->next_node_idx = -1;
+      } else if (root->next_node_idx == root->children.size() - 1) {
+	std::cout << "Next_node_idx = 0" << std::endl;
+	root->next_node_idx = 0;
+      } else {
+	std::cout << "Next_node_idx++" << std::endl;
+	root->next_node_idx++;
+      }
+      root = root->children[temp];
+    }
+  }
+
+  while(root->parent != nullptr) {
+    root = root->parent;
+  }
   SDL_RenderPresent(r);
   return;
 }
