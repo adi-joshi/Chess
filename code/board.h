@@ -10,15 +10,17 @@
 #include "result.h"
 #include "piece.h"
 #include "move.h"
+#include "movetree.h"
 
 typedef std::vector<std::shared_ptr<Piece>>::const_iterator Piece_CIter;
-typedef std::vector<std::shared_ptr<Move>>::const_iterator Move_CIter;
+typedef MoveTree::const_iterator Move_CIter;
 
 class Board : public std::enable_shared_from_this<Board> { // so that can send shared_ptr<Board> to pieces
   // vector <Object *> ob is in Subject class
   std::vector<std::shared_ptr<Piece>> pieces;
   // MoveTree *mt;
-  std::vector<std::shared_ptr<Move>> moves;
+  std::unique_ptr<MoveTree> moves;
+  // std::vector<std::shared_ptr<Move>> moves;
   int moves_id = -1;
   std::map<std::string, int> board_string; // map<board_string, # times it occured> (for 3fold)
   Color turn = Color::White;

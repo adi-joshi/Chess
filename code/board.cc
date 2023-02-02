@@ -111,8 +111,7 @@ std::vector<std::shared_ptr<Piece>> Board::get_pieces_from_board_string(std::str
 }
 
 Board::Board(void) {
-  moves.push_back(nullptr);
-  moves_id = 0;
+  moves = std::make_unique<MoveTree>();
 }
 
 void Board::setup_board(void) {
@@ -182,35 +181,26 @@ std::pair<Piece_CIter, Piece_CIter> Board::get_pieces_const_iter(void) {
 }
 
 std::pair<Move_CIter, Move_CIter> Board::get_moves_const_iter(void) {
-  auto begin = moves.cbegin();
+  auto begin = moves->cbegin();
   begin++;
-  auto end = moves.cend();
+  auto end = moves->cend();
   return std::make_pair<Move_CIter, Move_CIter>(std::move(begin), std::move(end));
 }
 
 void Board::move_back(void) {
-  if (moves_id <= 0) {
-    return;
-  } else if (moves_id == 1) {
-    moves_id--;
-    this->setup_board();
-    return;
-  } else {
-    moves_id--;
-    this->setup_board(this->get_pieces_from_board_string(moves[moves_id]->board_string));
+  if (moves->prev_move()) {
+    this->turn = static_cast<Color>((static_cast<int>(this->turn) + 1) % 2);
+    this->setup_board(this->get_pieces_from_board_string(moves->get_current_move()->board_string));
     return;
   }
-  // mt->prev_move();
 }
 
 void Board::move_forward(int variation) {
-  if (moves_id >= moves.size() - 1) {
+  if (moves->next_move(variation)) {
+    this->turn = static_cast<Color>((static_cast<int>(this->turn) + 1) % 2);
+    this->setup_board(this->get_pieces_from_board_string(moves->get_current_move()->board_string));
     return;
   }
-  moves_id++;
-  this->setup_board(this->get_pieces_from_board_string(moves[moves_id]->board_string));
-  return;
-  // mt->next_move();
 }
 
 Color Board::whose_move(void) {
@@ -307,7 +297,7 @@ bool Board::move(std::shared_ptr<Move> m) {
       std::string curboard = get_boardstring(pieces.cbegin(), pieces.cend());
       m->board_string = curboard;
       board_string[curboard]++;
-      moves.push_back(m);
+      moves->add_move(m);
       moves_id++;
 
       this->turn = static_cast<Color>((static_cast<int>(this->turn) + 1) % 2);
@@ -333,7 +323,7 @@ bool Board::move(std::shared_ptr<Move> m) {
 }
 
 std::shared_ptr<Move> Board::get_prev_move(void) {
-  return moves[moves.size() - 1];
+  return moves->get_prev_move();
 }
 
 bool Board::game_end(void) {
