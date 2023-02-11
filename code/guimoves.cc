@@ -135,6 +135,7 @@ void GUIMoves::update(SDL_Renderer *r) {
   SDL_RenderSetViewport(r, viewport);
   auto [begin, end] = b->get_moves_const_iter();
   int move_num = 0;
+  bool is_main_variation = true;
   while(root->parent != nullptr) {
     root = root->parent;
   }
@@ -158,7 +159,6 @@ void GUIMoves::update(SDL_Renderer *r) {
 	}
 	continue;
       }
-      bool is_main_variation = root->children.size() == 0;
       root->next_node_idx = root->children.size() > 0;
       auto node = std::make_shared<Node>();
       node->m = (*temp);
@@ -176,6 +176,7 @@ void GUIMoves::update(SDL_Renderer *r) {
       root->t = text_texture;
     } else if (temp.get_tree_traversal() == TreeTraversal::Backtrack) {
       root = root->parent;
+      is_main_variation = false;
       if ((*temp)->color == Color::Black) {
 	move_num--;
       }
