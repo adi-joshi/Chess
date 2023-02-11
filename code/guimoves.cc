@@ -170,6 +170,8 @@ void GUIMoves::find_drawing_rectangles(SDL_Renderer *r) {
     printf("hi");
     auto temp = nodes.top();
     nodes.pop();
+    x = xs.top();
+    xs.pop();
     if (SDL_QueryTexture(temp->t, NULL, NULL, &w, &h) == 0) {
       SDL_Rect rect = { x, y, w, h };
       temp->position = rect;
@@ -184,16 +186,20 @@ void GUIMoves::find_drawing_rectangles(SDL_Renderer *r) {
 
     // TODO: set temp rect
     if (temp->children.size() == 0) {
-      x = xs.top();
-      xs.pop();
       y += h;
       continue;
     }
+    if (temp->children.size() > 1) {
+      y += h;
+      xs.push(0);
+    } else {
+      xs.push(x);
+    }
+    nodes.push(temp->children[0]);
     for (int i = temp->children.size() - 1; i >= 1; i--) {
       xs.push(x);
       nodes.push(temp->children[i]);
     }
-    nodes.push(temp->children[0]);
   }
   SDL_RenderPresent(r);
   return;
