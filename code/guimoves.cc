@@ -45,80 +45,6 @@ static std::string move_to_str(std::shared_ptr<const Move> m) {
   return movestring;
 }
 
-static std::pair<int, int> draw_texture(SDL_Renderer *r, SDL_Texture *t, const int w, const int h) {
-  int texture_w = 0, texture_h = 0;
-  if (SDL_QueryTexture(t, NULL, NULL, &texture_w, &texture_h) == 0) {
-    SDL_Rect rect = { w, h, texture_w, texture_h };
-    SDL_RenderCopy(r, t, NULL, &rect);
-  }
-  return std::pair<int, int>(texture_w, texture_h);
-}
-
-std::pair<int, int> GUIMoves::recurse_subvariation(SDL_Renderer *r, std::shared_ptr<Node> variation, bool is_main_variation, std::pair<int, int> box) {
-  if (r == nullptr || variation == nullptr) {
-    return std::make_pair<int, int>(0, 0);
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  if (r == nullptr || variation == nullptr) {
-    return std::make_pair<int, int>(0, 0);
-  }
-  int w = std::get<0>(box);
-  int h = std::get<1>(box);
-  int max_w = 0;
-  while(1) {
-    if (variation == nullptr || variation->children.size() == 0) {
-      break;
-    }
-    auto pair = draw_texture(r, variation->children[0]->t, w, h);
-    auto texture_w = std::get<0>(pair);
-    auto texture_h = std::get<1>(pair);
-    if (w + texture_w > viewport->w) {
-      w = 0;
-      h += texture_h;
-    } else {
-      w += texture_w;
-    }
-    if (w > max_w) {
-      max_w = w;
-    }
-    int children_w = w;
-    int children_h = h;
-    for (int i = 1; i < variation->children.size(); i++) {
-      std::cout << "Here" << std::endl;
-      auto pair = this->recurse_subvariation(r, variation->children[i], false, std::pair<int, int>(children_w, children_h));
-      children_h += std::get<1>(pair);
-      if (children_w + std::get<0>(pair) > max_w) {
-	max_w = children_w + std::get<0>(pair);
-      }
-    }
-    w = children_w;
-    h = children_h;
-    std::cout << w << " " << h << std::endl;
-    if (variation->children.size() > 1) {
-      w = 0;
-    }
-    if (variation->children.size() == 0) {
-      break;
-    }
-    variation = variation->children[0];
-  }
-  return std::pair<int, int>(std::max(max_w, w), h);
-}
-
 GUIMoves::GUIMoves(std::shared_ptr<Board> b)
   : GUIElem(b)
 {
@@ -274,50 +200,6 @@ void GUIMoves::update(SDL_Renderer *r) {
   SDL_Rect thisrect = {0, 0, viewport->w, viewport->h};
   SDL_RenderFillRect(r, &thisrect);
   this->find_drawing_rectangles(r);
-  //this->recurse_subvariation(r, root, true, std::pair<int, int>(0,0));
-  /*
-  while(1) {
-    if (!is_backtrack) {
-      int w;
-      int h;
-      if (SDL_QueryTexture(root->t, NULL, NULL, &w, &h) == 0) {
-	SDL_Rect rect = { total_width, total_height, w, h };
-	SDL_RenderCopy(r, root->t, NULL, &rect);
-	if (total_width + w > viewport->w) {
-	  total_width = 0;
-	  total_height += h;
-	} else {
-	  total_width += w;
-	}
-	std::cout << "Total width" << total_width << std::endl;
-      }
-    }
-    if (root->parent == nullptr &&
-	(root->children.size() == 0 || root->next_node_idx == -1)) {
-      std::cout << "Parent is Null and all children visited" << std::endl;
-      break;
-    } else if (root->children.size() == 0 || root->next_node_idx == -1) {
-      std::cout << "All children visited" << std::endl;
-      root = root->parent;
-      is_backtrack = true;
-    } else {
-      is_backtrack = false;
-      std::cout << "Going to child node " << root->next_node_idx << std::endl;
-      auto temp = root->next_node_idx;
-      if (root->next_node_idx == 0) {
-	std::cout << "Next_node_idx = -1" << std::endl;
-	root->next_node_idx = -1;
-      } else if (root->next_node_idx == root->children.size() - 1) {
-	std::cout << "Next_node_idx = 0" << std::endl;
-	root->next_node_idx = 0;
-      } else {
-	std::cout << "Next_node_idx++" << std::endl;
-	root->next_node_idx++;
-      }
-      root = root->children[temp];
-    }
-  }
-  */
 
   while(root->parent != nullptr) {
     root = root->parent;

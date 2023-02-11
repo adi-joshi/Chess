@@ -27,7 +27,6 @@ class GUIMoves : public GUIElem {
   // -------------------------->v
   //             w           
   void find_drawing_rectangles(SDL_Renderer *r);
-  std::pair<int, int> recurse_subvariation(SDL_Renderer *r, std::shared_ptr<Node> variation, bool is_main_variation, std::pair<int, int> box);
   public:
   GUIMoves(std::shared_ptr<Board> b);
   void load_assets(SDL_Renderer *r) override;
