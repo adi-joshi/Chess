@@ -93,7 +93,6 @@ void GUIMoves::find_drawing_rectangles(SDL_Renderer *r) {
   int h = 0;
   xs.push(x);
   while(!nodes.empty()) {
-    printf("hi");
     auto temp = nodes.top();
     nodes.pop();
     x = xs.top();
@@ -192,7 +191,7 @@ void GUIMoves::update(SDL_Renderer *r) {
   }
 
 
-  std::cout << "Next Node Idx:" << root->next_node_idx << std::endl;
+  // std::cout << "Next Node Idx:" << root->next_node_idx << std::endl;
   
   int total_height = 0;
   int total_width = 0;
