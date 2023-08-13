@@ -216,6 +216,7 @@ bool Board::move(std::shared_ptr<Move> m) {
      return false;
      }
      */
+  // std::cout << "In board: " << m->from->get_row() << m->from->get_col() << " " << m->to->get_row() << m->to->get_col() << std::endl;
   if (m == nullptr || m->it != InputType::Move ||
       m->from == nullptr || m->to == nullptr) {
     return false;
@@ -297,6 +298,7 @@ bool Board::move(std::shared_ptr<Move> m) {
       std::string curboard = get_boardstring(pieces.cbegin(), pieces.cend());
       m->board_string = curboard;
       board_string[curboard]++;
+      // std::cout << "Before adding: " << m->from->get_row() << m->from->get_col() << " " << m->to->get_row() << m->to->get_col() << std::endl;
       moves->add_move(m);
       moves_id++;
 

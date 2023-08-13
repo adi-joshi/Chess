@@ -14,8 +14,13 @@ size_t MoveTree::size(void) {
 }
 
 void MoveTree::add_move(std::shared_ptr<Move> m) {
+  // std::cout << "Move to get: " << m->from->get_row() << m->from->get_col() << std::endl;
   for (int i = 0; i < cur->children.size(); i++) {
-    if (cur->m == m) {
+    // std::cout << "Prospective move: " << cur->m->from->get_row() << cur->m->from->get_col() << std::endl;
+    if (cur->children[i]->m->from->get_row() == m->from->get_row() &&
+	cur->children[i]->m->from->get_col() == m->from->get_col() &&
+	cur->children[i]->m->to->get_row() == m->to->get_row() &&
+	cur->children[i]->m->to->get_col() == m->to->get_col()) {
       cur = cur->children[i];
       return;
     }
