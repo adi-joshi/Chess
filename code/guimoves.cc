@@ -135,6 +135,7 @@ void GUIMoves::update(SDL_Renderer *r) {
   auto [begin, end] = b->get_moves_const_iter();
   int move_num = 0;
   bool is_main_variation = true;
+  bool backtracked = false;
   while(root->parent != nullptr) {
     root = root->parent;
   }
@@ -168,6 +169,9 @@ void GUIMoves::update(SDL_Renderer *r) {
       if (node->m->color == Color::White) {
 	move_num++;
 	move = move + std::to_string(move_num) + ". ";
+      } else if (backtracked) {
+	backtracked = false;
+	move = move + std::to_string(move_num) + "... ";
       }
       move += move_to_str(node->m);
       auto text_surface = TTF_RenderText_Blended_Wrapped(is_main_variation ? bold : reg, move.c_str() , { 0, 0, 0, 255 }, 300);
@@ -176,6 +180,7 @@ void GUIMoves::update(SDL_Renderer *r) {
     } else if (temp.get_tree_traversal() == TreeTraversal::Backtrack) {
       root = root->parent;
       is_main_variation = false;
+      backtracked = true;
       if ((*temp)->color == Color::Black) {
 	move_num--;
       }
