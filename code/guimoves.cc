@@ -98,15 +98,15 @@ void GUIMoves::find_drawing_rectangles(SDL_Renderer *r) {
     x = xs.top();
     xs.pop();
     if (SDL_QueryTexture(temp->t, NULL, NULL, &w, &h) == 0) {
+      if (x + w > viewport->w) {
+        x = 0;
+        y += h;
+      }
       SDL_Rect rect = { x, y, w, h };
       temp->position = rect;
       SDL_RenderCopy(r, temp->t, NULL, &rect);
-      if (x + w > viewport->w) {
-	x = 0;
-	y += h;
-      } else {
-	x += w;
-      }
+
+      x += w;
     }
 
     // TODO: set temp rect
