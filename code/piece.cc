@@ -70,7 +70,9 @@ bool Piece::move(std::vector<std::shared_ptr<Piece>>::iterator begin,
       return false;
     }
     m->color = this->color;
-    m->from = cursq;
+    std::cout << "Before reassignment:" << m->from->get_col() << " " << m->from->get_row() << std::endl;
+    m->from = cur;
+    std::cout << "After reassignment:" << m->from->get_col() << " " << m->from->get_row() << std::endl;
     m->piecename = this->get_name();
 
     moved = true;
