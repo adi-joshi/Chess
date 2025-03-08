@@ -106,10 +106,9 @@ void GUIBoard::handle(SDL_Renderer *r, SDL_Event *e) {
       std::get<2>(positions[id]) = origpos;
       id = -1;
       try {
-	b->move(m);
-	auto temp = m;
-	m = std::make_shared<Move>();
+        b->move(m);
       } catch(...) {}
+
       this->update(r);
       this->notify_observers(r);
       return;
@@ -147,10 +146,23 @@ void GUIBoard::draw_board(SDL_Renderer *r) {
   render(r, board, { 0, 0, board_region.w, board_region.h });
 
   for (int i = 0; i < len; i++) {
-    render(r, piece_textures[std::make_pair(std::get<0>(positions[i]), std::get<1>(positions[i]))],
-	{ std::get<2>(positions[i]).x, std::get<2>(positions[i]).y,
-	board_region.w / 8, board_region.h / 8});
+    if (i != id) { // the piece currently selected will be drawn later, so it looks like it is on top of all other pieces.
+      render(
+        r,
+        piece_textures[std::make_pair(std::get<0>(positions[i]), std::get<1>(positions[i]))],
+        { std::get<2>(positions[i]).x, std::get<2>(positions[i]).y, board_region.w / 8, board_region.h / 8}
+      );
+    }
   }
+
+  if (id != -1) {
+    render(
+      r,
+      piece_textures[std::make_pair(std::get<0>(positions[id]), std::get<1>(positions[id]))],
+      { std::get<2>(positions[id]).x, std::get<2>(positions[id]).y, board_region.w / 8, board_region.h / 8}
+    );
+  }
+
   SDL_RenderPresent(r);
   return;
 }
