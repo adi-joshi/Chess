@@ -1,6 +1,6 @@
 CXX=g++
-CXXFLAGS= -MMD -I/usr/include/SDL2
-LINKS= -lSDL2 -lSDL2_image -lSDL2_ttf
+CXXFLAGS= -MMD -I/usr/local/include -I/usr/local/include/SDL2
+LINKS= -L/usr/local/lib -Wl,-rpath,/usr/local/lib -Wl,--enable-new-dtags -lSDL2 -lSDL2_image -lSDL2_ttf
 OBJECTS= $(addprefix code/, main.o game.o exception.o color.o board.o result.o textdisplay.o \
 	 square.o piece.o move.o display.o gui.o guielem.o subject.o observer.o guiboard.o \
 	 guimoves.o movetree.o )
