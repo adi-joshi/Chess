@@ -107,6 +107,7 @@ void GUIBoard::handle(SDL_Renderer *r, SDL_Event *e) {
       id = -1;
       try {
         b->move(m);
+        m = std::make_shared<Move>();
       } catch(...) {}
 
       this->update(r);
